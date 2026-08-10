@@ -1,0 +1,287 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+CONTROL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+ENV_FILE="$CONTROL_ROOT/.env"
+CBM="$SCRIPT_DIR/codebase-memory-mcp"
+SNAPSHOT_ROOT="$CONTROL_ROOT/.code-intelligence/snapshots"
+
+MODE=""
+NEW_BRANCH=""
+FE_SOURCE=""
+BE_SOURCE=""
+E2E_SOURCE=""
+FE_BRANCH=""
+BE_BRANCH=""
+E2E_BRANCH=""
+INDEX_MODE="fast"
+ASSUME_YES=false
+
+usage() {
+  cat <<'EOF'
+Usage: ./scripts/index-all-repo [options]
+
+Without --mode, the script starts an interactive prompt.
+
+Options:
+  --mode current|new|specific
+  --new-branch NAME            New snapshot branch name (mode: new)
+  --fe-source BRANCH           Frontend source branch (mode: new)
+  --be-source BRANCH           Backend source branch (mode: new)
+  --e2e-source BRANCH          Automation source branch (mode: new)
+  --fe-branch BRANCH           Existing frontend branch (mode: specific)
+  --be-branch BRANCH           Existing backend branch (mode: specific)
+  --e2e-branch BRANCH          Existing automation branch (mode: specific)
+  --index-mode fast|moderate|full
+  --yes                        Skip the replacement confirmation
+  -h, --help                   Show this help
+
+Examples:
+  ./scripts/index-all-repo --mode current --yes
+  ./scripts/index-all-repo --mode new --new-branch feat/ringi-100 \
+    --fe-source develop --be-source development --e2e-source main
+  ./scripts/index-all-repo --mode specific \
+    --fe-branch feat/ringi-100 --be-branch development --e2e-branch main
+EOF
+}
+
+die() {
+  printf 'Error: %s\n' "$1" >&2
+  exit 1
+}
+
+read_env_path() {
+  local key="$1"
+  local value
+
+  value="$(awk -v key="$key" '
+    $0 ~ "^[[:space:]]*" key "[[:space:]]*=" {
+      sub("^[[:space:]]*" key "[[:space:]]*=[[:space:]]*", "")
+      sub("[[:space:]]*$", "")
+      print
+      exit
+    }
+  ' "$ENV_FILE")"
+
+  if [[ "$value" == \"*\" && "$value" == *\" ]]; then
+    value="${value:1:${#value}-2}"
+  elif [[ "$value" == \'*\' && "$value" == *\' ]]; then
+    value="${value:1:${#value}-2}"
+  fi
+
+  [[ -n "$value" ]] || die "missing required path: $key"
+  printf '%s' "$value"
+}
+
+validate_repo() {
+  local label="$1"
+  local path="$2"
+
+  [[ -d "$path" ]] || die "$label path does not exist"
+  git -C "$path" rev-parse --is-inside-work-tree >/dev/null 2>&1 || \
+    die "$label path is not inside a Git working tree"
+}
+
+require_value() {
+  local option="$1"
+  local value="${2-}"
+  [[ -n "$value" ]] || die "$option requires a value"
+}
+
+prompt_value() {
+  local variable_name="$1"
+  local prompt="$2"
+  local value
+
+  read -r -p "$prompt: " value
+  [[ -n "$value" ]] || die "$prompt cannot be empty"
+  printf -v "$variable_name" '%s' "$value"
+}
+
+resolve_branch_commit() {
+  local repo="$1"
+  local branch="$2"
+  local commit
+
+  commit="$(git -C "$repo" rev-parse --verify "${branch}^{commit}" 2>/dev/null)" || \
+    die "branch '$branch' was not found in $repo"
+  printf '%s' "$commit"
+}
+
+reset_snapshot_root() {
+  mkdir -p "$CONTROL_ROOT/.code-intelligence"
+
+  case "$SNAPSHOT_ROOT" in
+    "$CONTROL_ROOT/.code-intelligence/snapshots") ;;
+    *) die "refusing to replace unexpected snapshot path: $SNAPSHOT_ROOT" ;;
+  esac
+
+  if [[ -e "$SNAPSHOT_ROOT" ]]; then
+    rm -rf -- "$SNAPSHOT_ROOT"
+  fi
+  mkdir -p "$SNAPSHOT_ROOT"
+}
+
+create_snapshot() {
+  local label="$1"
+  local source_repo="$2"
+  local destination="$3"
+  local branch="$4"
+  local checkout_kind="$5"
+  local commit
+
+  commit="$(resolve_branch_commit "$source_repo" "$branch")"
+  printf 'Creating %s snapshot from %s (%s)...\n' "$label" "$branch" "$commit"
+  git clone --local --no-hardlinks --no-checkout --quiet "$source_repo" "$destination"
+
+  if [[ "$label" == "backend" ]]; then
+    git -C "$destination" sparse-checkout init --cone
+    git -C "$destination" sparse-checkout set ldx_addons
+  fi
+
+  if [[ "$checkout_kind" == "new" ]]; then
+    git -C "$destination" switch --quiet --force-create "$NEW_BRANCH" "$commit"
+  else
+    git -C "$destination" switch --quiet --force-create "$branch" "$commit"
+  fi
+}
+
+delete_index_if_present() {
+  local project="$1"
+  local projects
+
+  projects="$("$CBM" cli list_projects 2>/dev/null || true)"
+  if [[ "$projects" == *"$project"* ]]; then
+    printf 'Replacing existing %s index...\n' "$project"
+    "$CBM" cli delete_project --project "$project" >/dev/null
+  fi
+}
+
+index_project() {
+  local project="$1"
+  local path="$2"
+
+  printf 'Indexing %s from %s...\n' "$project" "$path"
+  "$CBM" cli index_repository \
+    --repo-path "$path" \
+    --name "$project" \
+    --mode "$INDEX_MODE" \
+    --persistence false
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --mode) require_value "$1" "${2-}"; MODE="$2"; shift 2 ;;
+    --new-branch) require_value "$1" "${2-}"; NEW_BRANCH="$2"; shift 2 ;;
+    --fe-source) require_value "$1" "${2-}"; FE_SOURCE="$2"; shift 2 ;;
+    --be-source) require_value "$1" "${2-}"; BE_SOURCE="$2"; shift 2 ;;
+    --e2e-source) require_value "$1" "${2-}"; E2E_SOURCE="$2"; shift 2 ;;
+    --fe-branch) require_value "$1" "${2-}"; FE_BRANCH="$2"; shift 2 ;;
+    --be-branch) require_value "$1" "${2-}"; BE_BRANCH="$2"; shift 2 ;;
+    --e2e-branch) require_value "$1" "${2-}"; E2E_BRANCH="$2"; shift 2 ;;
+    --index-mode) require_value "$1" "${2-}"; INDEX_MODE="$2"; shift 2 ;;
+    --yes) ASSUME_YES=true; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) die "unknown option: $1" ;;
+  esac
+done
+
+[[ -f "$ENV_FILE" ]] || die "missing $ENV_FILE"
+
+if [[ -z "$MODE" ]]; then
+  printf 'Index source:\n'
+  printf '  1) Current working trees\n'
+  printf '  2) New branch snapshots\n'
+  printf '  3) Existing branch snapshots\n'
+  read -r -p 'Choose [1-3]: ' choice
+  case "$choice" in
+    1) MODE="current" ;;
+    2) MODE="new" ;;
+    3) MODE="specific" ;;
+    *) die "invalid choice: $choice" ;;
+  esac
+fi
+
+case "$MODE" in
+  current|new|specific) ;;
+  *) die "--mode must be current, new, or specific" ;;
+esac
+
+case "$INDEX_MODE" in
+  fast|moderate|full) ;;
+  *) die "--index-mode must be fast, moderate, or full" ;;
+esac
+
+FE_PATH="$(read_env_path FE_PWD)"
+BE_ROOT="$(read_env_path BE_PWD)"
+E2E_PATH="$(read_env_path E2E_PWD)"
+
+validate_repo frontend "$FE_PATH"
+validate_repo backend "$BE_ROOT"
+validate_repo automation "$E2E_PATH"
+[[ -d "$BE_ROOT/ldx_addons" ]] || die "backend scope ldx_addons does not exist"
+
+if [[ "$MODE" == "new" ]]; then
+  [[ -n "$NEW_BRANCH" ]] || prompt_value NEW_BRANCH 'New branch name'
+  [[ -n "$FE_SOURCE" ]] || prompt_value FE_SOURCE 'Frontend source branch'
+  [[ -n "$BE_SOURCE" ]] || prompt_value BE_SOURCE 'Backend source branch'
+  [[ -n "$E2E_SOURCE" ]] || prompt_value E2E_SOURCE 'Automation source branch'
+  git check-ref-format --branch "$NEW_BRANCH" >/dev/null 2>&1 || die "invalid new branch name: $NEW_BRANCH"
+
+  for repo in "$FE_PATH" "$BE_ROOT" "$E2E_PATH"; do
+    if git -C "$repo" show-ref --verify --quiet "refs/heads/$NEW_BRANCH" || \
+      git -C "$repo" show-ref --verify --quiet "refs/remotes/origin/$NEW_BRANCH"; then
+      die "new branch '$NEW_BRANCH' already exists in $repo"
+    fi
+  done
+elif [[ "$MODE" == "specific" ]]; then
+  [[ -n "$FE_BRANCH" ]] || prompt_value FE_BRANCH 'Frontend branch'
+  [[ -n "$BE_BRANCH" ]] || prompt_value BE_BRANCH 'Backend branch'
+  [[ -n "$E2E_BRANCH" ]] || prompt_value E2E_BRANCH 'Automation branch'
+fi
+
+if [[ "$ASSUME_YES" != true ]]; then
+  printf '\nThis replaces the shared indexes: ldx-frontend, ldx-backend, and ldx-e2e.\n'
+  read -r -p 'Continue? [y/N]: ' answer
+  [[ "$answer" == "y" || "$answer" == "Y" ]] || exit 0
+fi
+
+if [[ "$MODE" == "current" ]]; then
+  FE_INDEX_PATH="$FE_PATH"
+  BE_INDEX_PATH="$BE_ROOT/ldx_addons"
+  E2E_INDEX_PATH="$E2E_PATH"
+else
+  reset_snapshot_root
+
+  if [[ "$MODE" == "new" ]]; then
+    create_snapshot frontend "$FE_PATH" "$SNAPSHOT_ROOT/frontend" "$FE_SOURCE" new
+    create_snapshot backend "$BE_ROOT" "$SNAPSHOT_ROOT/backend" "$BE_SOURCE" new
+    create_snapshot automation "$E2E_PATH" "$SNAPSHOT_ROOT/automation" "$E2E_SOURCE" new
+  else
+    create_snapshot frontend "$FE_PATH" "$SNAPSHOT_ROOT/frontend" "$FE_BRANCH" specific
+    create_snapshot backend "$BE_ROOT" "$SNAPSHOT_ROOT/backend" "$BE_BRANCH" specific
+    create_snapshot automation "$E2E_PATH" "$SNAPSHOT_ROOT/automation" "$E2E_BRANCH" specific
+  fi
+
+  FE_INDEX_PATH="$SNAPSHOT_ROOT/frontend"
+  BE_INDEX_PATH="$SNAPSHOT_ROOT/backend/ldx_addons"
+  E2E_INDEX_PATH="$SNAPSHOT_ROOT/automation"
+  [[ -d "$BE_INDEX_PATH" ]] || die "backend snapshot does not contain ldx_addons"
+fi
+
+"$CBM" config set auto_index false >/dev/null
+"$CBM" config set auto_watch false >/dev/null
+
+delete_index_if_present ldx-frontend
+delete_index_if_present ldx-core
+delete_index_if_present ldx-backend
+delete_index_if_present ldx-e2e
+
+index_project ldx-frontend "$FE_INDEX_PATH"
+index_project ldx-backend "$BE_INDEX_PATH"
+index_project ldx-e2e "$E2E_INDEX_PATH"
+
+printf '\nIndexed projects:\n'
+"$CBM" cli list_projects

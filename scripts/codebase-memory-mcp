@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+CONTROL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+CBM_BIN="$CONTROL_ROOT/.code-intelligence/runtime/node_modules/.bin/codebase-memory-mcp"
+
+if [[ ! -x "$CBM_BIN" ]]; then
+  printf 'codebase-memory-mcp runtime is missing.\n' >&2
+  printf 'Run: npm install --prefix .code-intelligence/runtime codebase-memory-mcp@latest --save-exact\n' >&2
+  exit 1
+fi
+
+export CBM_CACHE_DIR="$CONTROL_ROOT/.code-intelligence/cache"
+mkdir -p "$CBM_CACHE_DIR"
+
+exec "$CBM_BIN" "$@"
