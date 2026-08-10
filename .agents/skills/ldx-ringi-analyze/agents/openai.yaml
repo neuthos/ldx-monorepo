@@ -1,0 +1,4 @@
+interface:
+  display_name: "L-DX Ringi Analyze"
+  short_description: "Analyze Ringi into evidence-backed L-DX plans"
+  default_prompt: "Use $ldx-ringi-analyze to analyze a Ringi input path and prepare approved cross-repository planning artifacts."
