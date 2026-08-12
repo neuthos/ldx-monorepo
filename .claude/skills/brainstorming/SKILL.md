@@ -174,8 +174,9 @@ For each letter, state whether it **applies** to this change and how the design 
 
 When the internal knowledge graph is insufficient — e.g. Japanese consumption-tax rounding rules, official Odoo patterns, or DDD methodology — pull external knowledge:
 
-- Prefer `/deep-research` if it is active in this repo. **Note:** `/deep-research` is a *web research* tool (multi-source triangulation, ≥3 independent sources, adversarial pass) — it is for external/authoritative knowledge, **not** for understanding internal L-DX code structure. Internal code understanding always goes through `codebase-memory`.
-- If `/deep-research` is not active, fall back to `WebSearch` + `WebFetch`, and cite sources.
+- Use `/deep-research` — it is available as a workflow here. It runs fan-out `WebSearch` → source fetch → adversarial verification → cited synthesis. It is a **web research** tool: it is for external/authoritative knowledge (tax rules, Odoo patterns, DDD methodology), **not** for understanding internal L-DX code structure. Internal code understanding always goes through `codebase-memory`.
+- If the question is underspecified, refine scope (2-3 narrowing questions) before invoking, per the deep-research skill's own guidance.
+- `WebSearch`/`WebFetch` are a lighter fallback for single-source lookups where the full deep-research pipeline is overkill.
 - Never let an external source override verified internal code evidence. Internal graph wins for internal behavior; external sources inform domain rules and conventions.
 
 ## After the Design
