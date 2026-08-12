@@ -1,0 +1,7 @@
+interface:
+  display_name: "Spec Test Plan Agent"
+  short_description: "Review specs and draft repo-aware test plans"
+  default_prompt: "Use $spec-test-plan-agent to review this Markdown spec and produce a repo-aware test plan."
+
+policy:
+  allow_implicit_invocation: true
