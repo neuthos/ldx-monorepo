@@ -18,6 +18,21 @@ or state that it rests on fallback text-search evidence.
 Why now? What prompts this change — a bug, a Ringi requirement, a regulatory need, a
 user request? What is the intended outcome? One short paragraph.
 
+## Requirements (PRD / FR / BR)
+
+Ground this spec in the source PRD. Carry exact requirement IDs and their original
+wording. **Preserve every Japanese term verbatim** — never translate or paraphrase a
+domain term away, or downstream planning will miss the Japanese translation requirement.
+
+- **Source PRD:** <link or path>
+- **FR / BR IDs covered:** (e.g. `FR-0141-03`, `BR-100-2`) — quote original text; for Japanese, keep the Japanese and add an English gloss in parentheses.
+
+| ID | Original text (JP verbatim if applicable) | Notes |
+|----|-------------------------------------------|-------|
+| | | |
+
+- **Japanese terms preserved:** list domain terms kept verbatim (e.g. 仕訳 / journal entry, 請求書 / invoice, 消費税 / consumption tax, 締め / period closing, 税率 / tax rate).
+
 ## Objective
 
 What this spec achieves, in one or two sentences.

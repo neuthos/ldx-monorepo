@@ -58,7 +58,7 @@ Create a task for each item and complete them in order:
 1. **Resolve & validate target repos** — read `FE_PWD`/`BE_PWD`/`E2E_PWD` from `.env`; for each involved repo verify key present, directory exists, and it is a Git working tree. Honor the read-only boundary. Report an invalid key instead of guessing a path.
 2. **Explore FE/BE/E2E via codebase-memory** — run the mandatory sequence above across every affected project. Correlate FE routes/clients, Odoo models/controllers, and E2E flows before making cross-repo claims.
 3. **DDD deep exploration via Workflow** — fan-out **read-only** agents to map aggregates, entities, value objects, and bounded-context boundaries across affected repos. Determine which `D` (domain behavior) the change touches. Disclose graph gaps. (See DDD-Aware Design.)
-4. **External knowledge** — when the internal graph is insufficient (tax regulation, Odoo patterns, DDD literature), use `/deep-research` if active, else `WebSearch`. (See External Knowledge.)
+4. **PRD / FR / BR grounding** — locate the source PRD and its Functional Requirements (FR) / Business Requirements (BR). Carry the exact requirement IDs and their original (often Japanese) wording into the spec. Preserve every Japanese term verbatim — never translate or paraphrase away a term that downstream planning must match. (See Requirements & Japanese Term Preservation.)
 5. **Offer the visual companion just-in-time** — NOT upfront. Rare for Ringi/backend specs; default to terminal. See Visual Companion.
 6. **Ask clarifying questions** — one at a time; understand purpose/constraints/success criteria.
 7. **Propose 2-3 approaches** — with trade-offs; lead with your recommendation, explicitly **non-binding**. (CLAUDE.md Human Decision Authority — you advise, user decides.)
@@ -75,7 +75,7 @@ digraph brainstorming {
     "Resolve .env + validate repos" [shape=box];
     "Explore via codebase-memory" [shape=box];
     "DDD deep exploration\n(Workflow, read-only)" [shape=box];
-    "External knowledge\n(deep-research/WebSearch)" [shape=box];
+    "PRD/FR/BR + Japanese terms" [shape=box];
     "Ask clarifying questions" [shape=box];
     "Propose 2-3 approaches" [shape=box];
     "Present design sections" [shape=box];
@@ -87,8 +87,8 @@ digraph brainstorming {
 
     "Resolve .env + validate repos" -> "Explore via codebase-memory";
     "Explore via codebase-memory" -> "DDD deep exploration\n(Workflow, read-only)";
-    "DDD deep exploration\n(Workflow, read-only)" -> "External knowledge\n(deep-research/WebSearch)";
-    "External knowledge\n(deep-research/WebSearch)" -> "Ask clarifying questions";
+    "DDD deep exploration\n(Workflow, read-only)" -> "PRD/FR/BR + Japanese terms";
+    "PRD/FR/BR + Japanese terms" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";
     "Propose 2-3 approaches" -> "Present design sections";
     "Present design sections" -> "User approves design?";
@@ -170,14 +170,23 @@ Every spec's **Error Handling & Edge Cases** section must walk the BOUNDARIES fr
 
 For each letter, state whether it **applies** to this change and how the design handles it. If it does not apply, say so explicitly rather than omitting. Silent omission reads as "covered," which it isn't.
 
-## External Knowledge
+## Requirements & Japanese Term Preservation
 
-When the internal knowledge graph is insufficient — e.g. Japanese consumption-tax rounding rules, official Odoo patterns, or DDD methodology — pull external knowledge:
+L-DX requirements originate from PRDs written in Japanese. A spec that loses the original
+term guarantees a downstream planning miss — the planner (or implementer) can't match the
+wording the code, UI, or stakeholders expect.
 
-- Use `/deep-research` — it is available as a workflow here. It runs fan-out `WebSearch` → source fetch → adversarial verification → cited synthesis. It is a **web research** tool: it is for external/authoritative knowledge (tax rules, Odoo patterns, DDD methodology), **not** for understanding internal L-DX code structure. Internal code understanding always goes through `codebase-memory`.
-- If the question is underspecified, refine scope (2-3 narrowing questions) before invoking, per the deep-research skill's own guidance.
-- `WebSearch`/`WebFetch` are a lighter fallback for single-source lookups where the full deep-research pipeline is overkill.
-- Never let an external source override verified internal code evidence. Internal graph wins for internal behavior; external sources inform domain rules and conventions.
+**Ground the spec in the source PRD:**
+- Locate the PRD and its **FR** (Functional Requirements) / **BR** (Business Requirements) for this change.
+- Carry the **exact requirement IDs** (e.g. `FR-0141-03`, `BR-100-2`) into the spec and into the handoff.
+- Cite the requirement text. If the PRD is Japanese, quote the Japanese alongside any English gloss — never replace the source term.
+
+**Preserve Japanese terms verbatim — do not silently translate:**
+- Keep business/domain terms (e.g. 仕訳, 請求書, 消費税, 締め, 税率, 控除) in their original Japanese. An English gloss in parentheses is fine; replacing the term is not.
+- This applies everywhere Japanese appears: FR/BR text, field labels, error messages, status names, UI strings, and the JP character set under BOUNDARIES-**U**.
+- Reason: the spec feeds a later planning mode. If the spec translates a term away, the planner has no anchor to the PRD and the codebase's Japanese strings — it will miss the Japanese translation requirement entirely.
+
+**Self-check before writing the spec:** every requirement ID present in the PRD is present in the spec, and every Japanese term from the PRD that names a domain concept survives verbatim into the spec.
 
 ## After the Design
 
@@ -194,6 +203,7 @@ After writing the spec, look at it with fresh eyes:
 4. **Ambiguity check:** Could any requirement be interpreted two ways? If so, pick one and make it explicit.
 5. **BOUNDARIES check:** Does Error Handling & Edge Cases address every letter that plausibly applies? Flag silent omissions.
 6. **DDD check:** Do the affected aggregates/entities/VOs match what `trace_path` found? Is the affected `D` (domain behavior) named? Any unstated cross-context impact?
+7. **Requirements & Japanese check:** Are all PRD FR/BR IDs carried in? Does every Japanese domain term from the PRD survive verbatim (no silent translation)? If any term was paraphrased away, restore it.
 
 Fix any issues inline. No need to re-review — just fix and move on.
 

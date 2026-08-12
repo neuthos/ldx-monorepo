@@ -25,6 +25,7 @@ Subagent (general-purpose):
     | YAGNI | Unrequested features, over-engineering |
     | Edge cases (BOUNDARIES) | Does Error Handling & Edge Cases walk the BOUNDARIES framework? Flag any letter that plausibly applies but is silently absent. Silent omission reads as "covered" — it isn't. |
     | DDD consistency | Do the named aggregates/entities/value objects match what codebase-memory `trace_path` found? Is the affected `D` (domain behavior) named? Any unstated cross-context impact or external backend consumer outside `ldx_addons`? |
+    | Requirements & Japanese | Are the source PRD's FR/BR IDs carried into the spec? Does every Japanese domain term from the PRD survive verbatim — none silently translated or paraphrased away? (A lost term will cause a planning miss on the Japanese translation requirement.) |
 
     ## BOUNDARIES Framework
 
