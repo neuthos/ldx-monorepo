@@ -38,7 +38,10 @@ Last verified against the template on 2026-08-18.
    Source cells are **vertically merged per BR block** (1 BR : many FR).
 7. Every mutation updates Metadata: new random `ID`, `Last Updated At` `YYYY/MM/DD HH:MM`,
    and `Status` (`In progress` while any row is Pending/Question; `Done` only when the
-   contract agent's gate passes — see below).
+   Done gate passes). **ID is the sync checksum**: the same ID is embedded in each
+   generated markdown (`{ringi-id}-spec.md`, `-test-spec.md`, `-contract.md`); sheet +
+   three specs sharing one ID means they are in sync — a mismatch means one of them is
+   stale and must be regenerated.
 
 ## Tab contracts
 
