@@ -28,9 +28,16 @@ Last verified against the template on 2026-08-18.
    `Rejected`, the Q&A `Answer` column, and the Answerkey `Result` rows. `Editted` /
    `Rejected` / `Answer` are human input channels the AI must read, not write.
 3. **The `Issue` tab is never touched** by any skill. It is a development-time log.
-4. **Write zones** — template rows 1–8 (TM) and 1–11 (Testcases) are the legend/options
-   zone: keep them intact. Data starts at **TM row 10** and **Testcases row 13** (one blank
-   separator row before data). Append after existing data; never insert above it.
+4. **Write zones** — data REPLACES the template's guidance/options rows, starting at
+   **TM row 3** and **Testcases row 2** (the template's option-list rows exist to be
+   overwritten by real data — that is the intent). Before writing, extend the strict
+   status validation over the data rows (TM `A3:A{last}` — `ONE_OF_LIST`:
+   Approved/Editted/New/Pending/Question/Rejected; Testcases same; Q&A `E` over its data
+   rows: Draft/Forwarded To JP Team/Noted) so every written status is a real dropdown.
+   After writing, merge the BR blocks (Source/BR-ID/Business Requirement columns).
+   Content language: **English**; Source format `PRD <Doc> <sec>` (no `§`); Japanese
+   status terms carry an English gloss on first use, e.g.
+   "Pending Cancellation (取消待ち)".
 5. **IDs are stable and monotonic.** Never renumber existing IDs. New rows take the next
    free number. `{title}` = Metadata `Title` with spaces replaced by `-`
    (e.g. `Ringi-100-Cancellation-Phase-3`).
@@ -58,7 +65,7 @@ Last verified against the template on 2026-08-18.
 | 8 | Last Updated At | any writer | `YYYY/MM/DD HH:MM` |
 | 9–19 | BOUNDARIES | spec-test-plan-agent | per letter: `Covered` with TC-IDs in TC Refs, or `None` with the reason text in TC Refs |
 
-### Treacibility Matrix (A:H, data from row 10)
+### Treacibility Matrix (A:H, data from row 3)
 
 | Col | Field | Rule |
 |---|---|---|
@@ -81,7 +88,7 @@ Last verified against the template on 2026-08-18.
 | D | Answer | **human only** |
 | E | Status | `Draft` when created; human may set `Forwarded To JP Team` / `Noted` |
 
-### Testcases (A:H, data from row 13; one step per row)
+### Testcases (A:H, data from row 2; one step per row)
 
 | Col | Field | Rule |
 |---|---|---|
