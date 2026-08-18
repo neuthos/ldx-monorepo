@@ -181,12 +181,62 @@ Observable criteria (per-repo commands live in the handoff):
 - **USER-APPROVED** — Approach A: replicate the phase 1/2 pattern per domain; four new service classes; shared logic reused as-is; no refactor of approved code.
 - **USER-APPROVED** — Scope: all four documents in phase 3; Store Sales PRD re-supplied after the initial mis-paste.
 - **USER-APPROVED** — Store Sales Information list label: 取消確定 renders as **"Cancelled"** on that screen per PRD-StoreSales 2.6 (display-label only; the stored value and all other documents use 取消確定 / "Cancellation Confirmed"). Filters and downloads on that screen follow the same label.
+- **USER-APPROVED (direction)** — Payment/point side effects are handled by a **guard blocker**, not by reversal: slips whose confirmation consumed irreversible financial/member resources refuse cancellation. Per-item scope (inventory items 4–15) remains `PENDING` (PENDING-1…PENDING-4 in the inventory section).
+
+## Store Sales / Store Sales Return — Cancellation Side-Effects Inventory
+
+Systematic inventory of everything a confirmed `store.sales` slip consumes or feeds, found by text-searching `_inherit = 'store.sales'` and cross-module references across `ldx_addons` (13 extending modules + referencing models). The PRDs are silent on all of these; the USER-APPROVED direction is a **guard blocker** (slips with irreversible side effects refuse cancellation), with per-item scope still `PENDING`.
+
+**Covered by existing design (no action):**
+
+| # | Item | Evidence |
+|---|------|----------|
+| 1 | Inventory deduction (store virtual warehouse) | revert in the new cancellation service |
+| 2 | Sales Slip + AR | full chain STS→Sales (phase 1 guards) |
+| 3 | Linked RSTS / EC order / Sales Return | cascade matrix above |
+
+**Blocker candidates (consumed at confirm, no reversal machinery exists):**
+
+| # | Item | Evidence | Proposed disposition (non-binding) |
+|---|------|----------|-----------------------------------|
+| 4 | Point payment — member balance deducted (`membership.point.history` negative) at `create_sale_order` | `ldx_ec/models/store_sales.py:242→283` | BLOCK |
+| 5 | Point grant/reward — `ext.point.history`, base/special grant; expiry cron reads it | `ext_point/models/store_sales.py:13` | BLOCK |
+| 6 | Coupon consumption — `ec.coupon.history`; no restore method exists anywhere | `ldx_ec/models/store_sales.py` `_create_coupon_history` | BLOCK |
+| 7 | RSTS point refund + reward retract (positive refund of `point_usage`, negative retract × percentage) | `_get_point_retract` @ `ldx_ec/models/base_sales_channel.py:267` | BLOCK on RSTS |
+| 8 | Tax free (免税) — `tax.free.process` + amounts on slip; no cancel handling | `ldx_core/base/account_tax_free.py:25` | BLOCK |
+| 9 | Formal Receipt (領収書) — issued document linked to slip | `formal_receipt.store_sales_id` @ `ldx_core/transactions/formal_receipt.py:18` | BLOCK |
+| 10 | External-origin slips — Smaregi (`smaregi_link_id`, `smaregi_dispose_*`, `smaregi_is_cancellation`), POSCM import (`ext_poscm` `_create_sale_order_or_return`), TeamStore (`teamstore_id`) | `external_link/models/store_sales.py:14–18`, `ext_poscm/models/ext_poscm_sales.py`, `ext_teamstore/models/store_sales.py:8` | BLOCK (⚠️ quantify share first — see PENDING-3) |
+
+**Snapshot / aggregate / analytics (verify, not block):**
+
+| # | Item | Evidence | Proposed disposition |
+|---|------|----------|----------------------|
+| 11 | POS closing snapshot aggregates store sales at closing | `pos_closing.py:109` | PENDING-2: block cancel after POS closing, or accept staleness |
+| 12 | Daily sales linkage | `daily_sale_id` | same as 11 |
+| 13 | Membership purchase history (feeds RFM) — created at `create_sale_order` | `ldx_ec/models/store_sales.py:246–248` | verify/accept stale |
+| 14 | RFM / purchase analysis / DR summary / MD digest & daily report — read-based | `ldx_ec/models/rfm_setting.py:130+`, `ext_drsum`, `ldx_md` | verification item: queries must filter `state != 'cancel'` |
+| 15 | EC reserve order (取り置き) fulfillment state | `ec_reserve_order.store_sales_id` | verify/accept stale |
+
+**No system impact:** cash/change/gift-cert display amounts (`change_amount`, `marketable_securities_overpayment_amount`).
+
+**Additional facts resolved by this inventory:**
+- Closing-lock date field for `store.sales` = **`sales_date`** (resolves pin-point 1 for this model): `ldx_core/account_closing/store_sales.py` `_check_sales_date` guards `create_sale_order`/`create_sale_return` today; the cancellation guard mirrors it. `ldx_account_closing` also guards `unlink`/`action_archive` by `sales_date`.
+- Smaregi already models its own cancellation concept (`smaregi_is_cancellation`) — a future integration hook, out of phase 3 scope.
+
+**PENDING decisions from this inventory:**
+
+- [PENDING-1] Final blocker condition set: items 4–8 only, or 4–10 (include formal receipt + external-origin)? Consequence: more conditions = more slips uncancellable.
+- [PENDING-2] POS-closed / daily-sales-closed slips (11–12): block cancellation, or accept stale aggregates as known limitation?
+- [PENDING-3] External-origin share (10): if a large fraction of store sales is Smaregi/POSCM-imported, blocking them makes cancellation nearly unusable — quantify from production data before deciding.
+- [PENDING-4] Phase-1 bypass alignment: `_cancel_store_sales` (`cancellation_sales.py:521`) calls `_action_cancel()` directly and would bypass the new blocker. Options: leave + document (zero code change, inconsistent behavior), align it (small change, but changes approved phase-1 Sales-cancel behavior for point/coupon-paid store sales), or surface as a blocker row in the Sales preview.
+
+
 
 ## Open Questions
 
-No `PENDING` user decisions remain. Implementation pin-points (discoverable in-code, non-blocking, to be confirmed by the implementing repo):
+Product decisions PENDING-1…PENDING-4 are listed in the inventory section above. Implementation pin-points (discoverable in-code, non-blocking, to be confirmed by the implementing repo):
 
-1. Exact closing-lock date field per model (candidates: `stock.picking.scheduled_date`/`date_done`; `store.sales.sales_date`).
+1. Closing-lock date field per model — **resolved for `store.sales`: `sales_date`** (see inventory); still pending for `stock.picking` (candidates: `scheduled_date`/`date_done`).
 2. Exact flag re-activating "Create Arrival Slip" (order.master side; candidate `order_slip_created` @ base/stock_picking.py:521) and "Create Shipment" (receipt.order side; candidate `sales_slip_created` @ :630).
 3. Lot-deletion query semantics (only lots created by the arrival, unconsumed elsewhere).
 4. Outstanding-quantity recalculation entry point on `order.master`.
