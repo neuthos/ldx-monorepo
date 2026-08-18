@@ -58,7 +58,7 @@ Create a task for each item and complete them in order:
 1. **Resolve & validate target repos** — read `FE_PWD`/`BE_PWD`/`E2E_PWD` from `.env`; for each involved repo verify key present, directory exists, and it is a Git working tree. Honor the read-only boundary. Report an invalid key instead of guessing a path.
 2. **Explore FE/BE/E2E via codebase-memory** — run the mandatory sequence above across every affected project. Correlate FE routes/clients, Odoo models/controllers, and E2E flows before making cross-repo claims.
 3. **DDD deep exploration via Workflow** — fan-out **read-only** agents to map aggregates, entities, value objects, and bounded-context boundaries across affected repos. Determine which `D` (domain behavior) the change touches. Disclose graph gaps. (See DDD-Aware Design.)
-4. **Implicit-impact sweep** — for every existing aggregate/flow the change touches, sweep what the code does that no requirement mentions (extensions, referencing models, behavior-path writes, state readers, snapshots, external links) and classify each finding. **Requirement silence about behavior that exists in code is a `PENDING` product question, not absence of behavior.** (See Implicit-Impact Sweep.)
+4. **Impact & gap analysis** — for every existing aggregate/flow the change touches: run impact analysis over the codebase (extensions, referencing models, behavior-path writes and state readers), then gap-check the findings against the requirements — behavior that exists in code but no requirement mentions is a requirements gap, i.e. a `PENDING` product question, not absence of behavior. (See Impact & Gap Analysis.)
 5. **PRD / FR / BR grounding** — locate the source PRD and its Functional Requirements (FR) / Business Requirements (BR). Carry the exact requirement IDs and their original (often Japanese) wording into the spec. Preserve every Japanese term verbatim — never translate or paraphrase away a term that downstream planning must match. (See Requirements & Japanese Term Preservation.)
 6. **Offer the visual companion just-in-time** — NOT upfront. Rare for Ringi/backend specs; default to terminal. See Visual Companion.
 7. **Ask clarifying questions** — one at a time; understand purpose/constraints/success criteria.
@@ -76,7 +76,7 @@ digraph brainstorming {
     "Resolve .env + validate repos" [shape=box];
     "Explore via codebase-memory" [shape=box];
     "DDD deep exploration\n(Workflow, read-only)" [shape=box];
-    "Implicit-impact sweep" [shape=box];
+    "Impact & gap analysis" [shape=box];
     "PRD/FR/BR + Japanese terms" [shape=box];
     "Ask clarifying questions" [shape=box];
     "Propose 2-3 approaches" [shape=box];
@@ -89,8 +89,8 @@ digraph brainstorming {
 
     "Resolve .env + validate repos" -> "Explore via codebase-memory";
     "Explore via codebase-memory" -> "DDD deep exploration\n(Workflow, read-only)";
-    "DDD deep exploration\n(Workflow, read-only)" -> "Implicit-impact sweep";
-    "Implicit-impact sweep" -> "PRD/FR/BR + Japanese terms";
+    "DDD deep exploration\n(Workflow, read-only)" -> "Impact & gap analysis";
+    "Impact & gap analysis" -> "PRD/FR/BR + Japanese terms";
     "PRD/FR/BR + Japanese terms" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";
     "Propose 2-3 approaches" -> "Present design sections";
@@ -154,13 +154,18 @@ Disclose graph limits:
 - Backend graph = `ldx_addons` only. Cross-check external consumers (`env['...']`, `_inherit`, comodels, manifest deps) via text search.
 - Cite graph-resolved symbols/paths as evidence for each claim.
 
-## Implicit-Impact Sweep (undocumented interactions with existing behavior)
+## Impact & Gap Analysis (standard BA practice, applied to the codebase)
 
-**Why:** requirements and approved patterns describe intent and shape — not blast radius.
-Exploring the *new* feature's pattern (e.g. replicating a phase 1/2 architecture) is
-feature-inward and never enough: existing aggregates have extensions, consumers, and
-side effects living in modules no requirement mentions. This sweep is
-**target-aggregate-outward** and catches what the PRD and the pattern both omit.
+Two standard requirements-engineering activities, made concrete against the repositories:
+
+- **Impact analysis** — identify everything the change affects in the existing system.
+  Requirements and approved patterns describe intent and shape, not blast radius; existing
+  aggregates have extensions, consumers, and side effects in modules no requirement
+  mentions. The analysis is **target-aggregate-outward**, not feature-inward.
+- **Gap analysis** — compare documented requirements against actual current behavior.
+  Behavior that demonstrably exists in code but that no requirement addresses is a
+  **requirements gap**: it becomes a `PENDING` product question with options, never a
+  silent "not required".
 
 **When it runs — any of:**
 - the feature undoes an existing flow (cancel / revert / archive / void);
@@ -172,7 +177,7 @@ side effects living in modules no requirement mentions. This sweep is
 - **always**, when the design replicates an existing approved pattern — pattern replication
   is the single most common trigger, because the pattern looks like coverage.
 
-**Procedure, per existing aggregate/flow the change touches (e.g. `store.sales`, `stock.picking`):**
+**Techniques, per existing aggregate/flow the change touches (e.g. `store.sales`, `stock.picking`):**
 
 1. **Extension sweep** — text-search `_inherit = '<model>'` / `_inherits` across ALL addons
    (and FE analogues: wrappers/HOCs around the target screens). Every extending module is
@@ -187,7 +192,8 @@ side effects living in modules no requirement mentions. This sweep is
    - `covered` — a requirement or a design item already handles it;
    - `no-impact` — read-only or display-only;
    - `out-of-scope` — explicitly excluded by a recorded user decision;
-   - `PENDING` — needs a product/user decision; blocks design completion while open.
+   - `PENDING` — a requirements gap needing a product/user decision; blocks design
+     completion while open.
 5. **For undo-type features** (cancel/revert/archive/void), refine `covered` into
    `reverse` (design undoes it) / `block` (irreversible — refuse while present) /
    `accept-stale` (documented known limitation).
@@ -195,10 +201,10 @@ side effects living in modules no requirement mentions. This sweep is
    record bypass points — existing entry points that would skip the new flow/guards.
 
 **Hard rules:**
-- Requirement silence (including PRD silence) about behavior that demonstrably exists in
-  code is a **PENDING question** — surface it with options; never silently drop it or
+- Requirements silence (including PRD silence) about behavior that demonstrably exists in
+  code is a **requirements gap** — surface it with options; never silently drop it or
   assume "not required".
-- Pattern replication is not coverage: the sweep runs even when the feature exactly
+- Pattern replication is not coverage: the analysis runs even when the feature exactly
   mirrors an approved pattern.
 - Graph-first evidence; the `_inherit`/dynamic-relations sweep is expected text-search
   fallback territory — state when a conclusion rests on it.
@@ -209,7 +215,7 @@ side effects living in modules no requirement mentions. This sweep is
 replicating the approved phase 1/2 pattern plus the PRD's linked-slip table; a follow-up
 question then revealed that point payments, point grants, coupons, tax-free records,
 formal receipts, and Smaregi/POSCM-imported slips are all consumed at confirm with no
-reversal machinery — 13 modules extend `store.sales`. The sweep exists so that list is
+reversal machinery — 13 modules extend `store.sales`. The analysis exists so that list is
 produced during design, not after UAT.
 
 ## BOUNDARIES Edge-Case Discovery
@@ -264,7 +270,7 @@ After writing the spec, look at it with fresh eyes:
 4. **Ambiguity check:** Could any requirement be interpreted two ways? If so, pick one and make it explicit.
 5. **BOUNDARIES check:** Does Error Handling & Edge Cases address every letter that plausibly applies? Flag silent omissions.
 6. **DDD check:** Do the affected aggregates/entities/VOs match what `trace_path` found? Is the affected `D` (domain behavior) named? Any unstated cross-context impact?
-7. **Implicit-impact check:** Does the inventory cover every existing aggregate/flow the change touches, with every sweep finding classified (`covered`/`no-impact`/`out-of-scope`/`PENDING`)? For undo-type features: every side effect dispositioned `reverse`/`block`/`accept-stale`? Are `PENDING` rows listed in Open Questions? Bypass audit done (existing entry points that would skip the new flow/guards)?
+7. **Impact & gap check:** Does the inventory cover every existing aggregate/flow the change touches, with every finding classified (`covered`/`no-impact`/`out-of-scope`/`PENDING`)? For undo-type features: every side effect dispositioned `reverse`/`block`/`accept-stale`? Are `PENDING` requirements gaps listed in Open Questions? Bypass audit done (existing entry points that would skip the new flow/guards)?
 8. **Requirements & Japanese check:** Are all PRD FR/BR IDs carried in? Does every Japanese domain term from the PRD survive verbatim (no silent translation)? If any term was paraphrased away, restore it.
 
 Fix any issues inline. No need to re-review — just fix and move on.

@@ -65,14 +65,13 @@ name the behavior it changes is incomplete.
 - Cross-context impact: (if none, say "none")
 - External consumers outside `ldx_addons` (verified via text search):
 
-## Implicit Impact & Side-Effects Inventory
+## Impact Analysis & Requirements Gap Inventory
 
 Required when the change touches an existing aggregate/flow in any way — extending it,
 changing its states, undoing it (cancel/revert/archive/void), feeding or consuming it, or
-writing into it from an integration. Run the Implicit-Impact Sweep (see SKILL.md) per
-target aggregate and record every finding the requirements do not mention. **Requirement
-silence about behavior that exists in code is a `PENDING` product question, not absence of
-behavior.**
+writing into it from an integration. Run Impact & Gap Analysis (see SKILL.md) per target
+aggregate and record every finding. **Requirements silence about behavior that exists in
+code is a requirements gap — a `PENDING` product question, not absence of behavior.**
 
 | # | Impact / side effect | Evidence (symbol @ path) | Disposition | Status |
 |---|----------------------|--------------------------|-------------|--------|
@@ -82,7 +81,8 @@ General dispositions:
 - `covered` — a requirement or design item already handles it.
 - `no-impact` — read-only or display-only.
 - `out-of-scope` — explicitly excluded by a recorded user decision.
-- `PENDING` — needs a product/user decision; blocks design completion while open.
+- `PENDING` — a requirements gap; needs a product/user decision; blocks design completion
+  while open.
 
 For undo-type features (cancel/revert/archive/void), refine `covered` into:
 - `reverse` — the design undoes it.
