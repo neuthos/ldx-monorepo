@@ -1,6 +1,6 @@
 # Ringi 100 — Phase 3 Cancellation (Arrival / Shipment / Store Sales / Store Sales Return) — Technical Spec
 
-**Sync ID:** `r100p3-e2b61f` — must match the TDD sheet Metadata `ID`; a mismatch means the sheet or this file is stale.
+**Sync ID:** `r100p3-f8a03d` — must match the TDD sheet Metadata `ID`; a mismatch means the sheet or this file is stale.
 **TDD Sheet:** `Ringi 100 - Phase 3 - TDD` (folder `1eFHQSvv0LXLTl7UzH0na-k1FuK5lFK0h`) — Treacibility Matrix rows 10–42 are the 1:1 BR/FR mirror of this spec.
 **Status:** awaiting human bulk review in the sheet (5 open Questions in Q&A tab).
 

@@ -40,6 +40,10 @@ Last verified against the template on 2026-08-18.
    Approved/Editted/New/Pending/Question/Rejected; Testcases same; Q&A `E` over its data
    rows: Draft/Forwarded To JP Team/Noted) so every written status is a real dropdown.
    After writing, merge the BR blocks (Source/BR-ID/Business Requirement columns).
+   **Screen/Page holds an ldx-frontend page only** (name + route from `menu.json` /
+   L-Pedia screen number). Backend-only FRs get `-` in Screen/Page — backend module paths
+   live in the spec markdown, not in this column. Multi-item cells (Q&A options, lists)
+   use **one item per line** (`\n`), never ` | ` separators.
    Content language: **English**; Source format `PRD <Doc> <sec>` (no `§`); Japanese
    status terms carry an English gloss on first use, e.g.
    "Pending Cancellation (取消待ち)".
