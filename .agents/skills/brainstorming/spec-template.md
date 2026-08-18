@@ -65,25 +65,32 @@ name the behavior it changes is incomplete.
 - Cross-context impact: (if none, say "none")
 - External consumers outside `ldx_addons` (verified via text search):
 
-## Reversibility & Side-Effects Inventory (cancel/revert/archive/void features)
+## Implicit Impact & Side-Effects Inventory
 
-Required when the feature cancels, reverts, archives, or voids an existing flow. Run the
-Reversibility Sweep (see SKILL.md) per target aggregate and record every confirm-time side
-effect found across ALL modules. **PRD silence on a side effect that exists in code is a
-`PENDING` product question, not absence of behavior.**
+Required when the change touches an existing aggregate/flow in any way — extending it,
+changing its states, undoing it (cancel/revert/archive/void), feeding or consuming it, or
+writing into it from an integration. Run the Implicit-Impact Sweep (see SKILL.md) per
+target aggregate and record every finding the requirements do not mention. **Requirement
+silence about behavior that exists in code is a `PENDING` product question, not absence of
+behavior.**
 
-| # | Side effect | Evidence (symbol @ path) | Disposition | Status |
-|---|-------------|--------------------------|-------------|--------|
-|   |             |                          | reverse / block / accept-stale / no-impact | USER-APPROVED / PENDING |
+| # | Impact / side effect | Evidence (symbol @ path) | Disposition | Status |
+|---|----------------------|--------------------------|-------------|--------|
+|   |                      |                          | see below   | USER-APPROVED / PENDING |
 
-Dispositions:
-- `reverse` — the design undoes it on cancellation.
-- `block` — irreversible; cancellation is refused while present (guard + preview row).
-- `accept-stale` — documented known limitation (snapshots/analytics that go stale).
+General dispositions:
+- `covered` — a requirement or design item already handles it.
 - `no-impact` — read-only or display-only.
+- `out-of-scope` — explicitly excluded by a recorded user decision.
+- `PENDING` — needs a product/user decision; blocks design completion while open.
 
-Also record: existing entry points that bypass the new guards (e.g. older services calling
-the raw cancel method directly) and how each is aligned or documented.
+For undo-type features (cancel/revert/archive/void), refine `covered` into:
+- `reverse` — the design undoes it.
+- `block` — irreversible; the operation is refused while present (guard + preview row).
+- `accept-stale` — documented known limitation (snapshots/analytics that go stale).
+
+Also record: existing entry points that bypass the new flow/guards (e.g. older services
+calling the raw method directly) and how each is aligned or documented.
 
 ## FE / BE / E2E Contracts
 
