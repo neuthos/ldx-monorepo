@@ -1,0 +1,19 @@
+{
+  "mcp": {
+    "servers": {
+      "confluence": {
+        "type": "stdio",
+        "command": "./scripts/confluence-mcp",
+        "timeoutMs": 60000
+      },
+      "gsheets": {
+        "type": "stdio",
+        "command": "./scripts/gsheets-mcp",
+        "timeoutMs": 60000,
+        "env": {
+          "DRIVE_FOLDER_ID": ""
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+CONTROL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+RUNTIME="$HOME/.zcode/mcp-servers/node_modules/gsheets-mcp/index.js"
+
+if [[ ! -f "$RUNTIME" ]]; then
+  printf 'gsheets-mcp runtime is missing.\n' >&2
+  printf 'Run: npm install --prefix ~/.zcode/mcp-servers gsheets-mcp --no-fund --no-audit\n' >&2
+  exit 1
+fi
+
+# Service-account key stays project-scoped (gitignored) unless overridden.
+export SERVICE_ACCOUNT_PATH="${SERVICE_ACCOUNT_PATH:-$CONTROL_ROOT/.zcode/gsheets-service-account.json}"
+
+exec node "$RUNTIME"

@@ -1,0 +1,152 @@
+# TDD Sheet Contract (LOCKED)
+
+Canonical, locked write-contract for the per-ringi TDD Google Sheet. Both writer skills
+(`brainstorming`, `spec-test-plan-agent`) MUST follow this contract exactly. The contract
+agent (`fe-be-e2e-contract-agent`) reads Metadata only. **Format is locked: never alter
+structure, headers, dropdowns, or validation. If this file and the template disagree, stop
+and ask the user — never improvise.**
+
+Last verified against the template on 2026-08-18.
+
+## Identity
+
+| Item | Value |
+|---|---|
+| Template spreadsheet | `1ZEXFbzolW2VvDzm_h_Vp8DKutl0ACfVZ_CdKqgPA4Mo` ("Template") |
+| Drive folder | `1eFHQSvv0LXLTl7UzH0na-k1FuK5lFK0h` |
+| Per-ringi working copy | `scripts/gsheets-copy-template.sh "{Ringi N - Title} - TDD"` (Drive `files.copy` of the template into the folder; preserves dropdowns, merges, formatting) |
+| MCP | project-scoped `gsheets` server via `scripts/gsheets-mcp`; one-shot calls via `scripts/gsheets-mcp-call.sh <tool> <json>` |
+| Tab names (locked, typos included) | `Metadata`, `Treacibility Matrix`, `Q&A`, `Testcases`, `Answerkey TC-{1}`, `Issue` |
+
+## Global rules
+
+1. **Status spellings are strict dropdowns** (`strict: true`). Allowed on TM/Testcases:
+   `Pending`, `Approved`, `Editted`, `New`, `Question`, `Rejected`. On Q&A: `Draft`,
+   `Forwarded To JP Team`, `Noted`. On Metadata: `Done`, `In progress`. Any other value is
+   rejected by the sheet — do not try.
+2. **Human-owned values — never overwrite:** any cell status `Approved` / `Editted` /
+   `Rejected`, the Q&A `Answer` column, and the Answerkey `Result` rows. `Editted` /
+   `Rejected` / `Answer` are human input channels the AI must read, not write.
+3. **The `Issue` tab is never touched** by any skill. It is a development-time log.
+4. **Write zones** — template rows 1–8 (TM) and 1–11 (Testcases) are the legend/options
+   zone: keep them intact. Data starts at **TM row 10** and **Testcases row 13** (one blank
+   separator row before data). Append after existing data; never insert above it.
+5. **IDs are stable and monotonic.** Never renumber existing IDs. New rows take the next
+   free number. `{title}` = Metadata `Title` with spaces replaced by `-`
+   (e.g. `Ringi-100-Cancellation-Phase-3`).
+6. One status cell per FR row (`1 Status = 1 FR`). BR-ID / Business Requirement /
+   Source cells are **vertically merged per BR block** (1 BR : many FR).
+7. Every mutation updates Metadata: new random `ID`, `Last Updated At` `YYYY/MM/DD HH:MM`,
+   and `Status` (`In progress` while any row is Pending/Question; `Done` only when the
+   contract agent's gate passes — see below).
+
+## Tab contracts
+
+### Metadata (key-value A/B; BOUNDARIES block rows 9–19)
+
+| Row | Field | Written by | Rule |
+|---|---|---|---|
+| 2 | Title | brainstorming | ringi title, e.g. `Ringi 100 Cancellation - Phase 3` |
+| 3 | Ringi Spec | brainstorming | GitHub blob link to `{ringi-id}-spec.md` |
+| 4 | Test Spec | spec-test-plan-agent | link to `{ringi-id}-test-spec.md` |
+| 5 | Contract Spec | contract agent run | link to `{ringi-id}-contract.md` (or `-` until generated) |
+| 6 | ID | any writer | random ID regenerated on every change |
+| 7 | Status | any writer | `Done` / `In progress` — `Done` is the contract-agent gate |
+| 8 | Last Updated At | any writer | `YYYY/MM/DD HH:MM` |
+| 9–19 | BOUNDARIES | spec-test-plan-agent | per letter: `Covered` with TC-IDs in TC Refs, or `None` with the reason text in TC Refs |
+
+### Treacibility Matrix (A:H, data from row 10)
+
+| Col | Field | Rule |
+|---|---|---|
+| A | Status | `Pending` when brainstorm is confident; `Question` for dummy BR/FR awaiting confirmation (then a Q&A row must exist and Remarks notes it) |
+| B | Source | why this exists, from the Ringi document — keep it simple (section/short quote) |
+| C | BR-ID | `BR-{title}-{nn}` — merged vertically across the BR's FR rows |
+| D | Business Requirement | ONE clear non-technical sentence for the product team — merged with BR-ID |
+| E | FR-ID | `FR-{title}-{nn}` |
+| F | Screen / Page | ldx-frontend page (from `menu.json` route) touched by this FR |
+| G | Functional Requirement | one-liner FR |
+| H | Remarks | context; mandatory note when Status = `Question` |
+
+### Q&A (A:E, append)
+
+| Col | Field | Rule |
+|---|---|---|
+| A | BR-ID / FR-ID | the questioning row's ID (or `-`) |
+| B | Question | confirmation question, phrased simply |
+| C | Options | concrete answer options to make replying easy |
+| D | Answer | **human only** |
+| E | Status | `Draft` when created; human may set `Forwarded To JP Team` / `Noted` |
+
+### Testcases (A:H, data from row 13; one step per row)
+
+| Col | Field | Rule |
+|---|---|---|
+| A | Status | same strict set as TM |
+| B | TC-ID | `TC-{title}-{nn}` — written on the first row of the case, merged down |
+| C | Covered FR-ID | comma-separated FR-IDs |
+| D | Category | `Happy Path` / `Negative path` / `Edge case` / `Error handling` / `Boundaries` |
+| E | Test Case Title | "Should be able to …" one-liner — merged down |
+| F | Test Type | `Backend Unit Testing` / `Frontend Unit Testing` / `E2E Integration Testing` / `E2E Testing` |
+| G | Case | numbered steps, ONE STEP PER ROW (`1. Preparation data…`, `2. …`) |
+| H | Remarks | notes for this TC |
+
+### Answerkey TC-{n}
+
+Tab `Answerkey TC-{1}` holds the locked generation prompt in `B1`. For each TC needing an
+answer key: `copy_sheet` the template tab, rename to `Answerkey TC-{n}`, fill per the
+prompt's output contract (header block + step blocks + `Expectation:` lines). `Result`
+rows stay blank for QA.
+
+## Re-brainstorm rules (Editted / Rejected awareness)
+
+1. Before regenerating anything, **read the TM first**. Rows whose status is `Editted` or
+   `Rejected` carry human decisions that override the previous brainstorm output.
+2. `Editted` FR: keep the FR-ID; adapt the spec and downstream artifacts to the edited
+   wording; only the human may move the status back to `Approved`/`Pending`.
+3. `Rejected` row: exclude from spec regeneration and downstream test/contract output;
+   record the rejection reason (Remarks / Q&A) in the regenerated spec.
+4. `Question` rows: regenerate faithfully as dummy BR/FR + Q&A entry until the human
+   answers; then materialize the real BR/FR from the answer.
+5. New rows never reuse an ID of an Editted/Rejected row.
+
+## Interaction mode (Excel is the conversation)
+
+The brainstorming skill does **not** ask the user questions one at a time in chat. It runs
+the full design flow end to end, and every uncertainty becomes machine-written content:
+a TM row with Status `Question` (dummy BR/FR), a matching Q&A row with concrete options,
+and a note in Remarks. The human answers everything at once in the Excel (Q&A `Answer`
+column; status changes on TM/Testcases rows; reasons usually go in `Remarks`). Chat stays
+for approvals the contract cannot encode (design approach selection, scope decisions).
+
+## Done gate (checked by the `tdd-sheet-update` skill)
+
+`Metadata.Status` becomes `Done` only when ALL of the following hold:
+
+1. Every Treacibility Matrix data row status = `Approved` (no Pending / Question /
+   Editted / Rejected / New).
+2. Every Testcases data row status = `Approved` (same rule).
+3. No TM/Testcases row carries Status `Question`, and every Q&A row has Status
+   `Noted` or `Forwarded To JP Team` (no `Draft` left) — i.e. nothing is still awaiting
+   a human answer.
+
+If any row is `Editted` or `Rejected`, the gate does not just fail — those rows carry
+human decisions in `Remarks` that the next brainstorm/test-plan regeneration MUST ingest
+(see Re-brainstorm rules). The update skill reports them; it does not resolve them.
+
+## Markdown artifacts (generated in parallel, same content split by audience)
+
+| File | Writer | 1:1 with | Audience/language |
+|---|---|---|---|
+| `docs/ringi/specs/{ringi-id}-spec.md` | brainstorming | TM | technical — field names, BE/FE components, symbols |
+| `docs/ringi/test-plans/{ringi-id}-test-spec.md` | spec-test-plan-agent | Testcases | FE/BE/E2E teams, parallel-ready |
+| `docs/ringi/contracts/{ringi-id}-contract.md` | contract-agent run | Testcases (E2E TCs → POM with every element clicked/filled) | end-to-end implementation contract |
+
+## Skill responsibility matrix
+
+| Skill | Metadata | TM | Q&A | Testcases | Answerkey | Markdown |
+|---|---|---|---|---|---|---|
+| brainstorming | partial (Title/Ringi Spec/ID/timestamp/Status) | ✅ | ✅ | — | — | `{ringi-id}-spec.md` |
+| spec-test-plan-agent | partial (Test Spec/BOUNDARIES/ID/timestamp/Status) | read-only | — | ✅ | ✅ | `{ringi-id}-test-spec.md` |
+| tdd-sheet-update | updates `Status`/`ID`/`Last Updated At` when the Done gate passes | read | read | read | — | — |
+| fe-be-e2e-contract-agent | reads `Status` — **must be `Done`** to proceed; writes Contract Spec link afterward | read-only | — | read-only | — | `{ringi-id}-contract.md` |
