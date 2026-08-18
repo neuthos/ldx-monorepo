@@ -19,13 +19,26 @@ if [[ ! -f "$GS_KEY" ]]; then
   exit 1
 fi
 
+# The service account's Drive quota is 0 — it cannot own files. On the quota error,
+# print the manual fallback instead of a bare API message.
+copy_fallback_hint() {
+  printf '\nSA storage quota is 0 — it cannot own the copied file.\n' >&2
+  printf 'Manual fallback:\n' >&2
+  printf '  1. Open the template: https://docs.google.com/spreadsheets/d/%s/edit\n' "$TEMPLATE_ID" >&2
+  printf '  2. File > Make a copy — destination folder %s — title as passed to this script\n' "$FOLDER_ID" >&2
+  printf '  3. Share the copy to ldx-76@ldx-project-505914.iam.gserviceaccount.com as Editor\n' >&2
+  printf '  4. Re-run your pipeline step; it will find the sheet via list_spreadsheets\n' >&2
+}
+
 if [[ "${1:-}" == "--delete" ]]; then
   export GS_DELETE_ID="${2:?spreadsheet id required}"
 else
   export GS_TITLE="${1:?new spreadsheet title required}"
 fi
 
-NODE_PATH="$HOME/.zcode/mcp-servers/node_modules" exec node -e '
+ERRFILE="$(mktemp)"
+set +e
+NODE_PATH="$HOME/.zcode/mcp-servers/node_modules" node -e '
 const { google } = require("googleapis");
 const key = require(process.env.GS_KEY);
 const auth = new google.auth.JWT({
@@ -54,4 +67,10 @@ const drive = google.drive({ version: "v3", auth });
     url: `https://docs.google.com/spreadsheets/d/${res.data.id}/edit`,
   }));
 })().catch((e) => { console.error(e.message); process.exit(1); });
-'
+' 2>"$ERRFILE"
+rc=$?
+set -e
+if grep -qi "quota" "$ERRFILE"; then copy_fallback_hint; fi
+cat "$ERRFILE" >&2
+rm -f "$ERRFILE"
+exit "$rc"

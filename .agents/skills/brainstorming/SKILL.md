@@ -132,9 +132,12 @@ writing into existing models; **always** when replicating an approved pattern.
 Follow `.agents/skills/tdd-sheet-contract.md` exactly. This skill's writes:
 
 1. **Locate or create the ringi's sheet**: search folder `1eFHQSvv0LXLTl7UzH0na-k1FuK5lFK0h`
-   via `list_spreadsheets`; if absent, copy the template with
-   `./scripts/gsheets-copy-template.sh "{Ringi N - Title} - TDD"` (if Drive quota or
-   access blocks the copy, stop and report — never hand-build the sheet).
+   via `list_spreadsheets`; if absent, try
+   `./scripts/gsheets-copy-template.sh "{Ringi N - Title} - TDD"`. The SA cannot own
+   files (quota 0), so on the quota error STOP with the manual copy instructions
+   (template → File → Make a copy into the folder, title `{Ringi N - Title} - TDD`,
+   share to `ldx-76@ldx-project-505914.iam.gserviceaccount.com` as Editor) and resume
+   once the sheet appears — never hand-build the sheet.
 2. **Metadata (partial)**: `Title`, `Ringi Spec` (blob link to the committed spec),
    fresh `ID`, `Last Updated At`, `Status` = `In progress`. Never touch `Test Spec`,
    `Contract Spec`, or BOUNDARIES (owned by later pipeline stages).

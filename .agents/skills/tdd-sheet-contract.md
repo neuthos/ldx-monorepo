@@ -14,7 +14,7 @@ Last verified against the template on 2026-08-18.
 |---|---|
 | Template spreadsheet | `1ZEXFbzolW2VvDzm_h_Vp8DKutl0ACfVZ_CdKqgPA4Mo` ("Template") |
 | Drive folder | `1eFHQSvv0LXLTl7UzH0na-k1FuK5lFK0h` |
-| Per-ringi working copy | `scripts/gsheets-copy-template.sh "{Ringi N - Title} - TDD"` (Drive `files.copy` of the template into the folder; preserves dropdowns, merges, formatting) |
+| Per-ringi working copy | **The SA's Drive storage quota is 0 (verified) — it cannot own files.** Creation flow: the skill tries `scripts/gsheets-copy-template.sh "{Ringi N - Title} - TDD"`; on the quota error it stops with exact manual instructions (user: open the Template → File → Make a copy into folder `1eFHQSvv0LXLTl7UzH0na-k1FuK5lFK0h` with title `{Ringi N - Title} - TDD` → Share to `ldx-76@ldx-project-505914.iam.gserviceaccount.com` as Editor) and resumes as soon as the sheet appears in the folder. Editing user-owned shared sheets needs no quota and works today. |
 | MCP | project-scoped `gsheets` server via `scripts/gsheets-mcp`; one-shot calls via `scripts/gsheets-mcp-call.sh <tool> <json>` |
 | Tab names (locked, typos included) | `Metadata`, `Treacibility Matrix`, `Q&A`, `Testcases`, `Answerkey TC-{1}`, `Issue` |
 
