@@ -87,7 +87,7 @@ Last verified against the template on 2026-08-18.
 | G | Functional Requirement | one-liner FR |
 | H | Remarks | context; mandatory note when Status = `Question` |
 
-### Q&A (A:F, append)
+### Q&A (A:E, append)
 
 | Col | Field | Rule |
 |---|---|---|
@@ -95,8 +95,7 @@ Last verified against the template on 2026-08-18.
 | B | Question | confirmation question, phrased simply |
 | C | Options | concrete answer options to make replying easy — one option per line (`\n`) |
 | D | Answer | **human only** |
-| E | Status | `Draft` when created; human may set `Forwarded To JP Team` / `Noted` |
-| F | AI Updated | **AI only** — awareness marker: written when the answer has been ingested. Format: `Yes — YYYY/MM/DD — <what changed: updated FR-IDs / added FR-IDs / no change>`. Empty = not yet ingested. Answers are NOTED facts: an answer may add new BR/FR — the marker exists precisely so humans can see which answers already produced rows. |
+| E | Status | `Draft` = awaiting an answer. `Forwarded To JP Team` = human defers (human-only). **`Noted` = the AI has received and ingested the answer (AI-written acknowledgment)** — set it right after materializing the answer's effects. So: human fills `Answer` (status stays `Draft`); the next brainstorming run reads the answer, applies it (may update/add BR/FR), and flips the status to `Noted`. |
 
 ### Testcases (A:H, data from row 2; one step per row)
 
@@ -131,8 +130,8 @@ rows stay blank for QA.
    test/contract output, and record the reason verbatim in the regenerated spec.
 4. `Question` rows: regenerate faithfully as dummy BR/FR + Q&A entry until the human
    answers; then materialize the real BR/FR from the answer — which may ADD new BR/FR or
-   modify existing ones — and write the `AI Updated` marker (Q&A col F) listing exactly
-   which FR-IDs were updated/added.
+   modify existing ones — and flip the Q&A row's Status to `Noted` (the AI-awareness
+   marker).
 5. New rows never reuse an ID of an Editted/Rejected row.
 
 ## Interaction mode (Excel is the conversation)
@@ -151,9 +150,9 @@ for approvals the contract cannot encode (design approach selection, scope decis
 1. Every Treacibility Matrix data row status = `Approved` (no Pending / Question /
    Editted / Rejected / New).
 2. Every Testcases data row status = `Approved` (same rule).
-3. No TM/Testcases row carries Status `Question`, and every Q&A row has Status
-   `Noted` or `Forwarded To JP Team` (no `Draft` left) — i.e. nothing is still awaiting
-   a human answer.
+3. No TM/Testcases row carries Status `Question`, and **every Q&A row is `Noted`** —
+   i.e. every answer has been received AND ingested by the AI (no `Draft` awaiting an
+   answer, no `Forwarded To JP Team` still pending).
 
 If any row is `Editted` or `Rejected`, the gate does not just fail — those rows carry
 human decisions in `Remarks` that the same brainstorming run MUST ingest before finishing

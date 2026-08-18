@@ -147,8 +147,8 @@ Follow `.agents/skills/tdd-sheet-contract.md` exactly. This skill's writes:
 4. **Q&A**: one row per `Question` with concrete options; Remarks on the TM row notes it.
 5. On re-runs: **read the TM first** — ingest `Editted` (keep FR-ID, adapt to the edited
    wording) and `Rejected` rows (**read the Remarks reason first** — it may imply new or
-   modified BR/FR; propose those as `Pending`), materialize answered Q&A rows (marking
-   Q&A col F `AI Updated` with the changed FR-IDs), then apply the Done gate at the end
+   modified BR/FR; propose those as `Pending`), materialize answered Q&A rows (flipping their
+   Status to `Noted` — the AI-awareness marker), then apply the Done gate at the end
    (contract §Done gate): set `Metadata.Status = Done` when everything is `Approved` with
    no `Question`/`Draft` left. Never renumber IDs; never touch human-owned cells.
 
