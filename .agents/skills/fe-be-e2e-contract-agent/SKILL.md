@@ -1,16 +1,38 @@
 ---
 name: fe-be-e2e-contract-agent
-description: Create an English FE/BE/E2E contract document from a Markdown design spec and test plan before implementation. Use when the contract must define E2E pages and journeys, FE elements and stable data-test selectors for Page Objects, BE/API/data dependencies, existing selector evidence, proposed selectors for missing elements, and explicit PENDING decisions without writing application or test code.
+description: "Create {ringi-id}-contract.md — the end-to-end FE/BE/E2E implementation contract (long-running /goal pipeline) from the ringi's spec + test-spec + TDD sheet. Gated on the sheet's Metadata.Status = Done. Defines E2E pages/journeys, FE elements and stable data-test selectors for Page Objects covering every element to click/fill, BE/API/data dependencies, existing-selector evidence, proposed selectors, and explicit PENDING decisions — without writing application or test code."
 ---
 
 # FE/BE/E2E Contract Agent
 
-Act as a cross-repository contract analyst for QA, FE, BE, and E2E. Convert the supplied Markdown design spec and test plan into one implementation-ready contract document. The contract is a planning artifact: it defines what FE exposes, what BE provides, and what E2E consumes. It does not implement code or tests.
+Act as a cross-repository contract analyst for QA, FE, BE, and E2E. Convert the ringi's
+spec, test plan, and TDD sheet into one implementation-ready contract document. The
+contract is a planning artifact: it defines what FE exposes, what BE provides, and what
+E2E consumes. It does not implement code or tests.
+
+## Execution mode
+
+- **Long-running goal by default**: run under `/goal` (Claude Code / ZCode / Codex).
+- **Sheet gate (mandatory)**: locate the ringi's TDD Google Sheet (folder
+  `1eFHQSvv0LXLTl7UzH0na-k1FuK5lFK0h`) and read `Metadata!Status`. It **must be
+  `Done`** (set by `tdd-sheet-update` after all TM/Testcases rows are `Approved` and no
+  Question/Draft remains). If it is not `Done`, stop and report exactly which statuses
+  block the gate — do not generate the contract from unapproved content.
+- **Multiple agents**: fan out read-only repository-evidence agents (FE / BE / E2E) in
+  one message; merge findings before drafting.
+- This skill edits **nothing** in the sheet except, after the contract is saved:
+  `Metadata` `Contract Spec` (blob link to the contract), fresh `ID`, and
+  `Last Updated At` — per `.agents/skills/tdd-sheet-contract.md`.
 
 ## Scope and safety
 
-- Require both source documents: the design spec and the test plan. For the L-DX workflow, the default inputs are `2026-08-13-tax-classification-design.md` and `2026-08-13-tax-classification-test-plan.md`. If either input is missing, unreadable, or ambiguous, stop and ask for it.
-- Read the source documents first. Treat approved decisions and explicit contracts as the primary intent; treat test-plan scenarios as the executable coverage inventory.
+- Require the source documents: `docs/ringi/specs/{ringi-id}-spec.md`,
+  `docs/ringi/test-plans/{ringi-id}-test-spec.md`, and
+  the ringi's TDD sheet (Testcases tab = the coverage inventory). If any input is
+  missing, unreadable, or the sheet gate fails, stop and ask.
+- Read the source documents first. Treat approved decisions (including sheet
+  `Approved`/`Editted` statuses and their Remarks) as the primary intent; treat
+  test-spec cases as the executable coverage inventory.
 - Automatically resolve and validate FE, BE, and E2E repositories from `.env` (`FE_PWD`, `BE_PWD`, `E2E_PWD`) or explicit user paths before making repository claims. Never guess a path. If any required repository is unavailable or not a Git worktree, stop and request the missing repository/path.
 - Read each target repository's root `AGENTS.md`/`CLAUDE.md` before inspection. Keep FE, BE, and E2E strictly read-only. Do not create/edit code, install dependencies, run tests/apps, mutate data/services, switch branches, or change Git state.
 - Follow the project-prescribed `codebase-memory` MCP sequence before source discovery when available: list/select projects, get architecture, search graph, trace callers/callees/dependencies, and read snippets only for graph-resolved symbols. Use narrow text search only for literals, selector strings, configuration, non-code files, or incomplete graph coverage, and disclose fallback evidence.
@@ -101,15 +123,16 @@ Do not silently replace an existing selector with a prettier proposed name. If t
 
 Document only fields/endpoints required by the journeys. For each contract, include direction, endpoint/model/action, request fields, response fields, type/nullable/default semantics, error behavior, authorization/state guard, and linked test-plan cases.
 
-For the tax-classification pattern, explicitly verify or mark `PENDING` for:
+For data contracts, explicitly verify or mark `PENDING` for the feature's risky field
+semantics — the recurring L-DX patterns:
 
-- writable `tax_id` versus read-only mirrors `tax_classification_id` and `tax_ratio`;
-- active Tax Master dropdown source and filtering;
-- blank/unset tax versus explicit 0% tax;
-- product-tax → company-default fallback;
+- writable fields versus read-only mirrors/computeds;
+- dropdown option sources and their filtering;
+- blank/unset versus explicit zero/default values;
+- fallback chains (e.g. product-level → company-default);
 - FE summary field names and parity with BE grouping/rounding;
 - batch import columns and their exact mapping; and
-- closing-date, guest-user, and integration-failure behavior.
+- closing-date (締め), guest-user, and integration-failure behavior.
 
 Do not invent an endpoint or payload when the design says an existing route is reused. Mark the reused route as `Existing` only after repository evidence confirms it.
 
@@ -125,7 +148,10 @@ Order dependencies so FE selector contracts and BE response contracts are agreed
 
 ## Required output document
 
-Write one English Markdown contract document. Use this structure and keep tables focused; split a large inventory by page only when necessary.
+Write `docs/ringi/contracts/{ringi-id}-contract.md` — one English Markdown contract
+document, end-to-end from the sheet's Testcases: every E2E TC becomes a journey, and its
+POM section names **every element that will be clicked/filled/asserted**. Use this
+structure and keep tables focused; split a large inventory by page only when necessary.
 
 ```markdown
 # <Feature> FE/BE/E2E Contract
@@ -222,7 +248,7 @@ Write one English Markdown contract document. Use this structure and keep tables
 
 Before presenting or saving the contract, verify:
 
-1. Both source files are named and read.
+1. The sheet gate passed (`Metadata.Status = Done`) and both source files are named and read.
 2. All FE, BE, and E2E repositories are validated or the contract stops with a missing-repository request.
 3. Every E2E row in the test plan is mapped to a journey, page, element, and assertion, or explicitly marked `PENDING`.
 4. Every page boundary and downstream page is listed in the page map.
@@ -233,5 +259,7 @@ Before presenting or saving the contract, verify:
 9. BE fields, endpoint/model, defaults, nullability, errors, permissions, and state guards are explicit.
 10. FE, BE, and E2E owner work packets are ordered by dependency.
 11. No code, test, repository, database, or external state was modified.
+12. After saving: `Metadata` updated — `Contract Spec` blob link, fresh `ID`,
+    `Last Updated At` (nothing else in the sheet).
 
 If a material ambiguity blocks a contract, produce the non-blocked sections only, mark the document `PENDING decisions`, and ask one focused question rather than inventing a contract.
