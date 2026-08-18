@@ -1,6 +1,8 @@
 # Ringi 100 Phase 3 — Slip Cancellation (Arrival, Shipment, Store Sales, Store Sales Return) Test Plan
 
-Source spec: `docs/ringi/specs/2026-08-18-ringi-100-phase-3-cancellation-design.md` (User-Approved design, commit `0831401`).
+Source spec: `docs/ringi/specs/100-phase3-spec.md` (User-Approved design).
+
+**Sync ID:** `r100p3-8f4d21` — must match the TDD sheet Metadata `ID`; a mismatch means the sheet or this file is stale.
 
 ## 1. Summary
 

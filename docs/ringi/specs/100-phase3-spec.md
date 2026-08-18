@@ -6,6 +6,8 @@
 
 ---
 
+**Sync ID:** `r100p3-8f4d21` — must match the TDD sheet Metadata `ID`; a mismatch means the sheet or this file is stale.
+
 ## Context
 
 Ringi 100 introduces a governed two-step slip cancellation (取消) across the L-DX system. Phase 1/2 — already implemented, UAT-adjusted and approved — covers Sales Slip, Sales Return Slip, Purchase Slip, and Purchase Return Slip. Phase 3 extends the same capability to **Arrival Slip (入荷伝票)**, **Shipment Slip (出荷伝票)**, **Store Sales (店舗売上)**, and **Store Sales Return (店舗売上返品)**, per four English PRD documents supplied by the user (pasted texts, 2026-08-18).
