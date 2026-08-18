@@ -56,7 +56,7 @@ Follow `.agents/skills/tdd-sheet-contract.md` exactly. This skill's writes:
    step blocks + `Expectation:` lines; `Result` rows stay blank for QA).
 3. **Metadata (partial)** — `Test Spec` blob link, BOUNDARIES rows 10–19 (`Covered` +
    TC-IDs, or `None` + reason), fresh `ID`, `Last Updated At`. Never set `Status` to
-   `Done` (that is `tdd-sheet-update`'s gate). Never touch TM/Q&A rows.
+   `Done` (that is `brainstorming`'s Done gate). Never touch TM/Q&A rows.
 4. On re-runs: read Testcases statuses first — ingest `Editted` (adapt TC, keep TC-ID)
    and `Rejected` (drop from regeneration + downstream, keep the reason); never
    renumber IDs; never overwrite human cells.

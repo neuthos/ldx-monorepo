@@ -146,8 +146,11 @@ Follow `.agents/skills/tdd-sheet-contract.md` exactly. This skill's writes:
    vocabulary; `Screen / Page` = ldx-frontend route from `menu.json`.
 4. **Q&A**: one row per `Question` with concrete options; Remarks on the TM row notes it.
 5. On re-runs: **read the TM first** — ingest `Editted` (keep FR-ID, adapt to the edited
-   wording) and `Rejected` (exclude from regeneration, carry the reason) rows and their
-   Remarks; never renumber IDs; never touch human-owned cells.
+   wording) and `Rejected` rows (**read the Remarks reason first** — it may imply new or
+   modified BR/FR; propose those as `Pending`), materialize answered Q&A rows (marking
+   Q&A col F `AI Updated` with the changed FR-IDs), then apply the Done gate at the end
+   (contract §Done gate): set `Metadata.Status = Done` when everything is `Approved` with
+   no `Question`/`Draft` left. Never renumber IDs; never touch human-owned cells.
 
 BR writing rules: BR = one clear non-technical sentence; FR = one-liner with the screen;
 Source = simple pointer into the Ringi document.
@@ -175,8 +178,8 @@ Source = simple pointer into the Ringi document.
    human cells untouched) + BR one-liners readable by the product team.
 10. **Commit** the spec (control-plane repo only).
 11. **Report & hand off** — one final summary: what was designed, the Question rows
-    awaiting bulk answers, and the next pipeline steps (`tdd-sheet-update` after human
-    review; `spec-test-plan-agent` when TM is Approved). Emit the advisory per-repo
+    awaiting bulk answers, the gate result, and the next pipeline step
+    (`spec-test-plan-agent` once the gate passes). Emit the advisory per-repo
     implementation handoff. END — do not invoke implementation skills.
 
 ## BOUNDARIES Edge-Case Discovery
@@ -207,5 +210,6 @@ them alone.
 Terminal step: emit — do not execute — a per-repo handoff per the repo-root `CLAUDE.md`
 standard (goal, scoped symbols, evidence, ordered steps, acceptance criteria,
 verification, cross-repo dependencies). Remind the user of the pipeline order:
-`tdd-sheet-update` (human answers → Done gate) → `spec-test-plan-agent` → contract agent
-(gated on `Metadata.Status = Done`).
+re-run `/brainstorming <sheet-link>` after human edits (it ingests answers and applies
+the Done gate) → `spec-test-plan-agent` → contract agent (gated on
+`Metadata.Status = Done`).

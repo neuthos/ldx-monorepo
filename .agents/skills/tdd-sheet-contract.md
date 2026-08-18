@@ -87,15 +87,16 @@ Last verified against the template on 2026-08-18.
 | G | Functional Requirement | one-liner FR |
 | H | Remarks | context; mandatory note when Status = `Question` |
 
-### Q&A (A:E, append)
+### Q&A (A:F, append)
 
 | Col | Field | Rule |
 |---|---|---|
 | A | BR-ID / FR-ID | the questioning row's ID (or `-`) |
 | B | Question | confirmation question, phrased simply |
-| C | Options | concrete answer options to make replying easy |
+| C | Options | concrete answer options to make replying easy — one option per line (`\n`) |
 | D | Answer | **human only** |
 | E | Status | `Draft` when created; human may set `Forwarded To JP Team` / `Noted` |
+| F | AI Updated | **AI only** — awareness marker: written when the answer has been ingested. Format: `Yes — YYYY/MM/DD — <what changed: updated FR-IDs / added FR-IDs / no change>`. Empty = not yet ingested. Answers are NOTED facts: an answer may add new BR/FR — the marker exists precisely so humans can see which answers already produced rows. |
 
 ### Testcases (A:H, data from row 2; one step per row)
 
@@ -123,10 +124,15 @@ rows stay blank for QA.
    `Rejected` carry human decisions that override the previous brainstorm output.
 2. `Editted` FR: keep the FR-ID; adapt the spec and downstream artifacts to the edited
    wording; only the human may move the status back to `Approved`/`Pending`.
-3. `Rejected` row: exclude from spec regeneration and downstream test/contract output;
-   record the rejection reason (Remarks / Q&A) in the regenerated spec.
+3. `Rejected` row: **read the Remarks reason FIRST** — the reason is a decision, not just
+   a deletion. It may imply new or modified BR/FR elsewhere (e.g. "rejected because we
+   will handle it via the Return flow instead" → propose the corresponding FR as a new
+   `Pending` row). Then exclude the rejected row from spec regeneration and downstream
+   test/contract output, and record the reason verbatim in the regenerated spec.
 4. `Question` rows: regenerate faithfully as dummy BR/FR + Q&A entry until the human
-   answers; then materialize the real BR/FR from the answer.
+   answers; then materialize the real BR/FR from the answer — which may ADD new BR/FR or
+   modify existing ones — and write the `AI Updated` marker (Q&A col F) listing exactly
+   which FR-IDs were updated/added.
 5. New rows never reuse an ID of an Editted/Rejected row.
 
 ## Interaction mode (Excel is the conversation)
@@ -138,7 +144,7 @@ and a note in Remarks. The human answers everything at once in the Excel (Q&A `A
 column; status changes on TM/Testcases rows; reasons usually go in `Remarks`). Chat stays
 for approvals the contract cannot encode (design approach selection, scope decisions).
 
-## Done gate (checked by the `tdd-sheet-update` skill)
+## Done gate (checked by `brainstorming` at the end of every run)
 
 `Metadata.Status` becomes `Done` only when ALL of the following hold:
 
@@ -150,8 +156,8 @@ for approvals the contract cannot encode (design approach selection, scope decis
    a human answer.
 
 If any row is `Editted` or `Rejected`, the gate does not just fail — those rows carry
-human decisions in `Remarks` that the next brainstorm/test-plan regeneration MUST ingest
-(see Re-brainstorm rules). The update skill reports them; it does not resolve them.
+human decisions in `Remarks` that the same brainstorming run MUST ingest before finishing
+(see Re-brainstorm rules).
 
 ## Markdown artifacts (generated in parallel, same content split by audience)
 
@@ -165,7 +171,6 @@ human decisions in `Remarks` that the next brainstorm/test-plan regeneration MUS
 
 | Skill | Metadata | TM | Q&A | Testcases | Answerkey | Markdown |
 |---|---|---|---|---|---|---|
-| brainstorming | partial (Title/Ringi Spec/ID/timestamp/Status) | ✅ | ✅ | — | — | `{ringi-id}-spec.md` |
+| brainstorming | partial (Title/Ringi Spec/ID/timestamp/Status incl. the Done gate) | ✅ | ✅ | — | — | `{ringi-id}-spec.md` |
 | spec-test-plan-agent | partial (Test Spec/BOUNDARIES/ID/timestamp/Status) | read-only | — | ✅ | ✅ | `{ringi-id}-test-spec.md` |
-| tdd-sheet-update | updates `Status`/`ID`/`Last Updated At` when the Done gate passes | read | read | read | — | — |
-| fe-be-e2e-contract-agent | reads `Status` — **must be `Done`** to proceed; writes Contract Spec link afterward | read-only | — | read-only | — | `{ringi-id}-contract.md` |
+| fe-be-e2e-contract-agent | reads `Status` — **must be `Done`** (set by brainstorming's gate) to proceed; writes Contract Spec link afterward | read-only | — | read-only | — | `{ringi-id}-contract.md` |

@@ -15,8 +15,8 @@ E2E consumes. It does not implement code or tests.
 - **Long-running goal by default**: run under `/goal` (Claude Code / ZCode / Codex).
 - **Sheet gate (mandatory)**: locate the ringi's TDD Google Sheet (folder
   `1eFHQSvv0LXLTl7UzH0na-k1FuK5lFK0h`) and read `Metadata!Status`. It **must be
-  `Done`** (set by `tdd-sheet-update` after all TM/Testcases rows are `Approved` and no
-  Question/Draft remains). If it is not `Done`, stop and report exactly which statuses
+  `Done`** (set by `brainstorming`'s Done gate after all TM/Testcases rows are `Approved`
+  and no Question/Draft remains). If it is not `Done`, stop and report exactly which statuses
   block the gate — do not generate the contract from unapproved content.
 - **Multiple agents**: fan out read-only repository-evidence agents (FE / BE / E2E) in
   one message; merge findings before drafting.
