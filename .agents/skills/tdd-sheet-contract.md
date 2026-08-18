@@ -23,7 +23,12 @@ Last verified against the template on 2026-08-18.
 1. **Status spellings are strict dropdowns** (`strict: true`). Allowed on TM/Testcases:
    `Pending`, `Approved`, `Editted`, `New`, `Question`, `Rejected`. On Q&A: `Draft`,
    `Forwarded To JP Team`, `Noted`. On Metadata: `Done`, `In progress`. Any other value is
-   rejected by the sheet — do not try.
+   rejected by the sheet — do not try. **Status colors** are conditional-format rules
+   (TEXT_EQ → background) installed on BOTH the template and each working sheet as part of
+   sheet setup: TM `A3:A200` and Testcases `A2:A500` — Approved `#d9ead3`,
+   Pending `#fff2cc`, Question `#fce5cd`, Editted `#d0e0e3`, Rejected `#f4cccc`,
+   New `#d9d9d9`; Q&A `E3:E100` — Draft `#fff2cc`, Forwarded To JP Team `#d0e0e3`,
+   Noted `#d9ead3`; Metadata `B7` — Done `#d9ead3`, In progress `#fff2cc`.
 2. **Human-owned values — never overwrite:** any cell status `Approved` / `Editted` /
    `Rejected`, the Q&A `Answer` column, and the Answerkey `Result` rows. `Editted` /
    `Rejected` / `Answer` are human input channels the AI must read, not write.
