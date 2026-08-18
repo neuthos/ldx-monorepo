@@ -182,9 +182,14 @@ Two standard requirements-engineering activities, made concrete against the repo
 1. **Extension sweep** — text-search `_inherit = '<model>'` / `_inherits` across ALL addons
    (and FE analogues: wrappers/HOCs around the target screens). Every extending module is
    a candidate impact owner (points, coupons, tax-free, external links, analytics, guards…).
+   **Verified graph limitation:** the graph's `INHERITS` edges are Python class inheritance
+   (classes point at the `Model` base) — an Odoo `_inherit = '<model>'` assignment is a
+   string literal and NEVER becomes a graph edge. This sweep is therefore a mandatory text
+   search, not an optional graph fallback.
 2. **Referencing-model sweep** — find every model holding a relation to the target
    (comodel references, M2O/O2M/M2M, cross-module greps): histories, snapshots,
    aggregations, issued documents, reserve/reservation states, external identifiers.
+   Comodel names are likewise string literals — text search, not graph traversal.
 3. **Behavior-path sweep** — list the writes the target flow's key actions perform
    (directly and via inherit overrides), and the reads that depend on its state
    (list views, exports, analytics queries, crons, RFM-style scoring).
@@ -206,8 +211,9 @@ Two standard requirements-engineering activities, made concrete against the repo
   assume "not required".
 - Pattern replication is not coverage: the analysis runs even when the feature exactly
   mirrors an approved pattern.
-- Graph-first evidence; the `_inherit`/dynamic-relations sweep is expected text-search
-  fallback territory — state when a conclusion rests on it.
+- Graph-first evidence where the graph can see it — but Odoo `_inherit`/`_name`/comodel
+  strings are invisible to the graph (see the verified limitation above), so the extension
+  and referencing sweeps are mandatory text search; state when a conclusion rests on it.
 - Quantify before restricting usability: when a guard/blocker would refuse a high-volume
   condition (e.g. externally imported records), get the production share first.
 
