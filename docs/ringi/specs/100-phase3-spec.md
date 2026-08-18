@@ -1,8 +1,8 @@
 # Ringi 100 — Phase 3 Cancellation (Arrival / Shipment / Store Sales / Store Sales Return) — Technical Spec
 
-**Sync ID:** `r100p3-5db5bd` — must match the TDD sheet Metadata `ID`; a mismatch means the sheet or this file is stale.
+**Sync ID:** `r100p3-4461a2` — must match the TDD sheet Metadata `ID`; a mismatch means the sheet or this file is stale.
 **TDD Sheet:** `Ringi 100 - Test Spec` (spreadsheet `1r33gulIwHgDedgD3HD7hJN8jb99W1fV-esHlO4d25qQ`, folder `1eFHQSvv0LXLTl7UzH0na-k1FuK5lFK0h`) — Treacibility Matrix rows 3–35 are the 1:1 BR/FR mirror of this spec.
-**Status:** human review ingested 2026/08/19 — 4 FRs Rejected, 3 FRs materialized from Q&A answers (USER-APPROVED), **2 Questions remain open** (FR-31/FR-32: Q&A options were mis-synced and need re-confirmation).
+**Status:** human review fully ingested 2026/08/19 — 4 FRs Rejected, all 5 Q&A answers materialized (USER-APPROVED); **no open Questions**. Awaiting bulk approval of the 5 materialized rows (FR-27/29/30/31/32).
 
 ## 1. Context
 
@@ -30,7 +30,7 @@ Linked-slip fields (all `stock_picking.py` unless noted): `order_id`→`order.ma
 - **BR-05 Common UX (FR-22..25)**: reason modal contract (Input Error / Request from Business Partner, etc. / Others; details required only for Others; apply-to-all; never overwrite existing reason); standard related-slips modal (Type incl. Billing Creation/Deposit/Payment Creation/Payment | Related Slip | "Blocks Cancellation"/"Affected" | Open in new tab + top-of-modal messages); 取消区分 as separate `cancellation_type` field + filters (phase 1/2 approved approach); 締め closing guard.
 - **BR-06 Authority (FR-26)**: four items (Arrival/Shipment/Store Sales/Store Sales Return Slip Cancellation), Read/Write/Approve/Write+Approve, no guest — consistent with RINGI-139's four-level model (L-Pedia `1790050310`).
 - **BR-07 Chain semantics (FR-27, FR-28)**: cross-domain cascade = full phase-1 chain reuse (target-domain guards, purchase chain, transitive preview) — **USER-APPROVED via Q&A-1 Answer A**, materialized 2026/08/19; movement pair = ONE chain, arrival-side initiation, mark-before-cascade, loop-safe, reverse direction blocked.
-- **BR-08 Payment/point/external blockers (FR-29, 30 materialized; FR-31, 32 open)**: financial blocker set = point payment, point grant, coupon consumption, tax-free (minimum set; formal receipt and other non-cash payments do NOT block) — USER-APPROVED via Q&A-2 Answer A; external-origin slips (Smaregi/POSCM/TeamStore) all blocked — USER-APPROVED via Q&A-3 Answer A; see §5 inventory for FR-31 (POS/daily-sales closing) and FR-32 (phase-1 bypass), still `Question`.
+- **BR-08 Payment/point/external blockers (FR-29..32, all materialized)**: financial blocker set = point payment, point grant, coupon consumption, tax-free (minimum set; formal receipt and other non-cash payments do NOT block) — USER-APPROVED via Q&A-2 A; external-origin slips (Smaregi/POSCM/TeamStore) all blocked — USER-APPROVED via Q&A-3 A; slips already included in a POS closing / daily sales closing (締め) are blocked — USER-APPROVED via Q&A-4 a; the phase-1 `_cancel_store_sales` path is aligned with the new blocker set — USER-APPROVED via Q&A-5 b.
 - **BR-09 Labels (FR-33)**: Store Sales Information renders 取消確定 as "Cancelled" (PRD Store Sales 2.6); other screens use "Cancellation Confirmed".
 
 **Rejected by human (2026/08/19) — excluded from spec and all downstream test/contract output; IDs never reused:**
@@ -46,6 +46,7 @@ Linked-slip fields (all `stock_picking.py` unless noted): `order_id`→`order.ma
 - Controllers: `POST /api/v2/{arrival|shipment|store-sales|store-sales-return}/cancel/{preview,draft,confirm,release}`, `require_perm(menu,'write'|'approve')`, guard-error envelope `{success:false, message, column, affected}`; schemas in `ldx_core/schemas/`.
 - Multi-process batch (list): 8 new methods in `wizard/multi_process.py` (`.1`/`.2` variant codes) + `CANCELLATION_BATCH_PERMISSIONS` + `_batch_selection_domain`; partial success per slip; Store Sales Entry = one type, four methods.
 - **NOT built — batch registration upload** (`batch_cancel` / `process_batch_cancellation` hooks, `validate_cancellation_upload`): FR-03/09/15/19 Rejected 2026/08/19; the existing batch registration screens keep their current operations unchanged.
+- Phase-1 alignment: `_cancel_store_sales` (`cancellation_sales.py:521`) routes through the new Store Sales guard, so blocker conditions (point/coupon/tax-free/external-origin/closed-period) surface as blockers in the Sales cancellation preview instead of silently cancelling — USER-APPROVED (Q&A-5 b); approved phase-1 behavior intentionally changed.
 - Closing guard: `change.lock.date.history.is_date_period_closed`; date fields — `store.sales.sales_date` (resolved: `ldx_core/account_closing/store_sales.py`), `stock.picking` pending (candidates `scheduled_date`/`date_done`).
 - Cycle safety: origin marked 取消確定 before cascade; cascades skip cancelled records; preview flattens with visited-set.
 - eMenu/authority: four new keys in `utils/constant_menu.py` + User/Group Authority Master data; Store Sales & Return under "Store Sales Return Batch Registration Settings" group per PRD.
@@ -64,11 +65,11 @@ Linked-slip fields (all `stock_picking.py` unless noted): `order_id`→`order.ma
 | 8 | Tax free `tax.free.process` | `base/account_tax_free.py:25` | block | USER-APPROVED (Q&A-2 A) |
 | 9 | Formal receipt (領収書) | `formal_receipt.py:18` | **no blocker** — excluded from the approved minimum set; refund handled manually (documented) | USER-APPROVED (Q&A-2 A) |
 | 10 | External origin (Smaregi/POSCM/TeamStore) | `external_link/store_sales.py:14–18`, `ext_poscm`, `ext_teamstore:8` | block ALL external-origin slips | USER-APPROVED (Q&A-3 A) |
-| 11 | POS closing snapshot | `pos_closing.py:109` | block, or accept-stale | PENDING — Q&A-4 re-confirmation (options cell was mis-synced, corrected) |
-| 12 | Daily sales linkage | `daily_sale_id` | same as 11 | PENDING |
+| 11 | POS closing snapshot | `pos_closing.py:109` | block once the slip is included in a POS closing (aggregates stay correct) | USER-APPROVED (Q&A-4 a, re-confirmed) |
+| 12 | Daily sales linkage | `daily_sale_id` | same as 11 | USER-APPROVED (Q&A-4 a) |
 | 13 | Membership purchase history / RFM / DRsum / MD (read-based) | `rfm_setting.py:130+` etc. | verify state filters (`state != 'cancel'`) | — |
 | 14 | EC reserve order fulfillment state | `ec_reserve_order.store_sales_id` | accept-stale (documented) | — |
-| 15 | Bypass: `_cancel_store_sales` phase-1 path | `cancellation_sales.py:521` | leave + document / align / surface as blocker in Sales preview | PENDING — Q&A-5 re-confirmation (options cell was mis-synced, corrected) |
+| 15 | Bypass: `_cancel_store_sales` phase-1 path | `cancellation_sales.py:521` | align with the new blocker set — blockers surface via the standard guard/preview (approved phase-1 behavior intentionally changed) | USER-APPROVED (Q&A-5 b, re-confirmed) |
 
 ## 6. BOUNDARIES (spec-level; TC-level statuses belong to test-spec)
 
@@ -76,8 +77,8 @@ B boundary values / closing date inclusive — applies (guards + precision follo
 
 ## 7. Decisions
 
-- **USER-APPROVED 2026/08/19 (sheet Q&A answers + TM statuses):** full chain reuse for cross-domain cascade (Q&A-1 A → FR-27); minimum financial blocker set = point payment, point grant, coupon, tax-free — formal receipt and other non-cash payments do NOT block (Q&A-2 A → FR-29); block ALL externally-originated slips, Smaregi/POSCM/TeamStore (Q&A-3 A → FR-30); batch-registration 取消 upload operation rejected for all four documents (FR-03/09/15/19).
-- **PENDING (require human re-confirmation):** Q&A-4/FR-31 (POS closing / daily sales closing: block vs accept-stale) and Q&A-5/FR-32 (phase-1 `_cancel_store_sales` bypass: leave+document vs align vs surface in Sales preview). The previous sync (`r100p3-f8a03d`) corrupted those two Q&A Options cells (options of Q&A-1/Q&A-2 were written there by mistake), so the recorded "A" answers cannot be trusted for these two; the cells were corrected in `r100p3-5db5bd` and the TM rows stay `Question`.
+- **USER-APPROVED 2026/08/19 (sheet Q&A answers + TM statuses):** full chain reuse for cross-domain cascade (Q&A-1 A → FR-27); minimum financial blocker set = point payment, point grant, coupon, tax-free — formal receipt and other non-cash payments do NOT block (Q&A-2 A → FR-29); block ALL externally-originated slips, Smaregi/POSCM/TeamStore (Q&A-3 A → FR-30); block slips already included in a POS closing / daily sales closing (Q&A-4 a → FR-31); align the phase-1 `_cancel_store_sales` path with the new blocker set (Q&A-5 b → FR-32); batch-registration 取消 upload operation rejected for all four documents (FR-03/09/15/19).
+- **No open Questions.** The Q&A-4/5 Options mis-sync introduced by the `r100p3-f8a03d` sync was corrected in `r100p3-5db5bd`; both answers were re-given against the corrected options and materialized in `r100p3-4461a2`.
 - Code-vs-code deltas locked: batch modal = custom composition on MultiProcessTools (`extraForm` CancellationReasonForm); no affected/blocker modal in the batch flow — registration screens only (PRD-aligned). "Cancelled" label for Store Sales Information is PRD-explicit (FR-33).
 
 ## 8. L-Pedia sources
@@ -86,4 +87,4 @@ Shipment Slip List (INV-050-001, `1775566850`), Shipment Slip Registration (INV-
 
 ## 9. Handoff (advisory)
 
-BE (`feat/ringi-100-cancellation`) → FE (branch off phase-2) → E2E (`feat/ringi-100`), per-repo packets as in §4 (batch-registration upload excluded) + the existing reusable components (`src/services/Cancellation/*`, `CancellationPanelCore`, `generateMultiProcessTypes`, E2E page objects). Next pipeline steps: human re-answers Q&A-4/5 and approves the materialized rows (FR-27/29/30) + advances Q&A statuses → `tdd-sheet-update` (Done gate) → `/spec-test-plan-agent` → contract agent.
+BE (`feat/ringi-100-cancellation`) → FE (branch off phase-2) → E2E (`feat/ringi-100`), per-repo packets as in §4 (batch-registration upload excluded) + the existing reusable components (`src/services/Cancellation/*`, `CancellationPanelCore`, `generateMultiProcessTypes`, E2E page objects). Next pipeline steps: human bulk-approves the materialized rows (FR-27/29/30/31/32) + advances Q&A statuses → `tdd-sheet-update` (Done gate) → `/spec-test-plan-agent` → contract agent.
