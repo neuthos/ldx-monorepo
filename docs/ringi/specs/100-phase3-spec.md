@@ -1,6 +1,6 @@
 # Ringi 100 — Phase 3 Cancellation (Arrival / Shipment / Store Sales / Store Sales Return) — Technical Spec
 
-**Sync ID:** `r100p3-c7e94a` — must match the TDD sheet Metadata `ID`; a mismatch means the sheet or this file is stale.
+**Sync ID:** `r100p3-e2b61f` — must match the TDD sheet Metadata `ID`; a mismatch means the sheet or this file is stale.
 **TDD Sheet:** `Ringi 100 - Phase 3 - TDD` (folder `1eFHQSvv0LXLTl7UzH0na-k1FuK5lFK0h`) — Treacibility Matrix rows 10–42 are the 1:1 BR/FR mirror of this spec.
 **Status:** awaiting human bulk review in the sheet (5 open Questions in Q&A tab).
 
@@ -29,7 +29,7 @@ Linked-slip fields (all `stock_picking.py` unless noted): `order_id`→`order.ma
 - **BR-06 Authority (FR-26)**: four items (Arrival/Shipment/Store Sales/Store Sales Return Slip Cancellation), Read/Write/Approve/Write+Approve, no guest — consistent with RINGI-139's four-level model (L-Pedia `1790050310`).
 - **BR-07 Chain semantics (FR-27 Question, FR-28)**: cross-domain cascade = full phase-1 chain reuse (prior approval, re-confirm in Q&A-1); movement pair = ONE chain, arrival-side initiation, mark-before-cascade, loop-safe, reverse direction blocked.
 - **BR-08 Payment/point/external blockers (FR-29..32 Questions)**: see §5 inventory + Q&A-2..5.
-- **BR-09 Labels (FR-33)**: Store Sales Information renders 取消確定 as "Cancelled" (PRD-StoreSales §2.6); other screens use "Cancellation Confirmed".
+- **BR-09 Labels (FR-33)**: Store Sales Information renders 取消確定 as "Cancelled" (PRD Store Sales 2.6); other screens use "Cancellation Confirmed".
 
 ## 4. Backend architecture (replication of approved phase 1/2 pattern)
 
