@@ -6,20 +6,20 @@ Source spec: `docs/ringi/specs/2026-08-18-ringi-100-phase-3-cancellation-design.
 
 ### TL;DR
 
-Test plan for extending the governed two-step slip cancellation (Confirmed → 取消待ち → 取消確定) to four new slip types by replicating the approved phase 1/2 architecture. Highest risks: (1) cross-domain cascade correctness with full-chain reuse (Store Sales → Sales → Purchase; Arrival → Shipment movement pair), (2) inventory/lot/outstanding reversal side effects, (3) batch atomicity vs partial success, (4) regression of the already-approved phase 1/2 cancellation suites. One PENDING product decision remains (Store Sales Information list status label wording). The plan is otherwise ready.
+Test plan for extending the governed two-step slip cancellation (Confirmed → 取消待ち → 取消確定) to four new slip types by replicating the approved phase 1/2 architecture. Highest risks: (1) cross-domain cascade correctness with full-chain reuse (Store Sales → Sales → Purchase; Arrival → Shipment movement pair), (2) inventory/lot/outstanding reversal side effects, (3) batch atomicity vs partial success, (4) regression of the already-approved phase 1/2 cancellation suites. All product decisions resolved (the Store Sales Information list label was decided as "Cancelled" per PRD-StoreSales 2.6). The plan is ready.
 
 ### Coverage and confidence
 
 - BR/FR coverage: 20/20 requirement groups (100%), traced via the spec's `PRD-<doc> <section>#<no>` scheme (the PRDs carry section numbers, not formal FR/BR IDs — scheme defined in the spec).
 - Test-plan confidence: 86% (estimated, not execution evidence).
 - Confidence rubric: requirement traceability 40% → 36 (1:1 table traceability, all 20 groups covered); BOUNDARIES evaluation 20% → 17 (all ten addressed; E partially covered, justified below); blast-radius/domain-effect coverage 20% → 18 (cross-domain chains, EC, customer order, order-master outstanding, phase 1/2 regression all traced); test-level fit 10% → 7 (pyramid deviation, justified below); repository evidence 10% → 8 (codebase-memory graph + disclosed text-search fallback for `ldx_ec`).
-- Total test cases: 100 finalized + 1 PENDING.
-- Why this is sufficient: every PRD modification item and every PRD scenario-test section (3.1–3.8 × 4 documents) maps to at least one row; every locked decision (full-chain reuse, 取消区分 as separate field, doc-vs-code deltas) has explicit rows; the one wording conflict is carried as PENDING rather than assumed.
+- Total test cases: 101 finalized + 0 PENDING.
+- Why this is sufficient: every PRD modification item and every PRD scenario-test section (3.1–3.8 × 4 documents) maps to at least one row; every locked decision (full-chain reuse, 取消区分 as separate field, doc-vs-code deltas, Store Sales Information "Cancelled" label) has explicit rows.
 
 ### Healthy pyramid
 
 - Target: Unit ~70%, Integration 15–20%, E2E 5–10%.
-- Actual (by rows, not steps): Unit 43/100 (43%), Integration 28/100 (28%), E2E 29/100 (29%).
+- Actual (by rows, not steps): Unit 43/101 (43%), Integration 28/101 (28%), E2E 30/101 (30%).
 - Assessment: risk-adjusted deviation. The four PRDs mandate ~42 user-level scenario tests (sections 3.1–3.8 per document) that are inherently journey-shaped; each E2E row consolidates 3–10 PRD sub-scenarios (e.g. CXL-072 covers PRD-Arrival 3.1.1–3.1.5), so scenario-weighted coverage skews far more unit-heavy than raw rows suggest. Underlying logic (guards, markers, validation, eligibility, config) is covered at Unit; contracts and cascades at Integration.
 
 ### BOUNDARIES summary
@@ -47,7 +47,7 @@ Layers: BE services/controllers/schemas, `stock.picking` fields, multi-process w
 - Spec pin-points (closing-lock date field per model, Create-Arrival/Create-Shipment reactivation flags, lot-deletion query, outstanding recalc entry point, process-code numbering) are implementation-resolved; tests assert observable behavior and will bind fixtures to the resolved fields without changing intent.
 - BE repo has no root AGENTS/CLAUDE; BE test conventions follow the existing `test_ringi_100_*` suites (graph evidence).
 - E2E repo conventions per its `CLAUDE.md`: Playwright, sequential `--workers 1`, `tests/scenario/` layout, page objects under `pages/inventory-control/`.
-- [PENDING] Store Sales Information list label: PRD-StoreSales 2.6 says display "Cancelled" or "Pending Cancellation", while PRD-StoreSalesReturn 2.4 and the locked 取消確定 classification say "Cancellation Confirmed". One row is held PENDING until the user picks the label.
+- [USER-APPROVED] Store Sales Information list label: "Cancelled" per PRD-StoreSales 2.6 (the underlying value stays 取消確定 / `cancellation_confirmed`; display-label-only difference from other documents, which render "Cancellation Confirmed").
 - No repository was modified and no test was executed for this plan.
 
 ## 2. Data Preparation Summary
@@ -192,4 +192,4 @@ Feature code: **CXL**. `ARR`=Arrival, `SHP`=Shipment, `STS`=Store Sales, `RST`=S
 | CXL-098 | PRD-Arrival 3.7.1; PRD-Shipment 3.8.1; PRD-StoreSales 3.7.1; PRD-StoreSalesReturn 3.7.1 | E2E | Regression | Backend data integration is observable after cancellation confirms. | 1. Capture inventory values on the inventory screen. 2. Confirm-cancel one slip per domain. 3. Assert quantities revert per domain direction. 4. Open movement history → assert the four cancellation transaction labels visible. |
 | CXL-099 | PRD-Arrival 3.8.1; PRD-Shipment 3.8.2 | E2E | Regression | Linked-slip integration is visible: cancelled partners show their new status and preview hyperlinks open details. | 1. Preview an arrival cancellation on the registration screen. 2. Assert linked shipment/purchase rows listed with numbers as hyperlinks opening details in a new tab. 3. Confirm the cancellation. 4. Open the linked slip's list → status shows cancelled per the cascade matrix. |
 | CXL-100 | Spec doc-vs-code deltas (locked) | E2E | Negative; Contract | The batch flow shows no affected/blocker modal, while the registration screen does. | 1. Run a batch cancellation from each list → assert no affected-slips or blocker modal appears; failures appear in the multi-process result list. 2. Open a registration screen → Cancellation Registration preview modal lists affected slips with block indicators. |
-| PENDING — Store Sales Information list label wording (PRD-StoreSales 2.6 "Cancelled" vs PRD-StoreSalesReturn 2.4 "Cancellation Confirmed") | PRD-StoreSales 2.6; PRD-StoreSalesReturn 2.4 | E2E | Boundary (U) | The Store Sales Information list renders the cancelled-status label the user chooses. | 1. User picks the label ("Cancelled" vs "Cancellation Confirmed") for the Store Sales Information list. 2. Open Store Sales Information with a 取消確定 slip. 3. Assert the chosen label renders in item and filter. 4. Assert downloads use the same label. |
+| CXL-101 | PRD-StoreSales 2.6; PRD-StoreSalesReturn 2.4 | E2E | Boundary (U) | The Store Sales Information list renders the cancelled-status label as "Cancelled" (USER-APPROVED) while other documents use "Cancellation Confirmed". | 1. Create a 取消確定 Store Sales slip. 2. Open Store Sales Information. 3. Assert the status/cancellation item shows "Cancelled" for that slip. 4. Assert the filter option reads "Cancelled". 5. Assert the Store Sales Information download uses the same label. 6. Open Shipment Information for contrast → its equivalent shows "Cancellation Confirmed". |

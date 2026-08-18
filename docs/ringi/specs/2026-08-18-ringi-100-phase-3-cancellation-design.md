@@ -180,6 +180,7 @@ Observable criteria (per-repo commands live in the handoff):
 - **USER-APPROVED** — Cascade depth: cancelling Store Sales (and, by the same principle, Arrival/Shipment) runs the target domain's full phase 1/2 cancellation chain (guards + cascades), not a bare status flip. Preview is transitively flattened.
 - **USER-APPROVED** — Approach A: replicate the phase 1/2 pattern per domain; four new service classes; shared logic reused as-is; no refactor of approved code.
 - **USER-APPROVED** — Scope: all four documents in phase 3; Store Sales PRD re-supplied after the initial mis-paste.
+- **USER-APPROVED** — Store Sales Information list label: 取消確定 renders as **"Cancelled"** on that screen per PRD-StoreSales 2.6 (display-label only; the stored value and all other documents use 取消確定 / "Cancellation Confirmed"). Filters and downloads on that screen follow the same label.
 
 ## Open Questions
 
