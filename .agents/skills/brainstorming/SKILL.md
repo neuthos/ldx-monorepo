@@ -58,15 +58,16 @@ Create a task for each item and complete them in order:
 1. **Resolve & validate target repos** — read `FE_PWD`/`BE_PWD`/`E2E_PWD` from `.env`; for each involved repo verify key present, directory exists, and it is a Git working tree. Honor the read-only boundary. Report an invalid key instead of guessing a path.
 2. **Explore FE/BE/E2E via codebase-memory** — run the mandatory sequence above across every affected project. Correlate FE routes/clients, Odoo models/controllers, and E2E flows before making cross-repo claims.
 3. **DDD deep exploration via Workflow** — fan-out **read-only** agents to map aggregates, entities, value objects, and bounded-context boundaries across affected repos. Determine which `D` (domain behavior) the change touches. Disclose graph gaps. (See DDD-Aware Design.)
-4. **PRD / FR / BR grounding** — locate the source PRD and its Functional Requirements (FR) / Business Requirements (BR). Carry the exact requirement IDs and their original (often Japanese) wording into the spec. Preserve every Japanese term verbatim — never translate or paraphrase away a term that downstream planning must match. (See Requirements & Japanese Term Preservation.)
-5. **Offer the visual companion just-in-time** — NOT upfront. Rare for Ringi/backend specs; default to terminal. See Visual Companion.
-6. **Ask clarifying questions** — one at a time; understand purpose/constraints/success criteria.
-7. **Propose 2-3 approaches** — with trade-offs; lead with your recommendation, explicitly **non-binding**. (CLAUDE.md Human Decision Authority — you advise, user decides.)
-8. **Present design** — in sections scaled to their complexity; get user approval after each section.
-9. **Write spec** — save to `docs/ringi/specs/YYYY-MM-DD-<topic>-design.md` using `spec-template.md`; commit.
-10. **Spec self-review** — placeholders/consistency/scope/ambiguity **plus BOUNDARIES + DDD consistency** (see below).
-11. **User reviews spec** — ask the user to review the file before proceeding.
-12. **END — emit handoff** — produce an advisory implementation-handoff prompt for the target repo (see Implementation Handoff). Do NOT invoke any implementation skill.
+4. **Reversibility sweep (cancel/revert/archive/void features)** — for each target aggregate, enumerate every confirm-time side effect across ALL modules and classify it. **PRD silence on a side effect that exists in code is a `PENDING` product question, not absence of behavior.** (See Reversibility Sweep.)
+5. **PRD / FR / BR grounding** — locate the source PRD and its Functional Requirements (FR) / Business Requirements (BR). Carry the exact requirement IDs and their original (often Japanese) wording into the spec. Preserve every Japanese term verbatim — never translate or paraphrase away a term that downstream planning must match. (See Requirements & Japanese Term Preservation.)
+6. **Offer the visual companion just-in-time** — NOT upfront. Rare for Ringi/backend specs; default to terminal. See Visual Companion.
+7. **Ask clarifying questions** — one at a time; understand purpose/constraints/success criteria.
+8. **Propose 2-3 approaches** — with trade-offs; lead with your recommendation, explicitly **non-binding**. (CLAUDE.md Human Decision Authority — you advise, user decides.)
+9. **Present design** — in sections scaled to their complexity; get user approval after each section.
+10. **Write spec** — save to `docs/ringi/specs/YYYY-MM-DD-<topic>-design.md` using `spec-template.md`; include the Reversibility & Side-Effects Inventory when step 4 applies; commit.
+11. **Spec self-review** — placeholders/consistency/scope/ambiguity **plus BOUNDARIES + DDD + Reversibility consistency** (see below).
+12. **User reviews spec** — ask the user to review the file before proceeding.
+13. **END — emit handoff** — produce an advisory implementation-handoff prompt for the target repo (see Implementation Handoff). Do NOT invoke any implementation skill.
 
 ## Process Flow
 
@@ -75,6 +76,7 @@ digraph brainstorming {
     "Resolve .env + validate repos" [shape=box];
     "Explore via codebase-memory" [shape=box];
     "DDD deep exploration\n(Workflow, read-only)" [shape=box];
+    "Reversibility sweep\n(cancel/revert features)" [shape=box];
     "PRD/FR/BR + Japanese terms" [shape=box];
     "Ask clarifying questions" [shape=box];
     "Propose 2-3 approaches" [shape=box];
@@ -82,12 +84,13 @@ digraph brainstorming {
     "User approves design?" [shape=diamond];
     "Write spec to docs/ringi/specs" [shape=box];
     "Spec self-review\n(BOUNDARIES + DDD)" [shape=box];
-    "User reviews spec?" [shape=diamond];
+    "User reviews spec?" [shape=box];
     "Emit advisory handoff\n(END)" [shape=doublecircle];
 
     "Resolve .env + validate repos" -> "Explore via codebase-memory";
     "Explore via codebase-memory" -> "DDD deep exploration\n(Workflow, read-only)";
-    "DDD deep exploration\n(Workflow, read-only)" -> "PRD/FR/BR + Japanese terms";
+    "DDD deep exploration\n(Workflow, read-only)" -> "Reversibility sweep\n(cancel/revert features)";
+    "Reversibility sweep\n(cancel/revert features)" -> "PRD/FR/BR + Japanese terms";
     "PRD/FR/BR + Japanese terms" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";
     "Propose 2-3 approaches" -> "Present design sections";
@@ -151,6 +154,46 @@ Disclose graph limits:
 - Backend graph = `ldx_addons` only. Cross-check external consumers (`env['...']`, `_inherit`, comodels, manifest deps) via text search.
 - Cite graph-resolved symbols/paths as evidence for each claim.
 
+## Reversibility Sweep (cancel/revert/archive/void features)
+
+**Trigger:** the feature cancels, reverts, archives, voids, or otherwise undoes an existing
+business flow. Exploring the *new* feature's pattern (e.g. the phase 1/2 cancellation
+architecture) is feature-inward and is NOT enough — side effects hide on the *target
+aggregate's* confirm path, often in modules the PRD never mentions.
+
+**Mandatory procedure, per target aggregate (e.g. `store.sales`, `stock.picking`):**
+
+1. **Extension sweep** — text-search `_inherit = '<model>'` / `_inherits` across ALL addons.
+   Every extending module is a candidate side-effect owner (points, coupons, tax-free,
+   external POS links, analytics, closing guards…).
+2. **Referencing-model sweep** — find every model holding a relation to the target
+   (comodel references, M2O/O2M/M2M, cross-module greps): histories, snapshots,
+   aggregations, issued documents, reserve/reservation states.
+3. **Confirm-path write list** — trace the aggregate's confirm/create action and list every
+   write it performs directly or via inherit overrides: balances, histories, external
+   identifiers, snapshot tables, purchase/reward records.
+4. **Classify every item** into exactly one disposition:
+   - `reverse` — the design undoes it on cancellation;
+   - `block` — irreversible; the design refuses cancellation when present;
+   - `accept-stale` — documented known limitation (snapshots/analytics that go stale);
+   - `no-impact` — read-only or display-only.
+5. **Record** the inventory in the spec (template section) with evidence per row.
+   Anything unclassified is `PENDING` — it blocks the design from being marked complete.
+
+**Hard rules:**
+- PRD silence about a side effect that demonstrably exists in code is a **PENDING product
+  question** — surface it with options; never silently drop it or assume "not required".
+- Sweep evidence is graph-first where possible, but the `_inherit`/reference sweep is
+  Odoo-dynamic-relationship territory — text search is the expected fallback; state it.
+- Quantify before blocking on high-volume conditions (e.g. external-origin share) when the
+  blocker could make the feature practically unusable.
+
+**Cautionary tale (ringi-100 phase 3):** Store Sales cancellation was spec'd cleanly from
+the PRD's linked-slip table; only a follow-up question surfaced that point payments, point
+grants, coupons, tax-free records, formal receipts, and Smaregi/POSCM-imported slips are all
+consumed at confirm with no reversal machinery — 13 modules extend `store.sales`. The
+reversibility sweep exists so that list is produced during design, not after UAT.
+
 ## BOUNDARIES Edge-Case Discovery
 
 Every spec's **Error Handling & Edge Cases** section must walk the BOUNDARIES framework. The mnemonic:
@@ -203,7 +246,8 @@ After writing the spec, look at it with fresh eyes:
 4. **Ambiguity check:** Could any requirement be interpreted two ways? If so, pick one and make it explicit.
 5. **BOUNDARIES check:** Does Error Handling & Edge Cases address every letter that plausibly applies? Flag silent omissions.
 6. **DDD check:** Do the affected aggregates/entities/VOs match what `trace_path` found? Is the affected `D` (domain behavior) named? Any unstated cross-context impact?
-7. **Requirements & Japanese check:** Are all PRD FR/BR IDs carried in? Does every Japanese domain term from the PRD survive verbatim (no silent translation)? If any term was paraphrased away, restore it.
+7. **Reversibility check (cancel/revert features):** Does every confirm-time side effect from the sweep appear in the inventory with a disposition? Any `PENDING` rows clearly marked and listed in Open Questions? Is the phase-N bypass audit done (existing code paths that call the old cancel/void entry point directly and would skip the new guards)?
+8. **Requirements & Japanese check:** Are all PRD FR/BR IDs carried in? Does every Japanese domain term from the PRD survive verbatim (no silent translation)? If any term was paraphrased away, restore it.
 
 Fix any issues inline. No need to re-review — just fix and move on.
 

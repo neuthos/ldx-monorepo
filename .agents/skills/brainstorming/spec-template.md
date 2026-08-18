@@ -65,6 +65,26 @@ name the behavior it changes is incomplete.
 - Cross-context impact: (if none, say "none")
 - External consumers outside `ldx_addons` (verified via text search):
 
+## Reversibility & Side-Effects Inventory (cancel/revert/archive/void features)
+
+Required when the feature cancels, reverts, archives, or voids an existing flow. Run the
+Reversibility Sweep (see SKILL.md) per target aggregate and record every confirm-time side
+effect found across ALL modules. **PRD silence on a side effect that exists in code is a
+`PENDING` product question, not absence of behavior.**
+
+| # | Side effect | Evidence (symbol @ path) | Disposition | Status |
+|---|-------------|--------------------------|-------------|--------|
+|   |             |                          | reverse / block / accept-stale / no-impact | USER-APPROVED / PENDING |
+
+Dispositions:
+- `reverse` — the design undoes it on cancellation.
+- `block` — irreversible; cancellation is refused while present (guard + preview row).
+- `accept-stale` — documented known limitation (snapshots/analytics that go stale).
+- `no-impact` — read-only or display-only.
+
+Also record: existing entry points that bypass the new guards (e.g. older services calling
+the raw cancel method directly) and how each is aligned or documented.
+
 ## FE / BE / E2E Contracts
 
 Cross-repo contracts and dependencies, each backed by a graph-resolved symbol/path.
