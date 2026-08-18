@@ -1,0 +1,60 @@
+{
+  "body": "## PR Review — `feat/july2026-segment-briefing-fe`\n\n| Severity | Count |\n|---|---:|\n| 🔴 CRITICAL | 1 |\n| 🟠 HIGH | 2 |\n| 🟡 MEDIUM | 6 |\n| **Total** | **9** |\n\n**BE checked:** ⏭️ Skipped · **Spec verified:** ⏭️ Skipped · **Risk:** 🔴 High\n\nThe FE↔BE contract remains pending verification against L-DX-ERP/L-DX_Backend#15977. See the inline comments for confirmed frontend findings.\n\n*🤖 Triple-Agent AI Review (v2)*",
+  "commit_id": "0cff126e423a7490e2cced05fa8b693c846f8ec7",
+  "comments": [
+    {
+      "path": "src/views/AIAgent/Settings/AIAgentSettings.tsx",
+      "line": 133,
+      "side": "RIGHT",
+      "body": "🔴 **🐛 BUG — Add the new fields to `ContractAttributes`**\n\n`contractMaster` is typed as `ContractAttributes`, but this PR does not add `ai_customer_segment_enabled` or `ai_daily_briefing_enabled` to the shared interface in `src/data/useContract.tsx`. These optional-chained property reads therefore produce TS2339 during typecheck.\n\n**Fix:** Add both fields as optional booleans to `ContractAttributes` before using them here."
+    },
+    {
+      "path": "src/views/AIAgent/CustomerSegment/components/KpiInputModal.tsx",
+      "line": 56,
+      "side": "RIGHT",
+      "body": "🟠 **🐛 BUG — Empty submission overwrites all KPIs with zero**\n\nNone of the four `Form.Item`s is required, and every missing value is converted through `|| 0`. Pressing Save on an untouched form therefore writes four zeroes and triggers backend re-evaluation, losing the distinction between missing and measured-zero values.\n\n**Fix:** Require all four fields or omit untouched fields from the write payload; do not coerce blank values to zero. Add a regression test for an empty submission."
+    },
+    {
+      "path": "src/views/AIAgent/CustomerSegment/components/SegmentMap.tsx",
+      "line": 91,
+      "side": "RIGHT",
+      "body": "🟠 **🌐 I18N — Add translations for computed chart keys**\n\nThe four `seg_map_q_*` keys used here and the six `seg_axis_*` keys from `RADAR_AXES` are absent from both `public/locales/en/common.json` and `public/locales/ja/common.json`. Because the fallback strings are Japanese, the English UI renders Japanese map and radar labels.\n\n**Fix:** Add all ten keys to both locale files and cover them with an explicit locale-key test."
+    },
+    {
+      "path": "src/views/AIAgent/CustomerSegment/index.tsx",
+      "line": 62,
+      "side": "RIGHT",
+      "body": "🟡 **🐛 BUG — Wait for the module check before rendering**\n\n`useCheckInstalledModule` exposes a false initial value while its request is in flight. This component immediately takes the not-installed branch and suppresses its data queries, so a cold load can show the wrong error state before the module check resolves.\n\n**Fix:** Read the query loading/fetched state and render a skeleton until it resolves, as `DailyBriefing` already does."
+    },
+    {
+      "path": "src/views/AIAgent/CustomerSegment/components/KpiInputModal.tsx",
+      "line": 20,
+      "side": "RIGHT",
+      "body": "🟡 **🐛 BUG — Preserve legitimate zero-percent values**\n\nThe truthiness check maps a valid `0` rate to `undefined`, so an existing 0% KPI appears blank. The same pattern in `CustomerSegment/index.tsx` renders 0% as `-` in the table.\n\n**Fix:** Check only for `null`/`undefined`, for example `rate == null ? undefined : ...`, and add zero-value coverage."
+    },
+    {
+      "path": "src/data/useCustomerSegments.ts",
+      "line": 60,
+      "side": "RIGHT",
+      "body": "🟡 **🏗️ ARCH — Bound the segment search**\n\nThis `search_read` specifies fields and ordering but no explicit `limit` or server-side pagination. The returned size/default truncation is therefore implicit, which can make the screen incomplete or unnecessarily expensive as segment history grows.\n\n**Fix:** Add an agreed hard limit or implement server-side pagination."
+    },
+    {
+      "path": "src/views/AIAgent/CustomerSegment/hooks/useSegmentOutcomes.ts",
+      "line": 61,
+      "side": "RIGHT",
+      "body": "🟡 **🏗️ ARCH — Paginate the outcome query on the server**\n\nThe table paginates only in the browser, while this `search_read` has no explicit limit/offset contract. As outcome history grows, the page either downloads every row or silently depends on the backend default limit.\n\n**Fix:** Add server-side pagination or an explicit documented cap that matches the UI."
+    },
+    {
+      "path": "src/views/AIAgent/__tests__/aiScreenLocaleCoverage.test.ts",
+      "line": 33,
+      "side": "RIGHT",
+      "body": "🟡 **🧪 INCOMPLETE — The locale guard skips computed keys**\n\nThis regex only discovers literal `t('...')` calls, so it misses `t(\u0060common:${q.key}\u0060)` and `t(\u0060common:${ax.labelKey}\u0060)`. The test currently passes even though ten chart translation keys are missing.\n\n**Fix:** Export or explicitly inventory the dynamic keys and assert that each exists in both locales."
+    },
+    {
+      "path": "src/data/useCustomerSegments.ts",
+      "line": 34,
+      "side": "RIGHT",
+      "body": "🟡 **🧪 MISSING — Add coverage for the new read hooks**\n\n`customerSegmentHooks.test.tsx` covers the mutations and `useSegmentOutcomes`, but it never imports this hook or `useCustomerSegmentAnalysis`. Endpoint, domain, sort, option, and response-unwrapping regressions in the primary screen data layer would not be caught.\n\n**Fix:** Add request-shape, success, empty-result, disabled-query, and error-path tests for both read hooks."
+    }
+  ]
+}

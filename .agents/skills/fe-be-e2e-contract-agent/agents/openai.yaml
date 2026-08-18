@@ -1,0 +1,7 @@
+interface:
+  display_name: "FE BE E2E Contract Agent"
+  short_description: "Create FE, BE, and E2E contract documents"
+  default_prompt: "Use $fe-be-e2e-contract-agent to create the FE/BE/E2E contract from the test plan and design spec."
+
+policy:
+  allow_implicit_invocation: true

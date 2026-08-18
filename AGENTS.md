@@ -2,9 +2,9 @@
 
 ## Role
 
-This repository is a planning and review control plane for three independent repositories. It is not a source-code monorepo. Use the combined context for cross-repository investigation, architecture review, dependency analysis, medium-level planning, and implementation handoffs.
+This repository is a planning and review control plane for three independent repositories. It is not a source-code monorepo. Use the combined context for cross-repository investigation, architecture review, dependency analysis, medium-level planning, implementation, and implementation handoffs.
 
-Implementation belongs in separate agent sessions opened directly in the relevant repository.
+Target repositories are read-only by default. Implementation may be performed from this session only when the user explicitly requests edits or another mutating action in the relevant target repository.
 
 ## Repository Discovery
 
@@ -22,23 +22,31 @@ Resolve repository locations at runtime from the local `.env` file:
 - Before using a target, verify that its value is present, the directory is accessible, and `git -C <path> rev-parse --is-inside-work-tree` succeeds.
 - If a mapping is missing or invalid, report the key and stop analysis for that repository. Do not guess another path.
 
-## Hard Safety Boundary
+## Default Safety Boundary and Explicit Write Authorization
 
-The repositories referenced by `FE_PWD`, `BE_PWD`, and `E2E_PWD` are strictly read-only from this control plane.
+The repositories referenced by `FE_PWD`, `BE_PWD`, and `E2E_PWD` are read-only unless the user explicitly requests a mutating action in a named or unambiguously identified target repository.
 
-Allowed target operations are limited to reading files and running demonstrably read-only inspection commands such as `git status`, `git log`, `git diff`, `git show`, and repository-prescribed read-only knowledge-graph queries.
+Without explicit write authorization, allowed target operations are limited to reading files and running demonstrably read-only inspection commands such as `git status`, `git log`, `git diff`, `git show`, and repository-prescribed read-only knowledge-graph queries.
 
-Never perform any of the following in a target repository:
+An explicit request to edit or implement authorizes only the repository, files, and normal implementation operations reasonably required by that request. Before writing:
 
-- create, edit, move, or delete files;
+- resolve and validate the target from `.env`;
+- read and follow the target repository's current `AGENTS.md` and/or `CLAUDE.md`;
+- preserve unrelated user changes and keep modifications within the requested scope; and
+- state any material ambiguity that prevents the target or scope from being identified safely.
+
+Editing source and tests, running scoped formatters or generators, and running repository-prescribed verification are allowed when they are normal steps for an explicitly requested implementation. Prefer commands that do not affect shared services or environments.
+
+The following actions still require a separate explicit user request or approval; permission to edit does not imply them:
+
 - install or update dependencies;
-- run formatters, generators, migrations, or commands that produce repository artifacts;
-- run tests or applications when they may write files, mutate a database, call a shared environment, or change external state;
-- checkout or create branches or worktrees;
+- run migrations or applications that may mutate a database or shared environment;
+- create or modify services, test environments, or other external systems;
+- create or switch branches or worktrees;
 - stage, stash, commit, merge, rebase, pull, push, reset, or clean; or
-- modify services, databases, test environments, GitHub state, or other external systems.
+- modify GitHub or other external-system state.
 
-Do not request an exception that turns this control-plane session into an implementation session. Prepare a handoff instead.
+Never perform destructive or broadly scoped changes merely because editing was authorized. If implementation is not explicitly requested, prepare a handoff instead of changing a target repository.
 
 ## Human Decision Authority
 
@@ -58,7 +66,7 @@ For each unresolved material choice:
 
 ## Context Loading
 
-Before analyzing a target repository:
+Before analyzing or modifying a target repository:
 
 1. Resolve and validate its path from `.env`.
 2. Read its root `AGENTS.md` and/or `CLAUDE.md` when present.
@@ -104,9 +112,10 @@ Use this control plane for:
 - investigation and evidence gathering;
 - API, data-flow, and dependency mapping;
 - medium-level planning and sequencing; and
+- explicitly requested implementation across one or more target repositories; and
 - preparing work packets for repository-specific agents.
 
-Planning and review artifacts may be created only inside this repository. Preserve unrelated user changes and keep secrets out of every artifact.
+Planning and review artifacts may be created only inside this repository. Implementation changes may be made in a target repository only under the explicit write-authorization rules above. Preserve unrelated user changes and keep secrets out of every artifact.
 
 ## Planning Output Contract
 
@@ -120,11 +129,11 @@ When producing an implementation plan, include the applicable items:
 - risks, unknowns, rollout concerns, and dependency order; and
 - a self-contained handoff prompt for each repository-specific agent.
 
-Describe intended target changes, but do not apply them.
+When the user asks only for a plan, describe intended target changes but do not apply them. Apply changes only when implementation is explicitly requested.
 
 ## Handoff
 
-If implementation is requested, identify the target repository and provide a handoff package containing:
+When the user requests a handoff, or when implementation has not been authorized in this session, identify the target repository and provide a handoff package containing:
 
 1. repository and branch/base assumptions;
 2. goal and scoped files or symbols;
@@ -133,4 +142,4 @@ If implementation is requested, identify the target repository and provide a han
 5. acceptance criteria and verification; and
 6. cross-repository dependencies or follow-up work.
 
-Tell the user to execute that package in a separate agent session rooted at the target repository.
+Tell the user to execute that package in a separate agent session rooted at the target repository. Do not require a handoff when the user has explicitly authorized implementation from this session.
