@@ -1,6 +1,6 @@
 # Ringi 100 Phase 3 Cancellation (Arrival / Shipment / Store Sales / Store Sales Return) Test Plan
 
-**Sync ID:** `r100p3-a2bc03` — must match the TDD sheet Metadata `ID`; a mismatch means the sheet or this file is stale.
+**Sync ID:** `r100p3-172721` — must match the TDD sheet Metadata `ID`; a mismatch means the sheet or this file is stale.
 **Source spec:** `docs/ringi/specs/100-phase3-spec.md` (sync `r100p3-4461a2`, commit `d628181`).
 **TDD Sheet:** `Ringi 100 - Test Spec` (`1r33gulIwHgDedgD3HD7hJN8jb99W1fV-esHlO4d25qQ`) — Testcases rows 2–340 mirror this file 1:1 (78 TCs); Answerkey tabs `TC-34`…`TC-78` hold the QA expected-value keys.
 
