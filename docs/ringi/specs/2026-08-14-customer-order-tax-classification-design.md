@@ -1,10 +1,14 @@
-# Customer Order Tax Classification — Design Spec
+# Customer Order Tax Classification + 2026/08/17 Additional Changes — Design Spec
 
-**Date:** 2026-08-14
-**Status:** Draft
-**Decision state:** All material decisions in the ledger are user-approved; the
-consolidated document awaits final review.
-**Approval source:** Approval No. 0141, “Addition of the Item ‘Tax Classification’”
+**Date:** 2026-08-14; revised 2026-08-20 (PRD §3.6 additional changes ingested)
+**Sync ID:** `r141-7c4e19` — must match the TDD sheet Metadata `ID`; a mismatch means the
+sheet or this file is stale.
+**TDD Sheet:** spreadsheet `1ypvhoNWqvy81_NuEnQj28F26syOUTEZUqqtc2yjNmK0` — Treacibility
+Matrix rows 3–22 are the 1:1 BR/FR mirror of this spec.
+**Status:** In progress — Part 1 (`税区分`) decisions remain `USER-APPROVED`; Part 2
+(PRD §3.6) carries 7 open Q&A rows in the sheet and 4 `Question` FR rows.
+**Approval source:** Approval No. 0141, “Addition of the Item ‘Tax Classification’”, plus
+“3.6. Additional changes (2026/8/17)” and the extended Scenario Test list 01–17.
 **Target repositories:** FE (`FE_PWD`), BE (`BE_PWD`), E2E (`E2E_PWD`)
 
 ## Context
@@ -15,37 +19,69 @@ ordinary 0%, reduced 8%, standard 10%, and future Tax Master rates to coexist on
 single order. The choice must be retained upstream so downstream Sales can use it,
 while Shipment remains a logistics boundary and does not own Customer Order tax.
 
-The supplied PRD is an English rendering headed “Japanese.” It contains numbered
-sections and scenarios, but no formal FR/BR identifiers. This spec therefore uses the
-source identifiers `PRD §1.2`, `PRD §2.x`, `PRD §3.x`, and `Scenario 01–10`; it does
-not invent FR/BR IDs. Japanese UI terms visible in the supplied screenshots are
-preserved verbatim.
+The 2026/08/17 addendum (`PRD §3.6`) extends the same approval with five Customer Order
+header items — `納期`, the `納品書備考` rename, `社内メモ`, `前払金額` and a Custom
+`出荷住所` — plus three Customer Order List changes and one Batch Registration option, and
+it grows the Scenario Test list from 01–10 to 01–17. Those items share the Customer Order
+aggregate with the tax work but touch a different seam: what the order hands to the
+shipment slip it generates, and how the list names and filters its dates. They are
+specified in “Additional Changes (PRD §3.6, 2026/08/17)” below and tracked as `BR-02`–`BR-04`.
+
+The supplied PRD is an English rendering headed “Japanese.” It contains numbered sections
+and scenarios but no formal FR/BR identifiers, so this spec keeps the source identifiers
+`PRD §1.2`, `PRD §2.x`, `PRD §3.x`, `PRD §3.6.x` and `Scenario 01–17` as traceability
+anchors **and** mints the `BR-01`–`BR-05` / `FR-01`–`FR-20` identifiers that the TDD sheet
+requires, mapping each one back to its source row. Japanese UI terms from the PRD and the
+supplied screenshots are preserved verbatim; English renderings are glosses, never
+replacements.
 
 ## Evidence and Code-Intelligence Limits
 
 The repositories were resolved from `.env`, validated as Git working trees, and read
-under their repository-local rules. The evidence snapshot used for this design was:
+under their repository-local rules.
 
-- FE: `target/july-2026` at `531f716`.
-- BE: `target/july-2026` at `63ef5dba`.
-- E2E: `master` at `16a9055`.
+**Part 1 (`税区分`) snapshot — unchanged from the original design:** FE `target/july-2026`
+at `531f716`; BE `target/july-2026` at `63ef5dba`; E2E `master` at `16a9055`. At that time
+the configured `codebase-memory` projects were unavailable, so every Part 1 finding below
+rests on narrow fallback source inspection and Odoo dynamic-relation searches, not a
+complete graph blast radius.
 
-The configured L-DX `codebase-memory` projects were unavailable. The only exposed
-GitNexus project was unrelated, and the FE-local index pointed to an older clone and
-commit. No index was refreshed because refresh requires user approval. Consequently,
-all code findings below are explicitly based on narrow fallback source inspection,
-Odoo dynamic-relation searches, and target-local rules—not a complete graph blast
-radius. Implementation sessions must run the target repository's prescribed impact
-analysis against a current index before editing. The BE review also cannot claim a
-complete blast radius outside `ldx_addons`.
+**Part 2 (PRD §3.6) snapshot — 2026-08-20, graph available:** the `codebase-memory`
+projects are exposed and their indexed HEADs match the checked-out worktrees exactly:
+
+| Project | Repository | Branch | HEAD | Graph |
+| --- | --- | --- | --- | --- |
+| `ldx-frontend` | `FE_PWD` | `fix/em-4229-galang` | `76f01cd32f` | 34,761 nodes / 101,159 edges — in sync |
+| `ldx-backend` | `BE_PWD/ldx_addons` | `development` | `439d483a60` | 34,806 nodes / 237,644 edges — in sync |
+| `ldx-e2e` | `E2E_PWD` | `feat/ringi-100` | `2e2e9fd6` | 3,076 nodes / 6,587 edges — in sync |
+
+Residual limits that still apply to every claim in this document:
+
+- The backend graph covers `ldx_addons` only. Odoo field, `_inherit`, `env['model']`,
+  comodel, manifest, XML-ID, route, and ACL relationships were resolved by exact-literal
+  text search; BE blast radius outside `ldx_addons` is **not** claimed complete.
+- Part 1 line numbers were captured on `target/july-2026` and have drifted on
+  `development`. Implementation sessions must re-resolve every symbol against the branch
+  they actually edit.
+- The E2E worktree sits on `feat/ringi-100`, which does **not** contain
+  `pages/in-season-management/sales-linkage-for-wholesale-sales/customer-order-registration.ts`.
+  That page object exists on `master` (verified with `git ls-tree master`). E2E work must
+  branch from the line that owns the Customer Order page object.
+- Neither Part 1 nor Part 2 revalidated the FE/BE feature branches that will actually host
+  the work (`feat/ringi-141` for FE per the contract document). Revalidate before editing.
 
 ## Requirements (PRD / FR / BR)
 
-- **Source PRD:** Approval No. 0141, created 2026-06-17 by Kawakami.
+- **Source PRD:** Approval No. 0141, created 2026-06-17 by Kawakami, plus the
+  “3.6. Additional changes (2026/8/17)” addendum and Scenario Tests 01–17.
 - **Development classification:** Modification of Existing Function.
-- **Screens:** `INV-100-002` Customer Order Detail and `INV-100-003` Customer Order
-  Registration.
-- **Formal FR/BR IDs:** None in the supplied source.
+- **Screens:** `INV-100-002` Customer Order Detail, `INV-100-003` Customer Order
+  Registration, the Customer Order List, and Customer Order Batch Registration Setting.
+- **Formal FR/BR IDs:** none in the supplied source. This spec therefore **mints** them and
+  keeps them 1:1 with the TDD sheet Treacibility Matrix (see “BR/FR identifiers” below).
+  The short forms `BR-01…BR-05` / `FR-01…FR-20` used in this document expand in the sheet
+  to `BR-Ringi-141-Customer-Order-Tax-Classification-nn` /
+  `FR-Ringi-141-Customer-Order-Tax-Classification-nn`.
 
 | Source trace | Original source wording | Approved interpretation |
 | --- | --- | --- |
@@ -70,12 +106,62 @@ complete blast radius outside `ldx_addons`.
 | `Scenario 05` | Mixed 10% and 8%: untaxed 15,000; tax 1,400; including tax 16,400. | Preserve by grouping by `tax_id`. |
 | `Scenario 06` | Tentative per-line calculation and floor example; “Please read this in line with the actual specification as appropriate.” | **Approved override:** current Sales calculation wins—rounded line bases, tax grouping, and current `rounding_method_sales`, not unconditional floor. |
 | `Scenario 10` | Tax Classification and overall totals must be correctly saved and displayed after reload. | Persist only line `tax_id`; recompute nonstored totals authoritatively on read. |
+| `PRD §3.6.1` | Add “Delivery Date” (`納期`) below “Customer Order Date” in the panel. Calendar selection. Not a required field. | New optional date on `receipt.order`, rendered under `order_receipt_date` in `OrderInformation.tsx`. Storage field and shipment propagation are open Q&A-1 / Q&A-2. |
+| `PRD §3.6.1` | Item “Delivery Slip Notes”: change the item name of “Remarks” in the panel; on shipment creation reflect it in the shipment slip’s “Delivery Slip Notes” (as per the current specification). | Label-only rename of the existing `receipt.order.remarks` input (`納品書備考`). The reflection already exists: shipment creation writes `remarks` into `stock.picking.delivery_slip_note`. |
+| `PRD §3.6.1` | Item “Internal Memo”: insert below “Delivery Slip Notes”. Input, L-DX text standard. Reflect it in “Internal Memo” on the shipment slip. | New persisted text on `receipt.order` (`社内メモ`), propagated into the existing `stock.picking.internal_remarks`. Precedence against the shipment-creation modal is open Q&A-4. |
+| `PRD §3.6.1` | Add “Advance Payment Amount” (`前払金額`): “No” by default; “Yes” enables the amount input; reflect the value on the shipment slip. | New persisted `with_advance_payment` / `advance_payment_amount` pair on `receipt.order`, mirroring the existing Shipment Slip Registration control and propagated to the same picking fields. Amount-required rule is open Q&A-5. |
+| `PRD §3.6.1` | Shipment Address: “Shipment Address 1” by default; add “Custom”; expand inputs. Required: Recipient Name, Postal Code, Country, Prefecture, Address. Optional: Recipient Name (Phonetic), Building Name, Phone Number. Reflect on the shipment slip. | Add `custom` to `receipt.order.customer_shipment_address` plus eight persisted address fields; validated at Register; mapped onto the picking address payload, which already accepts `custom`. Field naming is open Q&A-3. |
+| `PRD §3.6.2 (list)` | Add the “Delivery Date” filter, calendar selection, to the right of Customer Order Confirmation Date. | New filter in `FilterReceiptList.tsx` immediately after the `confirmed_date` column, using the list’s existing `RangePicker` date-filter convention. |
+| `PRD §3.6.2 (list)` | Add “Delivery Date” to the table. Standard L-DX date format. Registered data. | New `delivery_date` column in the `order_receipt_list` header dictionaries with `format: 'date'`, and in the Excel `dateFields`. |
+| `PRD §3.6.2 (list)` | Rename the table field “Customer Order Due Date” → “Customer Order Date” (`受注納期` → `受注日`). | Relabel the existing `order_receipt_date` column in EN/JA `order_receipt_list.json`. The underlying field does not change. Rename scope beyond the list header is open Q&A-7. |
+| `PRD §3.6.2 (batch)` | Add “Delivery Date” to the Customer Order Information Batch Registration options and table. | Add one `parent` field to `RECIPT_ORDER_MAIN_CONFIG` and one sequence to the FE `getDefaultSequences`, which also feeds the sample file. Whether the other §3.6.1 items join batch is open Q&A-6. |
+| `Scenario 11` | Delivery Date appears below Order Date, is calendar-enterable, and saves with the order. | Covered by `FR-10`. |
+| `Scenario 12` | The former “Remarks” field is named “Delivery Note Remarks”; text saves and transfers to the shipment slip. | Covered by `FR-11`. The English rendering “Delivery Note Remarks” and “Delivery Slip Notes” refer to the same `納品書備考` item; the FE reuses the existing `delivery_slip_notes` resource key. |
+| `Scenario 13` | Internal Memo appears below Delivery Note Remarks; text saves and transfers to the shipment slip. | Covered by `FR-12`. |
+| `Scenario 14` | Prepayment Amount appears **below Total Gross Profit**; “No” default with the amount field disabled; “Yes” enables it; value transfers to the shipment slip. | Covered by `FR-13`. Scenario 14 fixes the placement in the summary area (`OrderPrice.tsx`), not in the information panel. |
+| `Scenario 15` | Custom is selectable for Shipment Address; inputs expand; blank required fields block Register with an error; complete input saves and transfers to the shipment slip. | Covered by `FR-14`. |
+| `Scenario 16` | The list table gains Delivery Date, the filter narrows results, and the “Order Delivery Date” header becomes “Order Date”. | Covered by `FR-15`, `FR-16`, `FR-17`. |
+| `Scenario 17` | Batch Registration Settings gain Delivery Date in the options, the table, and the sample file. | Covered by `FR-18`. |
+
+### BR/FR identifiers (1:1 with the TDD sheet Treacibility Matrix)
+
+| BR | Business requirement | FR | Screen / Page | Functional requirement | Sheet status |
+| --- | --- | --- | --- | --- | --- |
+| `BR-01` | A Customer Order can record, calculate and carry a per-line Tax Classification so downstream Sales is invoice-system compliant. | `FR-01` | Customer Order Registration / Detail (`customer-order-registration`, `customer-order-detail`) | `税区分` column between `値引` and `受注単価`, populated from active ordinary Tax Master records and locked with the existing price fields. | Pending |
+| | | `FR-02` | – | New-line default resolution: explicit value → Product `rate_of_tax_id` → current `default_tax_sale` → null. No hard-coded 10%. | Pending |
+| | | `FR-03` | – | Write intent: omitted-on-create resolves, omitted-on-update preserves, `tax_id: false` clears. Null stays distinct from ordinary 0%. | Pending |
+| | | `FR-04` | Customer Order Registration / Detail | `全行に適用` gains a Tax Classification checkbox and selector; unchecked changes nothing; scope is the selected rows or every active row of the current product group. | Pending |
+| | | `FR-05` | Customer Order Registration / Detail | Nonstored `税額` and `受注金額（税込）` grouped by `tax_id`, rounded once per group with `rounding_method_sales` at transaction-currency precision, on the net amount after `値引`. | Pending |
+| | | `FR-06` | Customer Order Registration (`?copyFromId=`) | Register New by Copying preserves every source line’s snapshot, including null and archived; lines added after the copy resolve current defaults. | Pending |
+| | | `FR-07` | Customer Order Batch Registration | Batch accepts optional Tax Classification and Shipment Address columns with supplied-blank versus absent-column semantics. | Pending |
+| | | `FR-08` | – | Direct Customer Order → Sales writes the exact snapshot for every currency, without Product/default fallback. | Pending |
+| | | `FR-09` | Shipment Slip / Sales Registration | Customer Order-generated Shipment stays tax-neutral; Shipment-originated Sales reads the source snapshot through the `sales_registration` preview purpose. | Pending |
+| `BR-02` | The Customer Order screen captures the delivery, note, memo, prepayment and custom-address information the warehouse and the customer need, and hands it to the shipment slip. | `FR-10` | Customer Order Registration / Detail | “Delivery Date” (`納期`) below “Customer Order Date”: optional calendar input, persisted on the order. | Question |
+| | | `FR-11` | Customer Order Registration / Detail | The panel’s “Remarks” item is renamed “Delivery Slip Notes” (`納品書備考`); its existing reflection into the shipment slip’s Delivery Slip Note is unchanged. | Pending |
+| | | `FR-12` | Customer Order Registration / Detail | “Internal Memo” (`社内メモ`) below Delivery Slip Notes: persisted on the order and written to the shipment slip’s Internal Memo when a shipment is created. | Question |
+| | | `FR-13` | Customer Order Registration / Detail | “Advance Payment Amount” (`前払金額`) below Total Gross Profit: No by default with the amount disabled, Yes enables it, and the value reaches the shipment slip. | Question |
+| | | `FR-14` | Customer Order Registration / Detail | Shipment Address gains “Custom”, expanding required Recipient Name / Postal Code / Country / Prefecture / Address and optional Phonetic / Building Name / Phone, validated at Register and reflected on the shipment slip. | Pending |
+| `BR-03` | The Customer Order List shows and filters delivery dates and names its date columns correctly. | `FR-15` | Customer Order List (`customer-order-list`) | Delivery Date filter, calendar selection, positioned to the right of Customer Order Confirmation Date. | Pending |
+| | | `FR-16` | Customer Order List | Delivery Date column in the list table and in the Excel download, in the standard L-DX date format. | Pending |
+| | | `FR-17` | Customer Order List | Rename the `order_receipt_date` column header from “Customer Order Due Date” (`受注納期`) to “Customer Order Date” (`受注日`) in EN and JA. | Question |
+| `BR-04` | Customer Orders imported in bulk can carry the same delivery date as manually registered ones. | `FR-18` | Customer Order Batch Registration Setting (`customer-order-batch-register-setting`) | Delivery Date added to the batch field options, the batch table, and the generated sample file. | Pending |
+| `BR-05` | The change stays automatable and bilingual. | `FR-19` | Customer Order Registration / Detail / List / Batch | Every new or touched automation surface exposes the stable `data-test` contract; no translated text, product text or row index is identity. | Pending |
+| | | `FR-20` | – | Every new label, option and error has EN and JA resources, and every Japanese domain term in this spec survives verbatim. | Pending |
 
 ### Japanese terms preserved
 
 `税区分`, `税区分マスタ`, `税額`, `受注金額（税込）`, `全行に適用`, `値引`,
 `受注単価`, `出荷住所`, `商品マスタ`, `税マスタ`, `消費税`, `締め`, `税率`,
-`適格請求書保存方式`, `請求書`, `ゲストユーザー`, `受注登録`, `免税`.
+`適格請求書保存方式`, `請求書`, `ゲストユーザー`, `受注登録`, `免税`,
+`納期`, `受注日`, `受注納期`, `受注確定日`, `納品書備考`, `社内メモ`, `前払金額`,
+`受注伝票`, `出荷伝票`, `得意先`.
+
+Terms introduced by PRD §3.6 and their approved English renderings: `納期` = Delivery Date;
+`受注日` = Customer Order Date; `受注納期` = the old (incorrect) Customer Order Due Date
+label being replaced; `納品書備考` = Delivery Slip Notes (the PRD’s Scenario 12 wording
+“Delivery Note Remarks” denotes the same item); `社内メモ` = Internal Memo; `前払金額` =
+Advance Payment Amount (Scenario 14 renders it “Prepayment Amount”). Neither English
+rendering replaces the Japanese term in code, resources or downstream planning.
 
 The attached English PRD did not contain full Japanese requirement sentences. These
 terms come from the supplied screenshots/context and are not represented as a verbatim
@@ -125,6 +211,13 @@ propagate the snapshot to Sales without turning Shipment into a fiscal owner.
 - Exact snapshot propagation to direct Sales and Shipment-originated Sales.
 - Stable FE `data-test` contracts and representative E2E vertical journeys.
 - Copy flow retaining the source tax snapshot.
+- PRD §3.6.1 Customer Order header items: `納期`, the `納品書備考` rename, `社内メモ`,
+  `前払金額`, and the Custom `出荷住所` with its eight address inputs, including their
+  propagation into the generated shipment slip.
+- PRD §3.6.2 Customer Order List: `納期` filter and column, and the `受注納期` → `受注日`
+  header rename.
+- PRD §3.6.2 Batch Registration Setting: `納期` in the options, the batch table, and the
+  sample file.
 
 ### Non-goals
 
@@ -140,6 +233,15 @@ propagate the snapshot to Sales without turning Shipment into a fiscal owner.
 - No ACL, guest permission, archive, cancellation, reservation, or Customer Order state
   redesign.
 - No automatic rewrite of already-created Sales when Customer Order tax changes later.
+- No redesign of the Shipment Slip Registration screen, its advance-payment accounting
+  flow, or `stock.picking` address handling; the Customer Order only feeds fields that
+  already exist there.
+- No migration of the unused `receipt.order.delivery_slip_note` column and no change to the
+  existing `remarks` → `stock.picking.delivery_slip_note` mapping. `FR-11` is a label change.
+- No new batch columns beyond Delivery Date (plus the Part 1 Tax Classification and
+  Shipment Address columns) unless Q&A-6 says otherwise.
+- No backfill of `納期`, `社内メモ`, `前払金額` or custom-address values onto existing
+  Customer Orders or already-created shipment slips.
 - No implementation in this control-plane session.
 
 ## Current-State Findings
@@ -913,6 +1015,270 @@ the database line ID is authoritative. Repeated child selectors are always scope
 8. Partial/split Shipment lines retain their source reference. Already-created Sales are
    never rewritten by a later Customer Order edit.
 
+## Additional Changes (PRD §3.6, 2026/08/17)
+
+### Current-state findings
+
+Backend — `ldx-backend` graph in sync at `development` `439d483a60`; Odoo field and
+relationship claims come from exact-literal text search inside `ldx_addons`.
+
+- `receipt.order` (`ldx_addons/ldx_core/transactions/receipt_order.py`) already owns
+  `order_receipt_date` (`:107`), a two-option `customer_shipment_address` selection
+  defaulting to `shipment_address_1` (`:113`), the computed
+  `customer_shipment_address_name` (`:117`), `remarks` (`:121`), and an **unused**
+  `delivery_slip_note` (`:124`). `delivery_schedule_date` (`:157`) exists but is explicitly
+  marked `# DEPRECATED: not use anymore`.
+- No `receipt.order` field exists today for `納期`, `社内メモ`, `前払金額`, or a custom
+  shipment address.
+- `_generate_shipment_and_picking_order_line()` resolves the address block at
+  `receipt_order.py:1283–1301` and builds `picking_payload` at `:1305–1335`. It maps
+  `shipment_address_1|2` to the picking's `address_1|address_2`, copies the customer
+  master's address values, and writes `'delivery_slip_note': self.remarks`. It never sends
+  `recepient_name_phonetic`, `internal_remarks`, `with_advance_payment`,
+  `advance_payment_amount`, or `delivery_date`.
+- The waiting-shipment payload overrides those defaults: `picking_payload.update(
+  shipment_payload)` runs after the order-derived values (`receipt_order.py:1338–1339`), so
+  anything the shipment modal sends wins today.
+- `stock.picking` already exposes every destination field, so **no new Shipment field is
+  required**: `shipment_address` including a `custom` option
+  (`ldx_addons/ldx_core/base/stock_picking.py:572–576`), `postal_code` / `country_id` /
+  `prefectures_id` / `address` / `building_name` / `phone` (`:577–582`), `recepient_name`
+  and `recepient_name_phonetic` (`:765`, `:767`), `internal_remarks` (`:378`, DB label
+  “Remarks”, rendered as Internal Memo on the Shipment screens), `delivery_slip_note`
+  (`:623`), `with_advance_payment` (`:716`), `advance_payment_amount` (`:726`),
+  `advance_payment_residual` (`:729`), and `delivery_date` (`:369`).
+- `StockPicking._action_check_ap_payment()` (`stock_picking.py:1992–2005`) raises
+  `Advance payment amount is required` when `with_advance_payment` is true and
+  `advance_payment_amount <= 0`. Propagating “Yes” without a positive amount therefore
+  breaks downstream Sales creation — the reason Q&A-5 exists.
+- Batch: `RECIPT_ORDER_MAIN_CONFIG`
+  (`ldx_addons/ldx_core/utils/batches/batch_config_receipt_order.py`) already carries
+  `order_receipt_date` as `type: 'datetime'` (`:56–63`) and `remarks` as `type: 'string'`
+  (`:182–188`); `ReceiptOrder.batch_create()` (`receipt_order.py:723`) consumes it.
+
+Frontend — `ldx-frontend` graph in sync at `fix/em-4229-galang` `76f01cd32f`.
+
+- The information panel is
+  `.../CustomerOrder/CustomerOrderRegistration/components/OrderInformation.tsx`: the
+  Shipment Address `Select` (`data-test="shipment_address"`, `:242`) sits immediately above
+  the Customer Order Date `FDatePicker` (`data-test="order_receipt_date"`, label
+  `customer_order_date`, required, `:256–270`). `納期` belongs directly beneath it.
+- The panel’s “Remarks” input lives in `components/createShipment.tsx:231–239` — label
+  `common:remarks`, `name="remarks"`, `data-test="remarks"` — bound to
+  `receipt.order.remarks`. This is the item PRD §3.6.1 renames, and it is also where
+  `社内メモ` is inserted.
+- Summary totals live in `components/OrderPrice.tsx`; `total_gross_profit` (`:131–141`) is
+  the anchor Scenario 14 names for `前払金額`.
+- `components/ShipmentToAddress.tsx` already implements the exact Custom behavior — options
+  `address_1` / `address_2` / `custom`, an Apply button, and `applyValue()` writing
+  `recipient_name`, `recipient_name_phonetic`, `postal_code`, `country_id`,
+  `prefecture_id`, `address`, `building_name`, `phone`. It is consumed only by
+  `ModalCreateShipmentWaiting.tsx:509` and its twin under
+  `SalesLinkage/CustomerOrderDetailList/partials/`, **not** by the order panel. `FR-14`
+  reuses this component rather than writing a second address widget.
+- The approved Advance Payment control pattern already exists on Shipment Slip
+  Registration: `ShipmentInstructionActRegistrationCreate/components/ShipmentActionsComponent.tsx:128–185`
+  renders an `FRadio` Yes/No bound to `with_advance_payment` that clears
+  `advance_payment_amount` on No and disables the `FInputNumberDecimal` unless Yes.
+- Resource keys to reuse rather than mint: `internal_memo` and `delivery_slip_notes`, both
+  already used by
+  `ShipmentInstructionActRegistrationList/components/Filters.tsx:585–612`.
+- Header form values are read for both detail and `copyFromId` mode by
+  `services/InitialDataFetcher.tsx` (only line identity is stripped) and serialized by
+  `services/utils.ts`; both list `remarks`, `customer_shipment_address` and
+  `order_receipt_date` today, so new header fields inherit copy behavior automatically once
+  added to the same lists.
+- Customer Order List: `views/MDExecution/SalesLinkage/CustomerOrderList/CustomerOrderList.tsx`
+  builds its table from `useColumnsV2('order_receipt_list')`, so headers come from
+  `public/locales/{en,ja}/order_receipt_list.json` → `headers[]`. JA currently holds
+  `{"name": "受注納期", "accessor": "order_receipt_date", "format": "date"}` — the exact row
+  `FR-17` renames. `DownloadExcel` receives
+  `dateFields={['order_receipt_date', 'confirmed_date']}` (`:338`).
+- The list filter panel is `src/components/FilterContainer/partials/FilterReceiptList.tsx`;
+  `confirmed_date` (label `order_receipt_list:customer_order_confirmation_date`,
+  `data-test="customer-order-confirmation-date-range-picker"`) is the anchor `FR-15` inserts
+  after, and every date filter there is a `RangePicker`.
+- Batch options come from
+  `CustomerOrderBatchRegister/hooks.ts::getDefaultSequences()`, which feeds both the setting
+  page and the generated `customer_order_batch_registration_sample` file, so `FR-18` is one
+  sequence entry plus its BE config twin.
+
+E2E — `ldx-e2e` graph in sync at `feat/ringi-100` `2e2e9fd6`.
+
+- `pages/in-season-management/sales-linkage-for-wholesale-sales/customer-order-registration.ts`
+  is **absent from this branch** and present on `master`. No Customer Order List or Batch
+  page object was found on either line. E2E work must start from the branch that owns the
+  page object and extend it; it must not fork a second Customer Order page object.
+
+### Domain model delta
+
+The aggregate root is unchanged: `receipt.order` in the Wholesale Ordering bounded context.
+PRD §3.6 adds header-level attributes to that same root; it introduces no new aggregate,
+entity, or lifecycle state.
+
+- **New value objects on the root:** `DeliveryDate` (`納期`, a plain optional date, no
+  ordering constraint against `order_receipt_date` unless a rule is approved),
+  `InternalMemo` (`社内メモ`, free text), `AdvancePaymentIntent` (`前払金額`: a boolean and
+  a monetary amount that are valid only together), and `CustomShipmentAddress` (a five-part
+  required core plus three optional parts, valid only when
+  `customer_shipment_address = 'custom'`).
+- **Bounded-context seam:** Wholesale Ordering → Logistics stays a one-way projection at
+  shipment creation. The Customer Order remains the source of intent; `stock.picking` stays
+  the operational owner. Nothing here makes Logistics recompute or write back.
+- **Which `D` changes:** the affected domain behavior is **what a Customer Order hands to
+  the shipment slip it generates**. Before, only the address selection, the customer
+  master’s address values, and `remarks` crossed the seam. After, the order also carries an
+  operator-authored custom address, an internal memo, and a prepayment intent, and it
+  records its own `納期` for planning and search.
+- **Invariants added:**
+  1. `advance_payment_amount` is meaningful only when `with_advance_payment` is true, and
+     clearing the flag clears the amount (Q&A-5 decides whether a positive amount is
+     mandatory at Register).
+  2. The five required custom-address parts exist whenever
+     `customer_shipment_address = 'custom'`, and are irrelevant otherwise.
+  3. Selecting `shipment_address_1|2` keeps the customer master as the address source of
+     truth; only `custom` makes the order the source.
+  4. A generated shipment slip is a snapshot: later edits to the Customer Order never
+     rewrite an existing `stock.picking`.
+- **Invariants at risk:** silent divergence between the order-level custom address and the
+  shipment modal’s own address widget (Q&A-4); prepayment intent reaching a picking without
+  a positive amount and failing at Sales creation (Q&A-5); a `納期` column colliding with the
+  renamed `受注日` column in saved list layouts and download templates.
+
+### Architecture — persisted fields
+
+All new state is header-level on `receipt.order`; backend field names stay `snake_case`.
+
+```text
+receipt.order.delivery_date            Date | null            # 納期 — FR-10 (name pending Q&A-1)
+receipt.order.internal_remarks         Text | null            # 社内メモ — FR-12
+receipt.order.with_advance_payment     Boolean, default False # 前払金額 Yes/No — FR-13
+receipt.order.advance_payment_amount   Float | null           # currency = use_currency — FR-13
+receipt.order.customer_shipment_address
+        Selection ['shipment_address_1', 'shipment_address_2', 'custom']  # FR-14, extended
+receipt.order.recipient_name           Char | null            # required when custom
+receipt.order.recipient_name_phonetic  Char | null            # optional
+receipt.order.postal_code              Char | null            # required when custom
+receipt.order.country_id               Many2one(res.country) | null        # required when custom
+receipt.order.prefecture_id            Many2one(res.country.state) | null  # required when custom
+receipt.order.address                  Char | null            # required when custom
+receipt.order.building_name            Char | null            # optional
+receipt.order.phone                    Char | null            # optional
+```
+
+Every field is nullable and unbackfilled, so existing Customer Orders keep their current
+behavior: `customer_shipment_address` still defaults to `shipment_address_1`, and an order
+that never chose `custom` never evaluates the custom-address constraint.
+
+The eight address field names above assume the corrected spelling; `stock.picking` uses the
+legacy `recepient_name`, `recepient_name_phonetic` and `prefectures_id`. Q&A-3 decides
+whether the order mirrors the legacy spelling or keeps the corrected names behind an
+explicit mapping. Whichever wins, the FE form already speaks the corrected names
+(`ShipmentToAddress.applyValue()`), so exactly one translation layer is needed — never two.
+
+### Write and propagation contract
+
+| Order field | Shipment slip target (`stock.picking`) | Rule |
+| --- | --- | --- |
+| `remarks` (`納品書備考`) | `delivery_slip_note` | Unchanged from today. `FR-11` renames the label only. |
+| `internal_remarks` (`社内メモ`) | `internal_remarks` | New payload entry at shipment creation. Precedence versus the waiting-shipment modal is Q&A-4. |
+| `with_advance_payment` / `advance_payment_amount` (`前払金額`) | same two fields | New payload entries. `advance_payment_residual` stays computed on the picking; the order never writes it. |
+| `customer_shipment_address = 'custom'` | `shipment_address = 'custom'` plus the eight address fields | The order’s own values replace the customer-master lookup. `address_1`/`address_2` keep the existing customer-master behavior verbatim. |
+| `delivery_date` (`納期`) | `delivery_date` — **only if Q&A-2 approves** | The PRD does not state propagation; the picking field exists. Until answered, the order stores and displays `納期` without sending it. |
+
+Propagation happens exactly where the existing mapping already happens
+(`_generate_shipment_and_picking_order_line()`), for every Customer Order → Shipment path:
+the panel’s Create Shipment action, the waiting-shipment modal, and the list-level batch
+shipment generator. No second propagation site is introduced.
+
+### FE contract additions
+
+- `OrderInformation.tsx`: add the `納期` `FDatePicker` directly below Customer Order Date,
+  optional, `format="YYYY/MM/DD"`, disabled with the existing `isFormDisabled` rule. Extend
+  `customerShipmentAddressOptions` with `custom`, and render the expanded address block
+  beneath the selector when `custom` is chosen, reusing `ShipmentToAddress.tsx` rather than
+  a new widget.
+- `createShipment.tsx`: change the Remarks item label from `common:remarks` to the existing
+  `delivery_slip_notes` resource, keeping `name="remarks"` and the `data-test="remarks"`
+  hook stable so current automation does not break; add the `社内メモ` input immediately
+  below it, bound to `internal_remarks`, using the existing `internal_memo` resource.
+- `OrderPrice.tsx`: add `前払金額` below `total_gross_profit`, mirroring
+  `ShipmentActionsComponent.tsx` — an `FRadio` Yes/No bound to `with_advance_payment` that
+  clears `advance_payment_amount` on No, plus an `FInputNumberDecimal` disabled unless Yes.
+  Keep the existing tax-exclusive gross-profit semantics untouched.
+- `services/data.types.ts`, `services/utils.ts` and `services/InitialDataFetcher.tsx`: add
+  every new field to the form type, the normalized write, and the read/copy list. The copy
+  flow inherits them for free because header values are copied wholesale.
+- `services/validationSchema.ts`: require Recipient Name, Postal Code, Country, Prefecture
+  and Address only when `customer_shipment_address === 'custom'`; require a positive
+  `advance_payment_amount` when `with_advance_payment` is true if Q&A-5 approves that rule.
+- `FilterReceiptList.tsx`: insert a `delivery_date` `RangePicker` immediately after the
+  `confirmed_date` column, using the same `Form.Item` shape and a `data-test` hook.
+- `public/locales/{en,ja}/order_receipt_list.json`: rename the `order_receipt_date` header
+  (`受注納期` → `受注日`; EN “Customer Order Due Date” → “Customer Order Date”) and add a
+  `delivery_date` header with `format: 'date'`. Add `delivery_date` to the list’s
+  `dateFields` for the Excel download.
+- `CustomerOrderBatchRegister/hooks.ts`: add a `delivery_date` sequence with
+  `type: 'date'`, optional, positioned next to `order_receipt_date`.
+- Add EN and JA resources for every new label, radio option and validation message.
+
+### BE contract additions
+
+- `ldx_addons/ldx_core/transactions/receipt_order.py`: declare the fields above; extend the
+  `customer_shipment_address` selection with `custom`; add a create/write constraint for the
+  custom-address required set and for the advance-payment pair; extend
+  `_generate_shipment_and_picking_order_line()`’s address resolution and `picking_payload`
+  with the new entries.
+- `ldx_addons/ldx_core/utils/batches/batch_config_receipt_order.py`: add one `parent` field
+  entry for `delivery_date` (`type: 'date'`) with EN and JA display names, and mirror it in
+  `ReceiptOrder.batch_create()` normalization.
+- `ldx_addons/ldx_core/i18n/ja_JP.po`: Japanese for every new user-visible label and error.
+- Nothing on `stock.picking` changes. Every destination field already exists, and the
+  Shipment Slip screens keep their current behavior.
+
+### Stable `data-test` contract additions
+
+| Element | Required `data-test` | Rule |
+| --- | --- | --- |
+| Delivery Date input | `customer_order_delivery_date` | Constant; expose the ISO value in `data-value` so automation never parses the localized display. |
+| Delivery Slip Notes input | `remarks` (unchanged) | Keep the existing hook across the label rename so current specs keep passing. |
+| Internal Memo input | `customer_order_internal_memo` | Constant. |
+| Advance payment Yes/No | `customer_order_with_advance_payment` | Constant; expose the chosen value in `data-value`. |
+| Advance payment amount | `customer_order_advance_payment_amount` | Constant; disabled state must be queryable. |
+| Shipment Address selector | `shipment_address` (unchanged) | Keep; the `custom` option carries `data-address-option="custom"`. |
+| Custom address block root | `customer_order_custom_address` | Present only when `custom` is selected. |
+| Custom address inputs | `customer_order_custom_address_<field>` | `<field>` ∈ `recipient_name`, `recipient_name_phonetic`, `postal_code`, `country_id`, `prefecture_id`, `address`, `building_name`, `phone`; scoped beneath the block root. |
+| Custom address field error | `customer_order_custom_address_error` | Required `data-field` naming the offending input. |
+| List Delivery Date filter | `customer-order-delivery-date-range-picker` | Follows the list’s existing kebab-case filter hook convention. |
+| List Delivery Date column | column key `delivery_date` | Located by column key, never by header text — the header text is being renamed in this same change. |
+| Batch Delivery Date option | `customer_order_batch_field_delivery_date` | Constant. |
+
+### Data flow
+
+**Register a Customer Order with §3.6 values.** The user picks `納期`, types
+`納品書備考` and `社内メモ`, chooses Yes plus an amount for `前払金額`, and selects
+`出荷住所 = Custom`, which expands the eight inputs. Register validates the five required
+custom fields client-side and again in the backend constraint, then persists all of it on
+`receipt.order`. Reload reads it back through the existing `search_read` initializer.
+
+**Create a shipment from that order.** `_generate_shipment_and_picking_order_line()`
+resolves the address block — `custom` reads the order’s own fields instead of the customer
+master — and adds `internal_remarks`, `with_advance_payment` and `advance_payment_amount`
+(plus `delivery_date` if Q&A-2 approves) to `picking_payload`. The waiting-shipment modal’s
+payload still merges last, so Q&A-4 decides whether that merge is narrowed for these
+fields. Downstream Sales creation reads the picking, so the prepayment reaches
+`_action_check_ap_payment()` exactly as a manually registered shipment does.
+
+**List and search.** `納期` is a stored order field, so the list filter is a plain domain
+range and the column is a plain read; no computed or joined value is involved. The
+`受注納期` → `受注日` rename touches presentation only — accessor, domain and download key
+all remain `order_receipt_date`.
+
+**Batch.** A new-pattern workbook may carry a Delivery Date column; `batch_create()`
+normalizes it like the existing `order_receipt_date`. A saved old pattern that omits the
+column is unchanged and keeps working, and an omitted column preserves the stored value on
+update — the same blank-versus-absent rule Part 1 defines for Tax Classification.
+
 ## Error Handling & Edge Cases (BOUNDARIES)
 
 - **B — Applies: Boundary values.** Cover 10%, 8%, ordinary 0%, null, supported decimal
@@ -979,6 +1345,65 @@ the database line ID is authoritative. Repeated child selectors are always scope
   changes recompute totals; in-place Tax Master edits affect the referenced record by
   design. Partial Shipments use the source line at each conversion. `締め` remains
   Shipment-owned.
+
+### PRD §3.6 delta — per letter
+
+The Part 1 analysis above stands unchanged. These are the additional obligations the
+§3.6 items introduce.
+
+- **B — Applies.** `納期` boundaries: far past, far future, leap day, and the same day as
+  `受注日`. No ordering rule between `納期` and `受注日` is specified, so none is enforced;
+  if the business wants one, it is a new requirement, not an implicit constraint.
+  `前払金額`: 0, negative, the order total, above the order total, and maximum decimal
+  precision for the order currency. Zero and negative are the dangerous pair, because
+  `_action_check_ap_payment()` rejects `<= 0` only later, at Sales creation. `社内メモ` and
+  `納品書備考` need their maximum-length behavior pinned to the L-DX text standard, and
+  postal code / phone need their existing master-side formats, not new ones.
+- **O — Applies.** The eight custom-address inputs are the classic transposition trap:
+  Recipient Name versus Recipient Name (Phonetic), Postal Code versus Phone, Address versus
+  Building Name. Every test must use distinct values per field and assert each one
+  separately on the generated shipment slip. On the list, `納期` and the renamed `受注日`
+  are two date columns of the same format — assert by column key, never by header text or
+  position, and check the Excel download column order too.
+- **U — Applies.** Japanese, multibyte and full-width input in `社内メモ`, `納品書備考`,
+  Recipient Name and its phonetic reading must persist, reload, reach the shipment slip and
+  survive the Excel download without corruption. The phonetic field is specifically a
+  kana field in practice. Every new label needs both EN and JA resources, and the
+  `受注納期` → `受注日` rename must land in both dictionaries — an EN-only rename silently
+  leaves JA users on the old wrong label.
+- **N — Applies.** `納期` empty is valid and must stay null, never today’s date. Empty
+  `社内メモ` must not overwrite an existing shipment memo with an empty string if Q&A-4
+  chooses order-wins. `前払金額` No must clear the amount rather than leaving a stale
+  value. Custom-address optional fields empty are valid; required fields blank or
+  whitespace-only must block Register with a field-level error, per Scenario 15. Switching
+  from `custom` back to `address_1` must not carry the custom values into the shipment.
+- **D — Applies.** The list gains one stored column and one range filter, so no query
+  growth beyond the existing pattern; confirm the new filter is a plain domain range and
+  does not trigger a per-row read. Batch: the Delivery Date column must not add a per-row
+  query, matching the existing `order_receipt_date` handling.
+- **A — Applies.** No new permission is introduced. The new fields inherit the Customer
+  Order’s existing read/write/editability rules, including the guest block and the
+  confirmed-order lock. Every new input must be disabled exactly when the existing panel
+  fields are.
+- **R — Applies.** If a shipment is generated while the order form is open, the picking
+  already holds a snapshot; a later order edit must not rewrite it. Double-submitting
+  Register must not create two orders — existing behavior, not redefined here. The
+  address-selector Apply button is a two-step interaction: selecting `custom` and never
+  pressing Apply must not half-apply.
+- **I — Applies.** A shipment-creation failure must not leave the order partially updated,
+  and a validation failure on the custom-address block must not persist any of the eight
+  fields. If Q&A-2 approves `納期` propagation, a picking that rejects the value must fail
+  loudly rather than silently dropping it.
+- **E — Applies.** `納期` is a date, not a timestamp: it must not shift across the JST
+  boundary the way `order_receipt_date` (a `Datetime`) can. Verify the list filter, the
+  column, the download and the batch import all agree in `Asia/Tokyo`. The expanded custom
+  address block must remain usable on the standard desktop widths the panel already
+  supports.
+- **S — Applies.** State transitions: draft → confirmed locks the new fields with the rest
+  of the panel; shipment-created orders keep their values but no longer rewrite the
+  picking; cancelled and archived orders keep them readable. Register New by Copying
+  carries every new header field, including a custom address — which is intended, since the
+  copy is a new order for the same customer. Legacy orders stay null everywhere.
 
 ## Acceptance Criteria & Verification
 
@@ -1050,6 +1475,46 @@ the database line ID is authoritative. Repeated child selectors are always scope
 25. Each `PRD §3.1–3.5` requirement and `Scenario 01–10` maps to at least one FE or BE
     test and a representative E2E assertion where practical.
 
+26. `納期` renders directly below `受注日` on Customer Order Registration and Detail, is a
+    calendar input, is not required, saves, and reloads with the entered value
+    (`FR-10`, Scenario 11).
+27. The panel item formerly labeled “Remarks” reads “Delivery Slip Notes” (`納品書備考`) in
+    EN and JA, keeps its existing `data-test` hook and field binding, and its text still
+    reaches the shipment slip’s Delivery Slip Note on shipment creation (`FR-11`,
+    Scenario 12).
+28. `社内メモ` renders directly below `納品書備考`, saves, reloads, and reaches the shipment
+    slip’s Internal Memo when a shipment is created (`FR-12`, Scenario 13).
+29. `前払金額` renders below Total Gross Profit with No selected and the amount input
+    disabled; choosing Yes enables it; the saved pair reaches the shipment slip’s
+    `with_advance_payment` and `advance_payment_amount` (`FR-13`, Scenario 14).
+30. Choosing No clears the amount rather than leaving a stale value, and a Customer
+    Order-generated shipment carrying a prepayment does not fail
+    `_action_check_ap_payment()` at Sales creation.
+31. Shipment Address offers Custom alongside Shipment Address 1 and 2, defaults to
+    Shipment Address 1, and expands the input block only when Custom is selected
+    (`FR-14`, Scenario 15).
+32. Registering with any of Recipient Name, Postal Code, Country, Prefecture or Address
+    blank shows a field-level error and saves nothing; completing them saves, and all eight
+    values — including the optional Phonetic, Building Name and Phone — appear on the
+    generated shipment slip with no field transposed (`FR-14`, Scenario 15).
+33. Selecting Shipment Address 1 or 2 keeps today’s customer-master behavior byte for byte;
+    switching away from Custom does not leak custom values onto the shipment slip.
+34. The Customer Order List shows a Delivery Date column in the standard L-DX date format,
+    populated from registered data, and includes it in the Excel download (`FR-16`,
+    Scenario 16).
+35. The Customer Order List offers a Delivery Date filter immediately to the right of
+    Customer Order Confirmation Date, and it narrows results (`FR-15`, Scenario 16).
+36. The list header for `order_receipt_date` reads “Customer Order Date” / `受注日` in both
+    dictionaries, and no other screen’s label regresses (`FR-17`, Scenario 16).
+37. Customer Order Batch Registration Setting offers Delivery Date in the field options and
+    the batch table, and the generated sample file contains it (`FR-18`, Scenario 17).
+38. A saved old batch pattern that omits Delivery Date still imports unchanged, and an
+    absent column on update preserves the stored value.
+39. Register New by Copying carries `納期`, `納品書備考`, `社内メモ`, the prepayment pair and
+    a custom address into the new order, and the copy can then be edited independently.
+40. Every new label, radio option and validation message has EN and JA resources, and every
+    Japanese term listed in this spec appears verbatim in the delivered resources.
+
 > Verification commands run only in separate sessions rooted at the target repository.
 > No target repository is modified or tested from this control-plane task.
 
@@ -1072,10 +1537,46 @@ the database line ID is authoritative. Repeated child selectors are always scope
   provenance, and copy-metadata validation. Each is pinned in the handoffs and acceptance
   criteria.
 
+PRD §3.6 additions:
+
+- Database change: twelve nullable header fields plus one extra selection value on
+  `receipt.order`. Nothing on `stock.picking`; every destination field already exists.
+- Data migration: none. No backfill onto existing orders and no rewrite of shipment slips
+  that were already generated.
+- Query behavior: `納期` is a stored scalar, so the new list column, filter and download
+  entry are plain reads and a plain domain range — no join, no per-row query.
+- Rollout dependency: BE fields and payload first, FE panel/list/batch second, E2E last.
+  The three §3.6 areas — order panel, list, batch — are independently shippable behind the
+  same BE change.
+- Backward compatibility: existing orders keep `customer_shipment_address =
+  shipment_address_1` and null everywhere else; saved batch patterns without the Delivery
+  Date column keep importing unchanged.
+- Rollback: code rollback leaves twelve unused nullable columns. Do not drop populated
+  custom-address, memo or prepayment values during rollback.
+- Main §3.6 risks: an eight-field address block that transposes silently, a prepayment
+  intent that fails only later inside `_action_check_ap_payment()`, a JA-only or EN-only
+  header rename, and precedence ambiguity against the waiting-shipment modal (Q&A-4). Each
+  is pinned in the BOUNDARIES delta, the acceptance criteria and the handoffs.
+
 ## Open Questions
 
-None. All material product, scope, architecture, migration, calculation, copy, currency,
-Shipment, and testability decisions in this spec are `USER-APPROVED`.
+Part 1 (`税区分`) has none: every material product, scope, architecture, migration,
+calculation, copy, currency, Shipment and testability decision remains `USER-APPROVED`
+(`DEC-01`–`DEC-18`).
+
+Part 2 (PRD §3.6) has seven. Each one is a row in the TDD sheet’s `Q&A` tab with concrete
+options; answer them there, in the `Answer` column. Recommendations below are advisory and
+**non-binding** — no dependent work should start until the row is answered.
+
+| Q&A | FR | Question | Options | Recommendation |
+| --- | --- | --- | --- | --- |
+| `Q&A-1` | `FR-10` | Where is `納期` stored on `receipt.order`? | a) new `delivery_date` field; b) revive the deprecated `delivery_schedule_date`; c) another name | (a) — `delivery_schedule_date` is explicitly marked deprecated and may hold stale legacy values that would surface as real `納期` data. |
+| `Q&A-2` | `FR-10` | Does `納期` propagate to the shipment slip’s existing `stock.picking.delivery_date` when a shipment is created? | a) no, the order records it only; b) yes, always; c) yes, only when the picking’s own value is empty | (a) — PRD §3.6.1 asks for propagation on every other new item and is silent here, and the picking field already has its own meaning in the logistics flow. |
+| `Q&A-3` | `FR-14` | How are the eight custom-address fields named on `receipt.order`? | a) corrected spelling (`recipient_name`, `prefecture_id`) with an explicit map to the picking’s legacy names; b) mirror the picking’s legacy spelling (`recepient_name`, `prefectures_id`) for a 1:1 payload | (a) — the FE form already uses the corrected names, so (a) needs one translation layer while (b) needs one on the FE side instead and entrenches the typo. |
+| `Q&A-4` | `FR-12`, `FR-14` | When the waiting-shipment modal also supplies an address, notes or a memo, which value reaches the picking? | a) the modal wins (today’s behavior — `picking_payload.update(shipment_payload)`); b) the order wins; c) the modal wins only for values it actually supplies, and blanks fall back to the order | (c) — it preserves the operator’s explicit shipment-time input without letting an untouched modal field silently erase order-level data. |
+| `Q&A-5` | `FR-13` | Is a positive `前払金額` required at Register when Yes is selected? | a) yes, block Register with amount ≤ 0; b) no, allow Yes with a blank amount | (a) — `_action_check_ap_payment()` already rejects `<= 0`, so (b) simply defers the same failure to Sales creation, far from where the user made the mistake. |
+| `Q&A-6` | `FR-18` | Do `社内メモ`, `前払金額` and the custom address also join Batch Registration? | a) no, Delivery Date only, exactly as §3.6.2 states; b) yes, add all of them; c) add a named subset | (a) — the PRD lists only Delivery Date; anything more is new scope and new columns in the sample file. |
+| `Q&A-7` | `FR-17` | How far does the `受注納期` → `受注日` rename reach? | a) the Customer Order List header only; b) also the Batch Registration column label; c) every screen that labels `order_receipt_date` | (a) — §3.6.2 names the list table field specifically, and the registration panel already reads `customer_order_date`. |
 
 ## Implementation Handoff (Advisory)
 
@@ -1112,6 +1613,17 @@ repository. They are advisory only and are not executed from this control-plane 
     module, `ldx_addons/ldx_ec/i18n/ja_JP.po`.
   - References only: `product_master.py::get_sales_tax()`, `account_tax.py`,
     `res_company.py::get_rounding_by_type()`.
+  - **PRD §3.6 additions** — `ReceiptOrder` field block and
+    `_generate_shipment_and_picking_order_line()` address resolution/`picking_payload`
+    (`ldx_addons/ldx_core/transactions/receipt_order.py:107–128`, `:1283–1339`);
+    `RECIPT_ORDER_MAIN_CONFIG` plus `ReceiptOrder.batch_create()`; JA resources in
+    `ldx_addons/ldx_core/i18n/ja_JP.po`.
+  - **Read-only references for §3.6** — `stock.picking` already owns every destination
+    field: `ldx_addons/ldx_core/base/stock_picking.py:369` (`delivery_date`), `:378`
+    (`internal_remarks`), `:572–582` (`shipment_address` incl. `custom` + address block),
+    `:623` (`delivery_slip_note`), `:716`/`:726`/`:729` (advance payment),
+    `:765`/`:767` (`recepient_name`, `recepient_name_phonetic`), and
+    `:1992–2005` (`_action_check_ap_payment()`). **Do not modify `stock.picking`.**
 - **Relevant rules/evidence:** Read root `CLAUDE.md`; inspect relevant ADRs; add
   `from __future__ import annotations` to edited first-party Python modules where local
   rules require it; annotate pure-data surfaces; register new tests in the applicable
@@ -1166,8 +1678,21 @@ repository. They are advisory only and are not executed from this control-plane 
      provide the Japanese translations without changing existing message keys.
   9. Verify Odoo dynamic consumers outside the indexed scope and run reservation plus
      existing Shipment-owned closing regressions.
-- **Acceptance criteria:** AC 2–20, the Backend portion of AC 21, AC 23, and the Backend
-  parts of AC 25.
+  10. **PRD §3.6 — start only after the sheet answers Q&A-1…Q&A-7.** Add failing tests
+      first: nullable `納期` persists and reloads (and does **not** propagate to the picking
+      unless Q&A-2 says otherwise); `社内メモ` reaches `stock.picking.internal_remarks`;
+      the advance-payment pair reaches `with_advance_payment` / `advance_payment_amount`
+      and survives `_action_check_ap_payment()`; `customer_shipment_address = 'custom'`
+      writes all eight order-owned address values onto the picking with **distinct values
+      per field** so a transposition fails the test; `address_1`/`address_2` keep today’s
+      customer-master behavior byte for byte; the custom-required constraint rejects each
+      of the five required fields blank and whitespace-only; and the batch Delivery Date
+      column round-trips with the same blank-versus-absent rule as Tax Classification. Then
+      implement the fields, the constraint, the payload additions and the batch config, and
+      add the Japanese resources. Do not touch `stock.picking`.
+- **Acceptance criteria:** AC 2–20, the Backend portion of AC 21, AC 23, the Backend parts
+  of AC 25, and the Backend parts of AC 26–40 (persistence, constraints, shipment payload,
+  batch config, JA resources).
 - **Test registration:** Tag new `ldx_core` and `ldx_ec` coverage
   `test_customer_order_tax` so the first verification command executes both modules.
 - **Verification commands:**
@@ -1217,6 +1742,22 @@ repository. They are advisory only and are not executed from this control-plane 
     `src/views/InventoryControl/ShipmentProcess/ShipmentInstructionActRegistration/ShipmentInstructionActRegistrationCreate/components/customFormComponents.tsx`
     and `src/data/useShipmentPreview.tsx`.
   - EN/JA locale files for the affected namespaces.
+  - **PRD §3.6 additions** — `components/OrderInformation.tsx` (`納期` below
+    `order_receipt_date`; `custom` in `customerShipmentAddressOptions`; expanded address
+    block), `components/createShipment.tsx:231–239` (label rename + `社内メモ`),
+    `components/OrderPrice.tsx:131–141` (`前払金額` below `total_gross_profit`),
+    `components/ShipmentToAddress.tsx` (reuse — do not fork a second address widget),
+    `services/validationSchema.ts`,
+    `src/components/FilterContainer/partials/FilterReceiptList.tsx` (filter after
+    `confirmed_date`),
+    `src/views/MDExecution/SalesLinkage/CustomerOrderList/CustomerOrderList.tsx`
+    (`dateFields`), `public/locales/{en,ja}/order_receipt_list.json` (rename + new column),
+    and `CustomerOrderBatchRegister/hooks.ts::getDefaultSequences()`.
+  - **Pattern reference (read-only)** —
+    `ShipmentInstructionActRegistrationCreate/components/ShipmentActionsComponent.tsx:128–185`
+    for the advance-payment Yes/No + amount control, and
+    `ShipmentInstructionActRegistrationList/components/Filters.tsx:585–612` for the existing
+    `internal_memo` / `delivery_slip_notes` resource keys.
 - **Relevant rules/evidence:** TDD before implementation; API/form fields snake_case;
   no `any`; reuse selectors and `Input.Number.Currency`; all user copy via `t()` with EN
   and JA entries; `data-test` required; ≥80% coverage on changed source files. Run current
@@ -1246,7 +1787,17 @@ repository. They are advisory only and are not executed from this control-plane 
      their semantics; generic Shipment preview/report callers remain current.
   8. Add EN/JA resources and focused component/integration tests; verify copy, unchanged
      guest-access gating, and existing Customer Order regressions.
-- **Acceptance criteria:** AC 1–13, 18–25 and FE portions of AC 14–17.
+  9. **PRD §3.6 — start only after the sheet answers Q&A-1…Q&A-7.** TDD as above: form
+     type, normalizer and initializer entries for every new field; the `納期` picker below
+     Customer Order Date; the label rename that keeps `name="remarks"` and
+     `data-test="remarks"` stable; the `社内メモ` input; the `前払金額` radio/amount pair
+     that clears the amount on No; the `custom` option with the expanded block reusing
+     `ShipmentToAddress`; conditional validation for the five required address fields; the
+     list filter, column, rename and `dateFields`; and the batch sequence. Assert the
+     rename lands in **both** `en` and `ja` dictionaries. Add the new `data-test` hooks
+     exactly as contracted.
+- **Acceptance criteria:** AC 1–13, 18–25, FE portions of AC 14–17, and AC 26–40 except
+  the purely backend persistence assertions.
 - **Verification commands:**
 
   ```bash
@@ -1263,8 +1814,12 @@ repository. They are advisory only and are not executed from this control-plane 
 
 - **Goal:** Add maintainable serial vertical coverage for Customer Order tax surfaces,
   persistence/copy, batch, and downstream propagation.
-- **Base assumption:** `master` near inspected `16a9055`; revalidate branch, HEAD,
-  worktree, root `CLAUDE.md`, and module ownership before editing.
+- **Base assumption:** the Customer Order page object exists on `master` (verified
+  2026-08-20 with `git ls-tree master`) and **not** on the currently checked-out
+  `feat/ringi-100`. Branch from the line that owns
+  `pages/in-season-management/sales-linkage-for-wholesale-sales/customer-order-registration.ts`
+  and revalidate branch, HEAD, worktree, root `CLAUDE.md`, and module ownership before
+  editing.
 - **Scoped files/symbols:**
   - Extend
     `pages/in-season-management/sales-linkage-for-wholesale-sales/customer-order-registration.ts::CustomerOrderRegistrationPage`.
@@ -1296,7 +1851,17 @@ repository. They are advisory only and are not executed from this control-plane 
      exact source ID/null through the Sales-purpose projection.
   6. Verify an existing guest cannot access/use the new Tax surface, then run the existing
      reservation scenario to protect permissions and lifecycle behavior.
-- **Acceptance criteria:** AC 1–11 and 13–25 as representative vertical slices.
+  7. **PRD §3.6 — after FE/BE land.** Extend the same page object (never a second one) with
+     `納期`, `納品書備考`, `社内メモ`, `前払金額` and the custom-address block, then add:
+     a register/reload journey for the new header fields; a Custom-address journey that
+     first submits with each required field blank (expecting a field error and no save) and
+     then completes it; a Customer Order → Shipment journey asserting all eight address
+     values, the memo and the prepayment on the generated slip **via authenticated API
+     reads with distinct per-field values**; and a list journey asserting the Delivery Date
+     column by column key, the filter narrowing results, and the renamed header in both
+     locales. Add a batch journey covering the Delivery Date column and an old pattern that
+     omits it.
+- **Acceptance criteria:** AC 1–11, 13–25, and AC 26–39 as representative vertical slices.
 - **Verification commands:**
 
   ```bash
