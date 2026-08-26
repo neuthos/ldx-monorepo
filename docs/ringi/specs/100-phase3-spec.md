@@ -78,7 +78,7 @@ B boundary values / closing date inclusive — applies (guards + precision follo
 ## 7. Decisions
 
 - **USER-APPROVED 2026/08/19 (sheet Q&A answers + TM statuses):** full chain reuse for cross-domain cascade (Q&A-1 A → FR-27); minimum financial blocker set = point payment, point grant, coupon, tax-free — formal receipt and other non-cash payments do NOT block (Q&A-2 A → FR-29); block ALL externally-originated slips, Smaregi/POSCM/TeamStore (Q&A-3 A → FR-30); block slips already included in a POS closing / daily sales closing (Q&A-4 a → FR-31); align the phase-1 `_cancel_store_sales` path with the new blocker set (Q&A-5 b → FR-32); batch-registration 取消 upload operation rejected for all four documents (FR-03/09/15/19).
-- **No open Questions.** The Q&A-4/5 Options mis-sync introduced by the `r100p3-f8a03d` sync was corrected in `r100p3-5db5bd`; both answers were re-given against the corrected options and materialized in `r100p3-4461a2`.
+- **No open Questions.** The Q&A-4/5 Options mis-sync introduced by the `r100p3-9d84c2` sync was corrected in `r100p3-5db5bd`; both answers were re-given against the corrected options and materialized in `r100p3-4461a2`.
 - Code-vs-code deltas locked: batch modal = custom composition on MultiProcessTools (`extraForm` CancellationReasonForm); no affected/blocker modal in the batch flow — registration screens only (PRD-aligned). "Cancelled" label for Store Sales Information is PRD-explicit (FR-33).
 
 ## 8. L-Pedia sources

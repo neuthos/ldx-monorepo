@@ -147,9 +147,10 @@ for approvals the contract cannot encode (design approach selection, scope decis
 
 `Metadata.Status` becomes `Done` only when ALL of the following hold:
 
-1. Every Treacibility Matrix data row status = `Approved` (no Pending / Question /
-   Editted / Rejected / New).
-2. Every Testcases data row status = `Approved` (same rule).
+1. Every Treacibility Matrix data row is RESOLVED: `Approved`, or `Rejected` (a final
+   human decision — excluded from scope, reason recorded; it does not block Done).
+   Unresolved = `Pending` / `Question` / `Editted` / `New`.
+2. Every Testcases data row is RESOLVED (same rule).
 3. No TM/Testcases row carries Status `Question`, and **every Q&A row is `Noted`** —
    i.e. every answer has been received AND ingested by the AI (no `Draft` awaiting an
    answer, no `Forwarded To JP Team` still pending).
