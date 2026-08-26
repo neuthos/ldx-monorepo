@@ -43,7 +43,7 @@ the locked contract. Keep all repository activity read-only.
 
 Follow `.agents/skills/tdd-sheet-contract.md` exactly. This skill's writes:
 
-1. **Testcases tab** — data rows from row 13, one step per row in `Case`:
+1. **Testcases tab** — data REPLACES the template rows, starting at row 2, one step per row in `Case` (extend the strict status validation over the data rows first; merge each TC block down):
    `Status` (strict vocab; `Pending` for confident TCs, `Question` for dummy TCs needing
    confirmation) | `TC-ID` (`TC-{title}-{nn}`, merged down) | `Covered FR-ID`
    (comma-separated TM FR-IDs) | `Category` (Happy Path / Negative path / Edge case /
