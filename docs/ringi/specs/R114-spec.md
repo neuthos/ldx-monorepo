@@ -1,6 +1,6 @@
 # R114 — Filter and Column Corrections (As-Built Spec)
 
-**Sheet**: R114 - All (`10MSZ_G7mSkLyd8FywJyHI5WAKmew8K-rfZ_UnsEDu-8`) · **Sync ID**: `r114-a7f3d9` · **Generated**: 2026-08-21 by `brainstorming` (retroactive/as-built run)
+**Sheet**: R114 - All (`10MSZ_G7mSkLyd8FywJyHI5WAKmew8K-rfZ_UnsEDu-8`) · **Sync ID**: `r114-b2e8c1` · **Generated**: 2026-08-21 by `brainstorming` (retroactive/as-built run)
 
 > Mode note: implementation for PRD rows 1–20 (phase 1) and most of 21–60 is already merged (FE PR #18661 + branch history). This spec documents **as-built behavior**, flags doc-vs-code deltas, and raises open points as sheet Question rows — it does not gate the existing implementation.
 
@@ -130,3 +130,11 @@ See `docs/ringi/research/R114-impact-gap.md` (classified: covered / no-impact / 
 ## 9. Decisions & open questions
 
 Decisions recorded as-built: OR-domain translation for 最終納期 (non-stored compute); registration/updated date aliases; download scope = current filter domain + merged exclusion. Open questions live in sheet Q&A (5 rows: #1 row-30 removal, #2 row-39 alias, #3 row-51 add-vs-ensure, #4 season code+name convention, #5 pre-existing/missing filter rows 26/31/33–38/50).
+
+## 10. Ingest log (2026-08-21, re-run after human answers)
+
+All 5 Q&A rows answered and ingested → `Noted`. Effects materialized:
+- Q&A #1/#2/#5 (answers: "check the code — rows 26-39, 50 already implemented"): verified on disk — ReplenishmentproductList Filter, ShipmentInformationList (+__tests__), DisposalListFilter (product_tmpl_id), CustomerOrderSafetyInventorySetting Filter, SettingProductClass, FilterBubleChartAnalysis, ParetoAnalysis.tsx (prior agent miss), AllocationProcess (ProductMaximumSetting, CreateTemplateForAllocation), FilterMovementSlip (classification), SummaryTableWithPictures. All 12 former Question FRs → `Pending` with evidence Remarks.
+- Q&A #3 (FR-51): existing 担当者 (pic_id) filter confirmed sufficient — FR reworded to a confirm-no-impact requirement.
+- Q&A #4 (FR-44): DECISION — unify ALL selectors to `[code] name`, including シーズン/倉庫名; the L-Pedia name-only exceptions are to be updated (doc task, non-blocking).
+Done gate: NOT passed — all 63 FR rows still `Pending` awaiting human approval. Metadata stays `In progress`.
