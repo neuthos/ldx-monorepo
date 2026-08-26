@@ -1,4 +1,4 @@
-# R114 Filter and Column Corrections — Test Plan (sync r114-c4d7f2)
+# R114 Filter and Column Corrections — Test Plan (sync r114-e5f8b4)
 
 ## 1. Summary
 As-built retroactive plan over 63 FRs (11 BR). Coverage strategy: existing FE jest suites (19 files/131+ TC, PR-scoped coverage 80.82%) already lock selector contracts, domain building, and page wiring → Unit rows reference them; Integration rows lock per-screen `search_read` payloads (L2); E2E rows cover the 40 unmanifested pages (rows 21–60) as L3 smoke + 3 Seamless journeys. Pyramid by rows: Unit 50 (69%) / Integration 13 (18%) / E2E 9 (13% — justified: consolidated PRD page journeys; existing L3 already covers rows 1–20). BOUNDARIES: B/O/U/N/D/A/R/I/E all Covered except S = standard ACL, no change. Confidence high for rows 42–60 (jest-verified), medium for inline-filter rows (2,3,5,6,9,13,14,16,18,20–25,30,36–38,50 — smoke-level only). Unknowns: none PENDING; E2E branch decision recorded (continue on feat/ringi-114; ai/test-author branch is non-additive).

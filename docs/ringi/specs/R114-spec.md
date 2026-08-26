@@ -1,6 +1,6 @@
 # R114 — Filter and Column Corrections (As-Built Spec)
 
-**Sheet**: R114 - All (`10MSZ_G7mSkLyd8FywJyHI5WAKmew8K-rfZ_UnsEDu-8`) · **Sync ID**: `r114-b2e8c1` · **Generated**: 2026-08-21 by `brainstorming` (retroactive/as-built run)
+**Sheet**: R114 - All (`10MSZ_G7mSkLyd8FywJyHI5WAKmew8K-rfZ_UnsEDu-8`) · **Sync ID**: `r114-e5f8b4` · **Generated**: 2026-08-21 by `brainstorming` (retroactive/as-built run)
 
 > Mode note: implementation for PRD rows 1–20 (phase 1) and most of 21–60 is already merged (FE PR #18661 + branch history). This spec documents **as-built behavior**, flags doc-vs-code deltas, and raises open points as sheet Question rows — it does not gate the existing implementation.
 
