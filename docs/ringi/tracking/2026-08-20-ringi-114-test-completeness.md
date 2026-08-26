@@ -224,3 +224,10 @@ Diagnosis tersisa (sesi lanjutan):
 6. Dua env-gap terverifikasi → TC sheet `Question` + skip beralasan (test code siap, flag aktivasi): TC-R114-042 wholesale (build env pra-wholesale_v2), TC-R114-044 season (calendar.season 0 records).
 
 Semua L1/L3 suite ringi-114 lainnya tidak berubah dari baseline (L3 kini 60 halaman via manifest).
+
+### 2026-08-21 (implementasi batch) — L3 60 halaman + journey Seamless
+
+- **L3 smoke (TC-072)**: 52 passed / 3 failed (inventory-adjustment-list, markdown-analysis, +1; 7.9m) — mayoritas 60 halaman hijau; 3 gagal perlu investigasi env/route.
+- **Journey Seamless (TC-057..063)**, commit E2E `76b802ca`: TC-060 **hijau parsial** (store picker + store.master fetch); 6 lain = **env deploy gap terverifikasi**: preview-e2e menjalankan build Seamless pra-`f6ba83f49f` (filter lama tanpa Form ids, tanpa field B001 baru, tanpa rename kolom point, tanpa download). Kode journey siap; flag `R114_B001_V2`/`R114_SEAMLESS_V2`. Fixture membership via UI (B001 detail link, id numerik — API direct ditolak ACL test user).
+- Sheet Testcases: TC-057..063 Remarks + status diperbarui (Question utk env-gap, TC-060 Approved parsial).
+- Sisa implementasi: 25 L2 integration (pola POM-005), 3 halaman L3 gagal, jest utk 25 unit fase-1 yang klaimnya kosong.
