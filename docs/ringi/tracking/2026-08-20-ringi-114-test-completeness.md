@@ -235,3 +235,7 @@ Semua L1/L3 suite ringi-114 lainnya tidak berubah dari baseline (L3 kini 60 hala
 ### 2026-08-26 — Investigasi L3: TC-072 HIJAU PENUH 60/60
 
 8 halaman tersangka (disposal/category/each-product/reservation/inventory-adjustment/markdown/ranking/size) **semua hijau** saat run terfokus (9/9, 1.2m) → kegagalan run pertama = flakiness beban run massal 60 halaman, bukan bug halaman. Full rerun L3 dengan retries=1: **60 passed / 0 failed (7.3m)**. Sheet TC-072 Remarks = GREEN.
+
+### 2026-08-26 (L2 batch) — +2 hijau; 22 sisanya = butuh POM per-halaman
+
+Percobaan batch generik 24 case (isi-input-pertama + marker payload `R114L2`): hanya 2 hijau (order-list TC-023, inventory-history TC-028 — committed E2E `09f30b65`). Diagnosis 22 gagal: (a) halaman master fase-1 = FORM REGISTRASI tanpa tombol search list; (b) analysis pages = filter penuh-select tanpa input teks; (c) beberapa butuh chain required. Kesimpulan: tiap halaman sisanya butuh POM khusus (pola aggregation-customer: riset endpoint + required chain, ±30–60 mnt/layar) — **backlog implementasi tersendiri**, bukan solusi generik. L2 final saat ini: 8 hijau / 2 skip env / 0 gagal.
