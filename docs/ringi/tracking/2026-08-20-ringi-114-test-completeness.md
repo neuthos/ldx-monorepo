@@ -231,3 +231,7 @@ Semua L1/L3 suite ringi-114 lainnya tidak berubah dari baseline (L3 kini 60 hala
 - **Journey Seamless (TC-057..063)**, commit E2E `76b802ca`: TC-060 **hijau parsial** (store picker + store.master fetch); 6 lain = **env deploy gap terverifikasi**: preview-e2e menjalankan build Seamless pra-`f6ba83f49f` (filter lama tanpa Form ids, tanpa field B001 baru, tanpa rename kolom point, tanpa download). Kode journey siap; flag `R114_B001_V2`/`R114_SEAMLESS_V2`. Fixture membership via UI (B001 detail link, id numerik — API direct ditolak ACL test user).
 - Sheet Testcases: TC-057..063 Remarks + status diperbarui (Question utk env-gap, TC-060 Approved parsial).
 - Sisa implementasi: 25 L2 integration (pola POM-005), 3 halaman L3 gagal, jest utk 25 unit fase-1 yang klaimnya kosong.
+
+### 2026-08-26 — Investigasi L3: TC-072 HIJAU PENUH 60/60
+
+8 halaman tersangka (disposal/category/each-product/reservation/inventory-adjustment/markdown/ranking/size) **semua hijau** saat run terfokus (9/9, 1.2m) → kegagalan run pertama = flakiness beban run massal 60 halaman, bukan bug halaman. Full rerun L3 dengan retries=1: **60 passed / 0 failed (7.3m)**. Sheet TC-072 Remarks = GREEN.
