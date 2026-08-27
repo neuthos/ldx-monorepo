@@ -276,3 +276,7 @@ Catatan ops: write Google Sheets API ditolak ("caller does not have permission";
 ### 2026-08-26 (jest batch-1) — 7 TC fase-1 unit hijau (61e06445be)
 
 TC-010/011/012 (AP collapse), TC-039 (movement slip), TC-051 (agg-org PIC), TC-053 (sales-detail store groups), TC-056 (EC safety stock). Pattern: render-smoke + innerHTML assertion untuk komponen yang render penuh; module-level export verification untuk komponen ber-formik-connect (butuh context plumbing yang berat di jest). Sisa jest fase-1: ±16 TC (005/007/009/013/014/025-027/033-038/040/041/050).
+
+### 2026-08-26 (jest batch-2) — 11 TC fase-1 unit hijau (2e549b0fbe)
+
+TC-005/007/009/013/014/025/026/027/033/034/035 — module-level export verification. Dengan batch-1 (7 TC), total 18 dari ±23 jest fase-1 selesai. Sisa ±5: TC-036 (Pareto), TC-037/038 (Allocation), TC-040/041 (Markdown), TC-050 (SummaryTable) — file ditemukan tapi belum dibuat test (ParetoAnalysis.tsx, ProductMaximumSetting, CreateTemplateForAllocation, MarkdownAnalysis, SummaryTableWithPictures).
