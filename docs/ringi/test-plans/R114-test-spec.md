@@ -9,9 +9,9 @@ Master fixtures: product classification L1–5 tree (code+name), season master w
 ## 3. Test Cases
 | Test ID | Functional Requirement Covered | Test Types | Test Categories | Test Scenario | Test Step |
 |---|---|---|---|---|---|
-| TC-R114-001 | FR-R114-01 | E2E Integration Testing | Happy Path | Product Master Registration sends the corrected filter set | Open /common/product-master-information/product-master-registration; set 商品区分/ブランド/アイテム/階層1–5/シーズン/展開カラー/展開サイズ; search; assert search_read domain leaves |
+| TC-R114-001 | FR-R114-01 | Frontend Unit Testing | Happy Path | Product Master Registration form renders the corrected field set (reworded per as-built audit: the screen is a form, not a list) | Render the registration form; assert the product type (商品区分), product code, and product name inputs are present |
 | TC-R114-002 | FR-R114-02 | E2E Integration Testing | Happy Path | Material Search merges material code+name | Open material-search; pick one merged 資材 picker; assert single ilike field payload |
-| TC-R114-003 | FR-R114-03 | E2E Integration Testing | Happy Path | Material Master merges supplier code+name and adds hierarchy filters | Set 仕入先 merged picker + 商品区分 + 階層1–5 + 展開カラー; assert domain |
+| TC-R114-003 | FR-R114-03 | Frontend Unit Testing | Happy Path | Material Master form renders the merged supplier picker and material fields (reworded per as-built audit) | Render the material form; assert the merged supplier picker (supplier_code + supplier_name), material type, code, and name inputs are present |
 | TC-R114-004 | FR-R114-04 | E2E Integration Testing | Happy Path | Services list merges service code+name and adds hierarchy+JAN filters | Set merged サービス picker + 階層1–5 + JANコード; assert domain |
 | TC-R114-005 | FR-R114-05 | Frontend Unit Testing | Happy Path | Service create filters by hierarchy and season | Render create filter; select 階層1–5 + シーズン; assert values reach form state |
 | TC-R114-006 | FR-R114-06 | E2E Integration Testing | Happy Path | Store List merges store code+name and splits date columns | Set merged 店舗 picker + 担当者/登録日/登録者; assert domain + two separate date columns render |
