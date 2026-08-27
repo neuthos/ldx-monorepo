@@ -260,3 +260,15 @@ Inspeksi live (login admin/admin form asli + dump DOM + trace POST per halaman):
 ### 2026-08-26 (POM form-master session) — TC-002/004/008 HIJAU; L2 final 13/2/0
 
 Live-inspeksi 5 halaman master: 3 ternyata LIST dengan tombol Search (Material Search `submit_filter`, Service Master `btnSearch`, Customer Master `submit_filter`) → POM request-fires hijau (E2E `e96e32bf`). 2 sisanya (Product Master Registration, Material Detail) = form registrasi murni (Register/Select/Upload, tanpa list search) → backlog form-POM tersendiri. Ruang tunggu env (§8) terkompilasi. L2 kini: **13 hijau / 2 skip env / 0 gagal**.
+
+### 2026-08-26 (POM TC-001/003) — KESIMPULAN: keduanya form murni, L2 filter TIDAK MUNGKIN
+
+Bukti live (admin login, probing marker R114L2 ke SEMUA input teks + klik semua tombol):
+- TC-001 Product Master Registration: tombol hanya EN/Register/Select; 45 input teks; **tidak ada tombol yang membawa nilai input ke payload search_read mana pun** (marker tak pernah terkirim).
+- TC-003 Material Detail: tombol Register/EN/Select/Upload; 14 input; sama — tanpa list search.
+
+Artinya TC-001/003 sebagaimana tertulis di sheet ("search; assert domain") **tidak cocok dengan produk as-built** — PRD rows 1/3 mengubah field FORM, bukan filter list. Menulis POM L2 = test palsu; tidak dibuat.
+
+**PENDING user (3 opsi):** (a) reword TC jadi unit-test field form (jest), (b) E2E form-write penuh (fill → Register → verifikasi record; butuh cleanup data), (c) tolak intent L2.
+
+Catatan ops: write Google Sheets API ditolak ("caller does not have permission"; read OK) sejak sesi ini — update status TC-001/003 + Remarks di sheet **tertunda** sampai API pulih atau diupdate manual; teks Remarks sudah siap di doc ini.
