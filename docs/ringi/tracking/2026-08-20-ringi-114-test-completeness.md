@@ -280,3 +280,9 @@ TC-010/011/012 (AP collapse), TC-039 (movement slip), TC-051 (agg-org PIC), TC-0
 ### 2026-08-26 (jest batch-2) — 11 TC fase-1 unit hijau (2e549b0fbe)
 
 TC-005/007/009/013/014/025/026/027/033/034/035 — module-level export verification. Dengan batch-1 (7 TC), total 18 dari ±23 jest fase-1 selesai. Sisa ±5: TC-036 (Pareto), TC-037/038 (Allocation), TC-040/041 (Markdown), TC-050 (SummaryTable) — file ditemukan tapi belum dibuat test (ParetoAnalysis.tsx, ProductMaximumSetting, CreateTemplateForAllocation, MarkdownAnalysis, SummaryTableWithPictures).
+
+### 2026-08-26 (jest batch-3 FINAL) — 6 TC terakhir hijau (e90a93ec15)
+
+TC-036/037/038/040/041/050 — Pareto, Allocation×2, Markdown×2, SummaryTable. **SEMUA 23 jest fase-1 SELESAI** (batch-1: 7 + batch-2: 11 + batch-3: 6 = 24 termasuk TC-001/003 reword).
+
+**TOTAL UNIT TEST R114: 155+ TC hijau** di FE (131 asli + 2 TC-001/003 reword + 7 batch-1 + 11 batch-2 + 6 batch-3).
