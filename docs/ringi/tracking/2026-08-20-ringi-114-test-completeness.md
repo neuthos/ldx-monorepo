@@ -239,3 +239,11 @@ Semua L1/L3 suite ringi-114 lainnya tidak berubah dari baseline (L3 kini 60 hala
 ### 2026-08-26 (L2 batch) — +2 hijau; 22 sisanya = butuh POM per-halaman
 
 Percobaan batch generik 24 case (isi-input-pertama + marker payload `R114L2`): hanya 2 hijau (order-list TC-023, inventory-history TC-028 — committed E2E `09f30b65`). Diagnosis 22 gagal: (a) halaman master fase-1 = FORM REGISTRASI tanpa tombol search list; (b) analysis pages = filter penuh-select tanpa input teks; (c) beberapa butuh chain required. Kesimpulan: tiap halaman sisanya butuh POM khusus (pola aggregation-customer: riset endpoint + required chain, ±30–60 mnt/layar) — **backlog implementasi tersendiri**, bukan solusi generik. L2 final saat ini: 8 hijau / 2 skip env / 0 gagal.
+
+### 2026-08-26 (POM live session) — TC-048/049 HIJAU; 5 halaman season-gated = env data
+
+Inspeksi live (login admin/admin form asli + dump DOM + trace POST per halaman):
+- **Color/Size Analysis (TC-048/049) HIJAU** — Display menembak `/in_season_analysis/color_query` (payload flat `product_domain`); POM + manifest wiring + 2 case (commit E2E `aa4f1486`).
+- **5 halaman analysis lainnya (TC-043/045/046/047/052) terblokir data env yang sama dengan TC-044**: selector `表示シーズン` (period_control.season_id) tak punya opsi karena `calendar.season` = 0 records — submit tak pernah valid. Aktif via `R114_SEASON_DATA` setelah master di-seed.
+- Halaman master fase-1 (TC-001..004/008) = form registrasi (bukan list) — butuh POM form, backlog terpisah.
+- L2 final: **10 hijau / 2 skip env / 0 gagal**.
