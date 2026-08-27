@@ -256,3 +256,7 @@ Inspeksi live (login admin/admin form asli + dump DOM + trace POST per halaman):
 | Deploy endpoint wholesale_v2 | TC-042 | R114_WHOLESALE_V2 | deploy FE baru |
 | Data master season kosong (calendar.season=0 records) | TC-044 + TC-043, 045, 046, 047, 052 (POM menyusul) | R114_SEASON_DATA | seed calendar.season di preview-e2e |
 | PIC merged selector build baru | TC-060 bagian PIC (parsial hijau utk store) | R114_SEAMLESS_V2 | sama dgn Seamless deploy |
+
+### 2026-08-26 (POM form-master session) — TC-002/004/008 HIJAU; L2 final 13/2/0
+
+Live-inspeksi 5 halaman master: 3 ternyata LIST dengan tombol Search (Material Search `submit_filter`, Service Master `btnSearch`, Customer Master `submit_filter`) → POM request-fires hijau (E2E `e96e32bf`). 2 sisanya (Product Master Registration, Material Detail) = form registrasi murni (Register/Select/Upload, tanpa list search) → backlog form-POM tersendiri. Ruang tunggu env (§8) terkompilasi. L2 kini: **13 hijau / 2 skip env / 0 gagal**.
