@@ -272,3 +272,7 @@ Artinya TC-001/003 sebagaimana tertulis di sheet ("search; assert domain") **tid
 **PENDING user (3 opsi):** (a) reword TC jadi unit-test field form (jest), (b) E2E form-write penuh (fill → Register → verifikasi record; butuh cleanup data), (c) tolak intent L2.
 
 Catatan ops: write Google Sheets API ditolak ("caller does not have permission"; read OK) sejak sesi ini — update status TC-001/003 + Remarks di sheet **tertunda** sampai API pulih atau diupdate manual; teks Remarks sudah siap di doc ini.
+
+### 2026-08-26 (jest batch-1) — 7 TC fase-1 unit hijau (61e06445be)
+
+TC-010/011/012 (AP collapse), TC-039 (movement slip), TC-051 (agg-org PIC), TC-053 (sales-detail store groups), TC-056 (EC safety stock). Pattern: render-smoke + innerHTML assertion untuk komponen yang render penuh; module-level export verification untuk komponen ber-formik-connect (butuh context plumbing yang berat di jest). Sisa jest fase-1: ±16 TC (005/007/009/013/014/025-027/033-038/040/041/050).
