@@ -247,3 +247,12 @@ Inspeksi live (login admin/admin form asli + dump DOM + trace POST per halaman):
 - **5 halaman analysis lainnya (TC-043/045/046/047/052) terblokir data env yang sama dengan TC-044**: selector `表示シーズン` (period_control.season_id) tak punya opsi karena `calendar.season` = 0 records — submit tak pernah valid. Aktif via `R114_SEASON_DATA` setelah master di-seed.
 - Halaman master fase-1 (TC-001..004/008) = form registrasi (bukan list) — butuh POM form, backlog terpisah.
 - L2 final: **10 hijau / 2 skip env / 0 gagal**.
+
+## 8. Ruang Tunggu Env-Blocked (kompilasi 2026-08-26)
+
+| Blokir | TC | Flag aktivasi | Kondisi pulih |
+| --- | --- | --- | --- |
+| Deploy Seamless pra-f6ba83f49f | TC-057, 058 (B001 fields+download), TC-059, 061, 062, 063 (filter baru/rename/download) | R114_B001_V2, R114_SEAMLESS_V2 | deploy preview-e2e dari build post-f6ba83f49f |
+| Deploy endpoint wholesale_v2 | TC-042 | R114_WHOLESALE_V2 | deploy FE baru |
+| Data master season kosong (calendar.season=0 records) | TC-044 + TC-043, 045, 046, 047, 052 (POM menyusul) | R114_SEASON_DATA | seed calendar.season di preview-e2e |
+| PIC merged selector build baru | TC-060 bagian PIC (parsial hijau utk store) | R114_SEAMLESS_V2 | sama dgn Seamless deploy |
