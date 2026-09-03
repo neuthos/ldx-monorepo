@@ -3,6 +3,10 @@
     "codebase-memory": {
       "type": "stdio",
       "command": "./scripts/codebase-memory-mcp"
+    },
+    "confluence": {
+      "type": "stdio",
+      "command": "./scripts/confluence-mcp"
     }
   }
 }

@@ -1,3 +1,7 @@
 .DS_Store
 .env
 .code-intelligence/
+__pycache__/
+
+# gsheets MCP service-account key (project-scoped, never commit)
+/.zcode/gsheets-service-account.json

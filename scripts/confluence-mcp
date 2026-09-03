@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Confluence MCP gateway for L-Pedia — runs `uvx mcp-atlassian` read-only with
+# credentials from the control-plane .env, so no secret ever enters git or the
+# MCP config. Wires into .mcp.json as the `confluence` server.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+CONTROL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+ENV_FILE="$CONTROL_ROOT/.env"
+
+command -v uvx >/dev/null 2>&1 || {
+  printf 'uvx not found — install uv first: https://docs.astral.sh/uv/getting-started/installation/\n' >&2
+  exit 1
+}
+
+# Fail with a setup-specific message instead of a generic MCP handshake error.
+require_env() {
+  local key="$1" raw=""
+  [[ -n "${!key:-}" ]] && return 0
+  if [[ -f "$ENV_FILE" ]]; then
+    raw="$(grep -m1 -E "^${key}=" "$ENV_FILE" 2>/dev/null || true)"
+  fi
+  [[ -n "$raw" ]] || {
+    printf 'Missing %s in %s — see .env.example (API token: https://id.atlassian.com/manage-profile/security/api-tokens)\n' "$key" "$ENV_FILE" >&2
+    exit 1
+  }
+}
+require_env CONFLUENCE_URL
+require_env CONFLUENCE_USERNAME
+require_env CONFLUENCE_API_TOKEN
+
+# Pin atlassian-python-api below 5: its 5.x endpoint-registry rewrite breaks
+# the v1 search paths mcp-atlassian 0.23.0 still uses (HTML error pages).
+exec uvx --with 'atlassian-python-api>=4.0.0,<5' mcp-atlassian --env-file "$ENV_FILE" --read-only "$@"

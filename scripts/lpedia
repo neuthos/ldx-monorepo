@@ -1,0 +1,403 @@
+#!/usr/bin/env python3
+"""lpedia — search & read the L-Pedia Confluence space (L-DX page documentation).
+
+Read-only helper for the L-DX control plane. Credentials come from the repo
+`.env` (CONFLUENCE_URL, CONFLUENCE_USERNAME, CONFLUENCE_API_TOKEN, optionally
+LPEDIA_SPACE_KEY) — the same keys the `confluence` MCP server uses; real
+environment variables override `.env`. The API token is used only in the
+Authorization header and is never printed, logged, or written to artifacts.
+
+Commands:
+  check                        verify credentials and space access
+  roots                        list top-level folders/pages of the space
+  resolve <title-substring>    find folders/pages by title (case-insensitive)
+  tree <id> [--depth N]        print a subtree (default depth 3)
+  search <text> [options]      CQL full-text search (--title for title search)
+  page <id-or-url> [options]   fetch one page (metadata + rendered body)
+
+Search options:
+  --scope all|manuals|ringi|<title-substring>   limit search to a subtree
+  --title          match title instead of body text
+  --limit N        max results per query (default 20, max 50)
+  --print-cql      print the CQL query(ies) and exit (offline debugging)
+
+Exit codes: 0 ok / 2 config error / 3 API error / 4 not found
+"""
+
+import argparse
+import base64
+import html
+import json
+import os
+import re
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.dirname(SCRIPT_DIR)
+ENV_FILE = os.path.join(REPO_ROOT, ".env")
+ENV_KEYS = (
+    "CONFLUENCE_URL",
+    "CONFLUENCE_BASE_URL",
+    "CONFLUENCE_USERNAME",
+    "CONFLUENCE_USER_EMAIL",
+    "CONFLUENCE_API_TOKEN",
+    "LPEDIA_SPACE_KEY",
+)
+SETUP_HINT = (
+    "Confluence credentials missing.\n"
+    "Add to the control-plane .env (gitignored — never commit it):\n"
+    "  CONFLUENCE_URL=https://l-dx.atlassian.net/wiki\n"
+    "  CONFLUENCE_USERNAME=<your Atlassian account email>\n"
+    "  CONFLUENCE_API_TOKEN=<token from https://id.atlassian.com/manage-profile/security/api-tokens>\n"
+    "These are the same keys the `confluence` MCP server (scripts/confluence-mcp) uses."
+)
+
+
+def die(code, message):
+    sys.stderr.write(message.rstrip() + "\n")
+    sys.exit(code)
+
+
+def load_config():
+    cfg = {}
+    if os.path.isfile(ENV_FILE):
+        with open(ENV_FILE, encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                m = re.match(r"(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$", line)
+                if not m:
+                    continue
+                key, val = m.group(1), m.group(2).strip()
+                if len(val) >= 2 and val[0] == val[-1] and val[0] in "\"'":
+                    val = val[1:-1]
+                if key in ENV_KEYS:
+                    cfg[key] = val
+    for key in ENV_KEYS:  # real environment wins over .env
+        if os.environ.get(key):
+            cfg[key] = os.environ[key]
+    # CONFLUENCE_URL (shared with the `confluence` MCP server) may carry a /wiki
+    # suffix; this tool builds /wiki/... paths itself.
+    base = cfg.get("CONFLUENCE_URL") or cfg.get("CONFLUENCE_BASE_URL") or "https://l-dx.atlassian.net"
+    cfg["CONFLUENCE_BASE_URL"] = re.sub(r"/wiki/?$", "", base.rstrip("/"))
+    if not cfg.get("CONFLUENCE_USER_EMAIL"):
+        cfg["CONFLUENCE_USER_EMAIL"] = cfg.get("CONFLUENCE_USERNAME", "")
+    cfg["LPEDIA_SPACE_KEY"] = cfg.get("LPEDIA_SPACE_KEY", "LPedia")
+    return cfg
+
+
+def require_auth(cfg):
+    email, token = cfg.get("CONFLUENCE_USER_EMAIL"), cfg.get("CONFLUENCE_API_TOKEN")
+    if not email or not token:
+        die(2, SETUP_HINT)
+    return email, token
+
+
+class Api:
+    def __init__(self, cfg):
+        email, token = require_auth(cfg)
+        self.base = cfg["CONFLUENCE_BASE_URL"]
+        self.header = {
+            "Accept": "application/json",
+            "Authorization": "Basic " + base64.b64encode(f"{email}:{token}".encode()).decode(),
+        }
+
+    def get(self, path, optional=False, **params):
+        url = self.base + path
+        if params:
+            url += "?" + urllib.parse.urlencode(params)
+        return self._get_url(url, optional)
+
+    def _get_url(self, url, optional=False):
+        req = urllib.request.Request(url, headers=self.header)
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                return json.load(resp)
+        except urllib.error.HTTPError as err:
+            body = ""
+            try:
+                body = err.read(800).decode("utf-8", "replace")
+            except Exception:
+                pass
+            if err.code in (401, 403):
+                hint = " — check CONFLUENCE_USER_EMAIL / CONFLUENCE_API_TOKEN (token: id.atlassian.com/manage-profile/security/api-tokens)"
+                die(3, f"HTTP {err.code} on {url}{hint}\n{body}")
+            if err.code == 404:
+                if optional:
+                    return None
+                # Confluence hides spaces behind 404 for accounts that cannot
+                # see them — bad credentials look identical to a wrong key.
+                die(4, f"HTTP 404 on {url}\n{body}\nhint: Confluence returns 404 both for a wrong key and for an account that cannot see the target — check LPEDIA_SPACE_KEY and the CONFLUENCE_* credentials.")
+            if optional:
+                return None
+            die(3, f"HTTP {err.code} on {url}\n{body}")
+        except urllib.error.URLError as err:
+            die(3, f"cannot reach {self.base}: {err.reason}")
+        return None
+
+    def get_paginated(self, path, optional=False, **params):
+        """Follow v2 cursor pagination (_links.next); return merged results."""
+        results, url, hops = [], self.base + path + "?" + urllib.parse.urlencode(params), 0
+        while url and hops < 100:
+            data = self._get_url(url, optional)
+            if data is None:  # optional endpoint unavailable
+                return None
+            results.extend(data.get("results", []))
+            nxt = (data.get("_links") or {}).get("next")
+            url = (self.base + nxt) if nxt and nxt.startswith("/") else nxt
+            hops += 1
+        return results
+
+
+def get_space(api, key):
+    data = api.get("/wiki/api/v2/spaces", keys=key)
+    for sp in data.get("results", []):
+        if (sp.get("key") or "").upper() == key.upper():
+            return sp
+    die(4, f'space "{key}" not found or not visible to this account (check LPEDIA_SPACE_KEY)')
+
+
+def load_space_map(api, space):
+    """All pages + folders of the space as {id: node}. Folder API is optional."""
+    sid = space["id"]
+    nodes = {}
+    for p in api.get_paginated(f"/wiki/api/v2/spaces/{sid}/pages", limit=250, sort="title"):
+        nodes[str(p["id"])] = {
+            "id": str(p["id"]),
+            "kind": "page",
+            "title": p.get("title") or "(untitled)",
+            "parent": str(p["parentId"]) if p.get("parentId") else None,
+        }
+    folders = api.get_paginated("/wiki/api/v2/folders", optional=True, **{"space-id": sid, "limit": 250})
+    if folders is None:
+        sys.stderr.write("note: folders API unavailable on this instance — page tree only\n")
+        folders = []
+    for f in folders:
+        nodes[str(f["id"])] = {
+            "id": str(f["id"]),
+            "kind": "folder",
+            "title": f.get("name") or "(unnamed folder)",
+            "parent": str(f["parentId"]) if f.get("parentId") else None,
+        }
+    return nodes
+
+
+def breadcrumb(nodes, space, node):
+    chain, cur, seen = [], node, set()
+    while cur and cur["id"] not in seen:
+        seen.add(cur["id"])
+        chain.append(cur["title"])
+        cur = nodes.get(cur["parent"]) if cur["parent"] else None
+    chain.append(space.get("name") or space.get("key") or "?")
+    return " / ".join(reversed(chain))
+
+
+def strip_html(text):
+    text = re.sub(r"<[^>]+>", "", text or "")
+    return re.sub(r"\s+", " ", html.unescape(text)).strip()
+
+
+def cmd_check(args):
+    cfg = load_config()
+    api = Api(cfg)
+    space = get_space(api, cfg["LPEDIA_SPACE_KEY"])
+    probe = api.get(f"/wiki/api/v2/spaces/{space['id']}/pages", optional=True, limit=1)
+    print(f"base url   : {cfg['CONFLUENCE_BASE_URL']}")
+    print(f"space      : {space.get('key')} — {space.get('name')} (id {space.get('id')})")
+    print(f"homepage id: {space.get('homepageId')}")
+    print(f"page read  : {'OK' if probe is not None else 'FAILED'}")
+
+
+def cmd_roots(args):
+    cfg = load_config()
+    api = Api(cfg)
+    space = get_space(api, cfg["LPEDIA_SPACE_KEY"])
+    nodes = load_space_map(api, space)
+    roots = sorted((n for n in nodes.values() if n["parent"] is None), key=lambda n: n["title"].casefold())
+    if not roots:
+        die(4, "no top-level nodes found")
+    for n in roots:
+        print(f"{n['id']:<12} [folder] {n['title']}" if n["kind"] == "folder" else f"{n['id']:<12} [page]   {n['title']}")
+
+
+def cmd_resolve(args):
+    cfg = load_config()
+    api = Api(cfg)
+    space = get_space(api, cfg["LPEDIA_SPACE_KEY"])
+    nodes = load_space_map(api, space)
+    needle = args.title_substring.casefold()
+    hits = sorted((n for n in nodes.values() if needle in n["title"].casefold()), key=lambda n: breadcrumb(nodes, space, n))
+    if not hits:
+        die(4, f'no folder/page title matches "{args.title_substring}"')
+    for n in hits:
+        print(f"{n['id']:<12} [{n['kind']:<6}] {breadcrumb(nodes, space, n)}")
+
+
+def cmd_tree(args):
+    cfg = load_config()
+    api = Api(cfg)
+    space = get_space(api, cfg["LPEDIA_SPACE_KEY"])
+    nodes = load_space_map(api, space)
+    children = {}
+    for n in nodes.values():
+        children.setdefault(n["parent"], []).append(n)
+    for kids in children.values():
+        kids.sort(key=lambda n: n["title"].casefold())
+
+    def walk(node_id, depth):
+        node = nodes.get(node_id)
+        if node:
+            badge = "d" if node["kind"] == "folder" else "-"
+            print(f"{'  ' * depth}[{badge}] {node['title']}  ({node['id']})")
+        if depth >= args.depth:
+            return
+        for kid in children.get(node_id, []):
+            walk(kid["id"], depth + 1)
+
+    walk(str(args.id), 0)
+
+
+def resolve_scope_roots(api, space, alias):
+    nodes = load_space_map(api, space)
+    # Exact title matches win over substring matches, so `ringi` resolves to
+    # the "Ringi" root alone instead of also matching every "RINGI-###" page.
+    exact = [n for n in nodes.values() if n["title"].casefold() == alias]
+    if exact:
+        return exact
+    return [n for n in nodes.values() if alias in n["title"].casefold()]
+
+
+def run_search(api, cql, limit):
+    data = api.get("/wiki/rest/api/search", cql=cql, limit=min(limit, 50), excerpt="indexed")
+    out = []
+    for r in data.get("results", []):
+        content = r.get("content") or {}
+        out.append({
+            "id": str(content.get("id") or r.get("id") or ""),
+            "title": r.get("title") or content.get("title") or "(untitled)",
+            "url": (api.base + r["url"]) if r.get("url") else "",
+            "excerpt": strip_html(r.get("excerpt", ""))[:400],
+        })
+    return out
+
+
+def cmd_search(args):
+    cfg = load_config()
+    key, term = cfg["LPEDIA_SPACE_KEY"], args.query.replace('"', '\\"')
+    field = "title" if args.title else "text"
+    scope = (args.scope or "all").casefold()
+    api = None
+    if scope == "all":
+        cqls = [f'space = "{key}" AND {field} ~ "{term}"']
+    else:
+        api = Api(cfg)
+        space = get_space(api, cfg["LPEDIA_SPACE_KEY"])
+        alias = {"manuals": "manual", "ringi": "ringi"}.get(scope, scope)
+        roots = resolve_scope_roots(api, space, alias)
+        if not roots:
+            die(4, f'--scope "{args.scope}": no folder/page title matches it')
+        for r in roots:
+            print(f"# scope root: [{r['kind']}] {r['title']} ({r['id']})")
+        cqls = [f'space = "{key}" AND ancestor = "{r["id"]}" AND {field} ~ "{term}"' for r in roots]
+    if args.print_cql:
+        for c in cqls:
+            print("CQL:", c)
+        return
+    api = api or Api(cfg)
+    merged, seen = [], set()
+    for c in cqls:
+        for hit in run_search(api, c, args.limit):
+            if hit["id"] and hit["id"] not in seen:
+                seen.add(hit["id"])
+                merged.append(hit)
+    if not merged:
+        print("no results")
+        return
+    for hit in merged:
+        print(f"## {hit['title']}")
+        print(f"   url    : {hit['url']}")
+        if hit["excerpt"]:
+            print(f"   excerpt: {hit['excerpt']}")
+        print()
+
+
+def parse_page_ref(ref):
+    if ref.isdigit():
+        return ref
+    m = re.search(r"/(?:pages|blog)/(\d+)", ref) or re.search(r"pageId=(\d+)", ref)
+    if m:
+        return m.group(1)
+    die(2, f"cannot parse a page id from: {ref}")
+
+
+def cmd_page(args):
+    cfg = load_config()
+    api = Api(cfg)
+    page_id = parse_page_ref(args.ref)
+    params = {"get-draft": "false"}
+    if not args.no_body:
+        params["body-format"] = "styled_view"
+    page = api.get(f"/wiki/api/v2/pages/{page_id}", optional=True, **params)
+    body_fmt = "styled_view"
+    if page is None and not args.no_body:  # styled_view unsupported → retry storage
+        params["body-format"] = "storage"
+        body_fmt = "storage"
+        page = api.get(f"/wiki/api/v2/pages/{page_id}", optional=True, **params)
+    if page is None:
+        die(4, f"page {page_id} not found or not visible")
+    meta = api.get(f"/wiki/rest/api/content/{page_id}", optional=True, expand="ancestors")
+    if meta:
+        titles = [a.get("title", "?") for a in meta.get("ancestors", []) if a.get("type") != "space"]
+        path = " / ".join([cfg["LPEDIA_SPACE_KEY"]] + titles + [page.get("title") or "?"])
+    else:
+        path = f"{cfg['LPEDIA_SPACE_KEY']} / {page.get('title') or '?'}"
+    print(f"title      : {page.get('title')}")
+    print(f"id         : {page_id}")
+    print(f"url        : {cfg['CONFLUENCE_BASE_URL']}/wiki/pages/{page_id}")
+    print(f"path       : {path}")
+    print(f"status     : {page.get('status')}  version {(page.get('version') or {}).get('number', '?')}")
+    if args.no_body:
+        return
+    body = ((page.get("body") or {}).get(body_fmt) or {}).get("value", "")
+    print(f"body-format: {body_fmt}")
+    print("--- body ---")
+    print(body)
+
+
+def main():
+    parser = argparse.ArgumentParser(prog="lpedia", description="Search & read the L-Pedia Confluence space (read-only).")
+    sub = parser.add_subparsers(dest="cmd", required=True)
+
+    sub.add_parser("check", help="verify credentials and space access")
+
+    sub.add_parser("roots", help="list top-level folders/pages")
+
+    p_resolve = sub.add_parser("resolve", help="find folders/pages by title substring")
+    p_resolve.add_argument("title_substring")
+
+    p_tree = sub.add_parser("tree", help="print a subtree")
+    p_tree.add_argument("id")
+    p_tree.add_argument("--depth", type=int, default=3)
+
+    p_search = sub.add_parser("search", help="CQL full-text search")
+    p_search.add_argument("query")
+    p_search.add_argument("--scope", help="all (default) | manuals | ringi | <title-substring>")
+    p_search.add_argument("--title", action="store_true", help="match page titles instead of body text")
+    p_search.add_argument("--limit", type=int, default=20)
+    p_search.add_argument("--print-cql", action="store_true", help="print the CQL query(ies) and exit")
+
+    p_page = sub.add_parser("page", help="fetch one page (metadata + body)")
+    p_page.add_argument("ref", help="page id or URL")
+    p_page.add_argument("--no-body", action="store_true", help="metadata only")
+
+    args = parser.parse_args()
+    {"check": cmd_check, "roots": cmd_roots, "resolve": cmd_resolve,
+     "tree": cmd_tree, "search": cmd_search, "page": cmd_page}[args.cmd](args)
+
+
+if __name__ == "__main__":
+    main()
