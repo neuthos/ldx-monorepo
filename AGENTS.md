@@ -1,145 +1,99 @@
 # L-DX Cross-Repository Control Plane
 
-## Role
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
-This repository is a planning and review control plane for three independent repositories. It is not a source-code monorepo. Use the combined context for cross-repository investigation, architecture review, dependency analysis, medium-level planning, implementation, and implementation handoffs.
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
-Target repositories are read-only by default. Implementation may be performed from this session only when the user explicitly requests edits or another mutating action in the relevant target repository.
+## 1. Think Before Coding
 
-## Repository Discovery
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
 
-Resolve repository locations at runtime from the local `.env` file:
+Before implementing:
 
-| Key | Repository |
-| --- | --- |
-| `FE_PWD` | Frontend |
-| `BE_PWD` | Backend |
-| `E2E_PWD` | End-to-end automation |
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
 
-- Never hardcode a local absolute path.
-- Never execute or source `.env` as shell code; read only the required values.
-- Never print, copy, or persist unrelated `.env` values.
-- Before using a target, verify that its value is present, the directory is accessible, and `git -C <path> rev-parse --is-inside-work-tree` succeeds.
-- If a mapping is missing or invalid, report the key and stop analysis for that repository. Do not guess another path.
+## 2. Simplicity First
 
-## Default Safety Boundary and Explicit Write Authorization
+**Minimum code that solves the problem. Nothing speculative.**
 
-The repositories referenced by `FE_PWD`, `BE_PWD`, and `E2E_PWD` are read-only unless the user explicitly requests a mutating action in a named or unambiguously identified target repository.
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
 
-Without explicit write authorization, allowed target operations are limited to reading files and running demonstrably read-only inspection commands such as `git status`, `git log`, `git diff`, `git show`, and repository-prescribed read-only knowledge-graph queries.
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-An explicit request to edit or implement authorizes only the repository, files, and normal implementation operations reasonably required by that request. Before writing:
+## 3. Surgical Changes
 
-- resolve and validate the target from `.env`;
-- read and follow the target repository's current `AGENTS.md` and/or `CLAUDE.md`;
-- preserve unrelated user changes and keep modifications within the requested scope; and
-- state any material ambiguity that prevents the target or scope from being identified safely.
+**Touch only what you must. Clean up only your own mess.**
 
-Editing source and tests, running scoped formatters or generators, and running repository-prescribed verification are allowed when they are normal steps for an explicitly requested implementation. Prefer commands that do not affect shared services or environments.
+When editing existing code:
 
-The following actions still require a separate explicit user request or approval; permission to edit does not imply them:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
 
-- install or update dependencies;
-- run migrations or applications that may mutate a database or shared environment;
-- create or modify services, test environments, or other external systems;
-- create or switch branches or worktrees;
-- stage, stash, commit, merge, rebase, pull, push, reset, or clean; or
-- modify GitHub or other external-system state.
+When your changes create orphans:
 
-Never perform destructive or broadly scoped changes merely because editing was authorized. If implementation is not explicitly requested, prepare a handoff instead of changing a target repository.
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
 
-## Human Decision Authority
+The test: Every changed line should trace directly to the user's request.
 
-The agent investigates, compares options, identifies risks, and makes advisory recommendations. The user retains every material decision.
+## 4. Goal-Driven Execution
 
-Never decide or silently assume product behavior, scope, architecture, repository ownership, API/data semantics, UX, acceptance criteria, test exclusions, migration strategy, security or performance trade-offs, rollout thresholds, risk acceptance, or go/no-go status. Existing code and conventions are evidence, not authorization.
+**Define success criteria. Loop until verified.**
 
-For each unresolved material choice:
+Transform tasks into verifiable goals:
 
-1. state the confirmed evidence and remaining unknown;
-2. present 2–3 concrete options with consequences when possible;
-3. keep any recommendation explicitly non-binding;
-4. mark the decision `PENDING`; and
-5. stop work that depends on it until the user explicitly chooses.
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
 
-“Whatever you think” is not approval for a material decision. Narrow the options and ask again. Record accepted decisions as `USER-APPROVED` and do not revise them without new user approval.
+For multi-step tasks, state a brief plan:
 
-## Context Loading
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
 
-Before analyzing or modifying a target repository:
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-1. Resolve and validate its path from `.env`.
-2. Read its root `AGENTS.md` and/or `CLAUDE.md` when present.
-3. Treat those repository-local files as the source of truth for architecture, conventions, code-intelligence tools, and quality gates.
-4. Load only the source, tests, ADRs, diffs, and history relevant to the current question.
-5. Prefer the target repository's prescribed knowledge-graph tooling when available; use text search only for allowed fallback cases.
-6. Surface conflicts or missing context instead of silently choosing an interpretation.
+---
 
-Do not copy detailed target-repository rules into this repository; they become stale. Reference and read the current local rules when needed.
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
 
-## Code Intelligence
+## Default Communication Style
 
-For every task that requires understanding application code, use the project-local `codebase-memory` MCP before reading or searching source files. Do not begin code discovery with `rg`, `grep`, globbing, or broad file reads when the MCP is available. The MCP serves three independently indexed projects from this control plane:
+Always answer concisely and directly:
 
-| MCP project | Scope |
-| --- | --- |
-| `ldx-frontend` | Repository at `FE_PWD` |
-| `ldx-backend` | `BE_PWD/ldx_addons` |
-| `ldx-e2e` | Repository at `E2E_PWD` |
+- Lead with the answer/conclusion first, details after.
+- Maximum brevity: bullet points or a few short sentences. No extra context.
+- Answer exactly what was asked — do not elaborate or add unasked background.
+- Use simple everyday language, no jargon; briefly explain any unavoidable term.
+- Write like Hemingway: short sentences, simple words.
+- No preamble, no filler, no restating the question, no generic closing offers.
+- Keep important caveats, drop everything else.
 
-For codebase questions, follow this sequence:
+## Project-Specific Guidelines
 
-1. Call `list_projects` and select the relevant project explicitly. For cross-repository work, query every affected project rather than assuming one graph represents all repositories.
-2. Compare the indexed root, branch, and HEAD with the target repository when branch freshness affects the answer. If they differ, disclose that the graph is stale and ask before refreshing it.
-3. Use `get_architecture` for orientation and `search_graph` to resolve relevant symbols.
-4. Use `trace_path` in both directions for callers, callees, dependencies, and transitive blast radius.
-5. Use `get_code_snippet` only for the specific qualified symbols returned by the graph.
-6. Use `detect_changes` for diff and change-impact analysis, and `query_graph` for relationships not covered by the higher-level tools.
-7. Correlate FE routes and clients, Odoo models/controllers, and E2E flows across their respective projects before making cross-repository claims.
-8. Fall back to text search only for literals, configuration, non-code files, incomplete graph coverage, and Odoo dynamic relationships. State when a conclusion depends on fallback evidence.
+Every test must cover the following dimensions — use this as a checklist before writing any code:
 
-If the MCP is unavailable or returns insufficient data, say so explicitly. Do not silently replace graph analysis with broad filesystem search. Codebase conclusions and plans must cite the graph-resolved symbols, paths, or relationships that support them.
-
-For Odoo, verify graph results against `_name`, `_inherit`, `_inherits`, `env['model.name']`, relational field comodels, manifest dependencies, XML IDs, `inherit_id`, routes, and ACL files. Never describe an `ldx-backend` result as the complete backend blast radius without checking consumers outside `ldx_addons`.
-
-Do not initialize or refresh indexes implicitly. When the user requests it, run `./scripts/index-all-repo` from this control-plane repository. The configured cache and persistence settings keep index writes out of all target repositories.
-
-## Working Modes
-
-Use this control plane for:
-
-- cross-repository code and architecture review;
-- investigation and evidence gathering;
-- API, data-flow, and dependency mapping;
-- medium-level planning and sequencing; and
-- explicitly requested implementation across one or more target repositories; and
-- preparing work packets for repository-specific agents.
-
-Planning and review artifacts may be created only inside this repository. Implementation changes may be made in a target repository only under the explicit write-authorization rules above. Preserve unrelated user changes and keep secrets out of every artifact.
-
-## Planning Output Contract
-
-When producing an implementation plan, include the applicable items:
-
-- objective, scope, and explicit non-goals;
-- evidence-backed current-state findings;
-- contracts and dependencies between FE, BE, and E2E;
-- ordered work packets grouped by repository;
-- acceptance criteria and repository-specific verification commands;
-- risks, unknowns, rollout concerns, and dependency order; and
-- a self-contained handoff prompt for each repository-specific agent.
-
-When the user asks only for a plan, describe intended target changes but do not apply them. Apply changes only when implementation is explicitly requested.
-
-## Handoff
-
-When the user requests a handoff, or when implementation has not been authorized in this session, identify the target repository and provide a handoff package containing:
-
-1. repository and branch/base assumptions;
-2. goal and scoped files or symbols;
-3. relevant findings and target-local rules;
-4. ordered implementation steps;
-5. acceptance criteria and verification; and
-6. cross-repository dependencies or follow-up work.
-
-Tell the user to execute that package in a separate agent session rooted at the target repository. Do not require a handoff when the user has explicitly authorized implementation from this session.
+| Dimension                    | Minimum useful probes                                                                                                          | Typical failure it exposes                                                      |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| **B — Boundary values**      | min, max, zero, negative, just below/at/above limits, overflow, decimal precision, round-half-up/down and truncation direction | off-by-one, overflow, incorrect validation, tax/amount rounding, precision loss |
+| **O — Ordering**             | sorted, reversed, duplicates, already processed, repeated submission, distinct values in each field/column                     | order dependence, unstable sorting, duplicate handling, field transposition     |
+| **U — Unicode & encoding**   | emoji, RTL, punctuation/special characters, multibyte, Japanese text, mixed scripts, translated labels/errors                  | encoding corruption, validation surprises, clipping, missing translation        |
+| **N — Null/empty**           | omitted/undefined, null, empty string, whitespace-only, zero versus null, missing optional field                               | defaulting bugs, null dereference, incorrect required-field behavior            |
+| **D — Data volume**          | zero, one, many, maximum supported, pagination/batch boundary                                                                  | empty-state bugs, performance collapse, pagination/count errors                 |
+| **A — Access & permissions** | unauthenticated, expired session, wrong role, own record, another user’s record, object-level access                           | privilege escalation, data leakage, incorrect authorization                     |
+| **R — Race conditions**      | concurrent create/update, double click/submit, stale read, retry after timeout, idempotency, conflicting state changes         | duplicate records, lost updates, inconsistent totals, non-idempotent commands   |
+| **I — Integration failures** | timeout, 4xx, 5xx, partial success, malformed payload, unavailable dependency, retry/recovery                                  | unsafe failure handling, contract drift, partial data corruption                |
+| **E — Environment**          | timezone boundary, locale/currency/date format, supported browser/OS, narrow/wide viewport, slow/offline network               | date shifts, formatting errors, responsive/accessibility regressions            |
+| **S — State transitions**    | every valid path, invalid jump, re-entry, cancellation, finalized/archived record, period close/reopen                         | illegal transitions, stale actions, lifecycle bypass, irrecoverable workflow    |
