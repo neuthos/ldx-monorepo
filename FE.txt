@@ -1,2 +1,2 @@
-PWD:
-BRANCH:
+PWD:/Users/galangkeda/Documents/Keda/L-DX_Backend
+BRANCH:feat/ringi-156

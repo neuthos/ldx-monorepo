@@ -1,0 +1,1324 @@
+{
+ "url": "docs/ringi-156/index.html",
+ "at": "2026-10-20T18:51:07.836Z",
+ "allow": [
+  "placeholder-data"
+ ],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 10,
+   "filled": [
+    0.38,
+    0.36,
+    0.34,
+    0.31,
+    0.4,
+    0.3,
+    0.36,
+    0.37,
+    0.42,
+    0.49
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 8863,
+     "screens": 9.8,
+     "words": 4893,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 0,
+     "sections": 4,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "RINGI: Addition of New Purchase Plan Management Function",
+     "words": 8,
+     "chars": 56,
+     "lines": 1,
+     "size": 16,
+     "vw": 1.1,
+     "font": "IBM Plex Sans",
+     "weight": 600,
+     "tracking": 0,
+     "leading": 1.45,
+     "top": 15,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "RINGI: Addition of New Purchase Plan Management Function",
+     "words": 8,
+     "lines": 1,
+     "size": 16,
+     "font": "IBM Plex Sans"
+    },
+    "headings": [],
+    "headingSummary": {
+     "count": 0,
+     "maxLines": 0,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "IBM Plex Sans",
+       "share": 0.83,
+       "mono": false
+      },
+      {
+       "family": "IBM Plex Mono",
+       "share": 0.17,
+       "mono": true
+      }
+     ],
+     "familyCount": 2,
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+     ],
+     "sizeCount": 6,
+     "notLoaded": [],
+     "body": {
+      "font": "IBM Plex Sans",
+      "size": 13,
+      "leading": 1.45,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 18.4
+     },
+     "measureChars": 79,
+     "max": {
+      "size": 16,
+      "vw": 1.1,
+      "font": "IBM Plex Sans",
+      "text": "RINGI: Addition of New Purchase Plan Man"
+     },
+     "monoShare": 0.17,
+     "monoProseShare": 0.17,
+     "monoFamilies": [
+      "IBM Plex Mono"
+     ],
+     "monoSamples": [
+      "REQ-001",
+      "3. Modification Targets",
+      "REQ-002",
+      "3. Modification Targets",
+      "REQ-003",
+      "①-①Search Filter"
+     ],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0.05,
+     "centerShare": 0.06,
+     "smallText": 172
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#f9fbfc",
+     "bodyBgHsl": {
+      "h": 200,
+      "s": 0.33,
+      "l": 0.98
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#ffffff",
+       "top": 111,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#131416",
+       "share": 0.71
+      },
+      {
+       "color": "#5d5f60",
+       "share": 0.18
+      },
+      {
+       "color": "#000000",
+       "share": 0.05
+      },
+      {
+       "color": "#353736",
+       "share": 0.05
+      },
+      {
+       "color": "#04250e",
+       "share": 0.01
+      }
+     ],
+     "button": {
+      "bg": "#ffffff",
+      "hsl": {
+       "h": 0,
+       "s": 0,
+       "l": 1
+      },
+      "fg": "#000000"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 4,
+     "inHero": 4,
+     "radius": 6,
+     "height": 32,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Save requirements",
+      "+ Add requirement",
+      "Copy CSV",
+      "Copy Excel (TSV)"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 2,
+     "hairlineSamples": [
+      "header 1440px",
+      "nav#tabs 1440px"
+     ],
+     "outlinedBoxes": 1,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 1,
+     "boxRadius": 16,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": true,
+     "height": 53,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "ibm plex mono",
+     "ibm plex sans"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 8863,
+    "margins": {
+     "left": 35,
+     "right": 44
+    },
+    "sections": [
+     {
+      "sel": "div#req-wrap",
+      "tag": "div",
+      "top": 174,
+      "height": 7673,
+      "words": 4059,
+      "media": 0,
+      "middle": 31,
+      "heading": null,
+      "left": 35,
+      "right": 44,
+      "textLeft": 35,
+      "textRight": 44,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div#amb-wrap",
+      "tag": "div",
+      "top": 7847,
+      "height": 931,
+      "words": 755,
+      "media": 0,
+      "middle": 21,
+      "heading": {
+       "text": "Ambiguity log (14)",
+       "size": 15,
+       "tag": "h2"
+      },
+      "left": 25,
+      "right": 38,
+      "textLeft": 25,
+      "textRight": 38,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "RINGI: Addition of New Purchase Plan Management Function",
+      "size": 16,
+      "top": 15,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 18,
+      "n": 2
+     }
+    ],
+    "leftBlocks": 2,
+    "bodySize": 13,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0.13,
+    "voidBox": {
+     "x": 840,
+     "y": 180,
+     "w": 240,
+     "h": 720
+    }
+   },
+   "app": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "dark": false,
+    "ground": "#f9fbfc",
+    "sidebar": null,
+    "topbar": {
+     "h": 53
+    },
+    "canvas": {
+     "left": 35,
+     "right": 35
+    },
+    "hero": {
+     "text": "RINGI: Addition of New Purchase Plan Management Function",
+     "words": 8,
+     "chars": 56,
+     "lines": 1,
+     "size": 16,
+     "vw": 1.1,
+     "font": "IBM Plex Sans",
+     "weight": 600,
+     "tracking": 0,
+     "leading": 1.45,
+     "top": 15,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 0,
+     "firstScreen": 0,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 0,
+     "radii": [],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": {
+     "count": 169,
+     "median": 53
+    },
+    "chartHues": 0,
+    "placeholders": [
+     "user name"
+    ],
+    "type": {
+     "under13": 0.29,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+     ]
+    },
+    "title": {
+     "text": "RINGI: Addition of New Purchase Plan Management Function",
+     "size": 16,
+     "top": 15
+    },
+    "colourShare": 0
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 12,
+   "filled": [
+    0.34,
+    0.31,
+    0.39,
+    0.29,
+    0.31,
+    0.31,
+    0.31,
+    0.28,
+    0.27,
+    0.41,
+    0.35,
+    0.31
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 23428,
+     "screens": 22.9,
+     "words": 4893,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 0,
+     "sections": 4,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "RINGI: Addition of New Purchase Plan Management Function",
+     "words": 8,
+     "chars": 56,
+     "lines": 1,
+     "size": 16,
+     "vw": 2.1,
+     "font": "IBM Plex Sans",
+     "weight": 600,
+     "tracking": 0,
+     "leading": 1.45,
+     "top": 10,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "RINGI: Addition of New Purchase Plan Management Function",
+     "words": 8,
+     "lines": 1,
+     "size": 16,
+     "font": "IBM Plex Sans"
+    },
+    "headings": [],
+    "headingSummary": {
+     "count": 0,
+     "maxLines": 0,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "IBM Plex Sans",
+       "share": 0.83,
+       "mono": false
+      },
+      {
+       "family": "IBM Plex Mono",
+       "share": 0.17,
+       "mono": true
+      }
+     ],
+     "familyCount": 2,
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+     ],
+     "sizeCount": 6,
+     "notLoaded": [],
+     "body": {
+      "font": "IBM Plex Sans",
+      "size": 13,
+      "leading": 1.45,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 18.4
+     },
+     "measureChars": 23,
+     "max": {
+      "size": 16,
+      "vw": 2.1,
+      "font": "IBM Plex Sans",
+      "text": "RINGI: Addition of New Purchase Plan Man"
+     },
+     "monoShare": 0.17,
+     "monoProseShare": 0.17,
+     "monoFamilies": [
+      "IBM Plex Mono"
+     ],
+     "monoSamples": [
+      "REQ-001",
+      "3. Modification Targets",
+      "REQ-002",
+      "3. Modification Targets",
+      "REQ-003",
+      "①-①Search Filter"
+     ],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0.05,
+     "centerShare": 0.06,
+     "smallText": 172
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#f9fbfc",
+     "bodyBgHsl": {
+      "h": 200,
+      "s": 0.33,
+      "l": 0.98
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#ffffff",
+       "top": 144,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#131416",
+       "share": 0.71
+      },
+      {
+       "color": "#5d5f60",
+       "share": 0.18
+      },
+      {
+       "color": "#000000",
+       "share": 0.05
+      },
+      {
+       "color": "#353736",
+       "share": 0.05
+      },
+      {
+       "color": "#04250e",
+       "share": 0.01
+      }
+     ],
+     "button": {
+      "bg": "#ffffff",
+      "hsl": {
+       "h": 0,
+       "s": 0,
+       "l": 1
+      },
+      "fg": "#000000"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 4,
+     "inHero": 4,
+     "radius": 6,
+     "height": 32,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Save requirements",
+      "+ Add requirement",
+      "Copy CSV",
+      "Copy Excel (TSV)"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 2,
+     "hairlineSamples": [
+      "header 768px",
+      "nav#tabs 768px"
+     ],
+     "outlinedBoxes": 1,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 1,
+     "boxRadius": 16,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": true,
+     "height": 86,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "ibm plex mono",
+     "ibm plex sans"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 23428,
+    "margins": {
+     "left": 35,
+     "right": 40
+    },
+    "sections": [
+     {
+      "sel": "div#req-wrap",
+      "tag": "div",
+      "top": 232,
+      "height": 19843,
+      "words": 4059,
+      "media": 0,
+      "middle": 225,
+      "heading": null,
+      "left": 35,
+      "right": 0,
+      "textLeft": 35,
+      "textRight": -261,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div#amb-wrap",
+      "tag": "div",
+      "top": 20076,
+      "height": 3267,
+      "words": 755,
+      "media": 0,
+      "middle": 20,
+      "heading": {
+       "text": "Ambiguity log (14)",
+       "size": 15,
+       "tag": "h2"
+      },
+      "left": 25,
+      "right": 35,
+      "textLeft": 25,
+      "textRight": 35,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "RINGI: Addition of New Purchase Plan Management Function",
+      "size": 16,
+      "top": 10,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 18,
+      "n": 2
+     }
+    ],
+    "leftBlocks": 2,
+    "bodySize": 13,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "dark": false,
+    "ground": "#f9fbfc",
+    "sidebar": null,
+    "topbar": {
+     "h": 86
+    },
+    "canvas": {
+     "left": 35,
+     "right": -270
+    },
+    "hero": {
+     "text": "RINGI: Addition of New Purchase Plan Management Function",
+     "words": 8,
+     "chars": 56,
+     "lines": 1,
+     "size": 16,
+     "vw": 2.1,
+     "font": "IBM Plex Sans",
+     "weight": 600,
+     "tracking": 0,
+     "leading": 1.45,
+     "top": 10,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 0,
+     "firstScreen": 0,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 0,
+     "radii": [],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": {
+     "count": 169,
+     "median": 109
+    },
+    "chartHues": 0,
+    "placeholders": [
+     "user name"
+    ],
+    "type": {
+     "under13": 0.29,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+     ]
+    },
+    "title": {
+     "text": "RINGI: Addition of New Purchase Plan Management Function",
+     "size": 16,
+     "top": 10
+    },
+    "colourShare": 0
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 12,
+   "filled": [
+    0.54,
+    0.6,
+    0.45,
+    0.42,
+    0.4,
+    0.58,
+    0.48,
+    0.63,
+    0.43,
+    0.46,
+    0.46,
+    0.53
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 23663,
+     "screens": 28,
+     "words": 4893,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 0,
+     "sections": 4,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "RINGI: Addition of New Purchase Plan Management Function",
+     "words": 8,
+     "chars": 56,
+     "lines": 2,
+     "size": 16,
+     "vw": 4.1,
+     "font": "IBM Plex Sans",
+     "weight": 600,
+     "tracking": 0,
+     "leading": 1.45,
+     "top": 10,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "RINGI: Addition of New Purchase Plan Management Function",
+     "words": 8,
+     "lines": 2,
+     "size": 16,
+     "font": "IBM Plex Sans"
+    },
+    "headings": [],
+    "headingSummary": {
+     "count": 0,
+     "maxLines": 0,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "IBM Plex Sans",
+       "share": 0.83,
+       "mono": false
+      },
+      {
+       "family": "IBM Plex Mono",
+       "share": 0.17,
+       "mono": true
+      }
+     ],
+     "familyCount": 2,
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+     ],
+     "sizeCount": 6,
+     "notLoaded": [],
+     "body": {
+      "font": "IBM Plex Sans",
+      "size": 13,
+      "leading": 1.45,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 18.4
+     },
+     "measureChars": 23,
+     "max": {
+      "size": 16,
+      "vw": 4.1,
+      "font": "IBM Plex Sans",
+      "text": "RINGI: Addition of New Purchase Plan Man"
+     },
+     "monoShare": 0.17,
+     "monoProseShare": 0.17,
+     "monoFamilies": [
+      "IBM Plex Mono"
+     ],
+     "monoSamples": [
+      "REQ-001",
+      "3. Modification Targets",
+      "REQ-002",
+      "3. Modification Targets",
+      "REQ-003",
+      "①-①Search Filter"
+     ],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0.05,
+     "centerShare": 0.06,
+     "smallText": 172
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#f9fbfc",
+     "bodyBgHsl": {
+      "h": 200,
+      "s": 0.33,
+      "l": 0.98
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#ffffff",
+       "top": 204,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#131416",
+       "share": 0.71
+      },
+      {
+       "color": "#5d5f60",
+       "share": 0.18
+      },
+      {
+       "color": "#000000",
+       "share": 0.05
+      },
+      {
+       "color": "#353736",
+       "share": 0.05
+      },
+      {
+       "color": "#04250e",
+       "share": 0.01
+      }
+     ],
+     "button": {
+      "bg": "#ffffff",
+      "hsl": {
+       "h": 0,
+       "s": 0,
+       "l": 1
+      },
+      "fg": "#000000"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 4,
+     "inHero": 4,
+     "radius": 6,
+     "height": 32,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Save requirements",
+      "+ Add requirement",
+      "Copy CSV",
+      "Copy Excel (TSV)"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 2,
+     "hairlineSamples": [
+      "header 390px",
+      "nav#tabs 390px"
+     ],
+     "outlinedBoxes": 1,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 1,
+     "boxRadius": 12,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": true,
+     "height": 154,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "ibm plex mono",
+     "ibm plex sans"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 23663,
+    "margins": {
+     "left": 33,
+     "right": 7
+    },
+    "sections": [
+     {
+      "sel": "header",
+      "tag": "header",
+      "top": 0,
+      "height": 154,
+      "words": 21,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "RINGI: Addition of New Purchase Plan Management Fu",
+       "size": 16,
+       "tag": "h1"
+      },
+      "left": 18,
+      "right": 18,
+      "textLeft": 18,
+      "textRight": 31,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": true
+     },
+     {
+      "sel": "main",
+      "tag": "main",
+      "top": 204,
+      "height": 23435,
+      "words": 4844,
+      "media": 0,
+      "middle": 601,
+      "heading": null,
+      "left": 23,
+      "right": 0,
+      "textLeft": 23,
+      "textRight": -637,
+      "fullBleed": false,
+      "footer": true,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "RINGI: Addition of New Purchase Plan Management Function",
+      "size": 16,
+      "top": 10,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 18,
+      "n": 2
+     }
+    ],
+    "leftBlocks": 2,
+    "bodySize": 13,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "dark": false,
+    "ground": "#f9fbfc",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 33,
+     "right": -646
+    },
+    "hero": {
+     "text": "RINGI: Addition of New Purchase Plan Management Function",
+     "words": 8,
+     "chars": 56,
+     "lines": 2,
+     "size": 16,
+     "vw": 4.1,
+     "font": "IBM Plex Sans",
+     "weight": 600,
+     "tracking": 0,
+     "leading": 1.45,
+     "top": 10,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 1,
+     "firstScreen": 1,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 1,
+     "radii": [
+      [
+       12,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": {
+     "count": 169,
+     "median": 109
+    },
+    "chartHues": 0,
+    "placeholders": [
+     "user name"
+    ],
+    "type": {
+     "under13": 0.29,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+     ]
+    },
+    "title": {
+     "text": "RINGI: Addition of New Purchase Plan Management Function",
+     "size": 16,
+     "top": 10
+    },
+    "colourShare": 0
+   },
+   "consoleErrors": []
+  }
+ ],
+ "findings": [],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "/Users/galangkeda/Documents/Keda/ldx-monorepo/.taste-skill/inspect/desktop-fold.jpg",
+   "pages": [
+    "/Users/galangkeda/Documents/Keda/ldx-monorepo/.taste-skill/inspect/desktop-page-01.jpg",
+    "/Users/galangkeda/Documents/Keda/ldx-monorepo/.taste-skill/inspect/desktop-page-02.jpg",
+    "/Users/galangkeda/Documents/Keda/ldx-monorepo/.taste-skill/inspect/desktop-page-03.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "/Users/galangkeda/Documents/Keda/ldx-monorepo/.taste-skill/inspect/tablet-fold.jpg",
+   "pages": [
+    "/Users/galangkeda/Documents/Keda/ldx-monorepo/.taste-skill/inspect/tablet-page-01.jpg",
+    "/Users/galangkeda/Documents/Keda/ldx-monorepo/.taste-skill/inspect/tablet-page-02.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "/Users/galangkeda/Documents/Keda/ldx-monorepo/.taste-skill/inspect/mobile-fold.jpg",
+   "pages": [
+    "/Users/galangkeda/Documents/Keda/ldx-monorepo/.taste-skill/inspect/mobile-page-01.jpg",
+    "/Users/galangkeda/Documents/Keda/ldx-monorepo/.taste-skill/inspect/mobile-page-02.jpg"
+   ],
+   "film": []
+  }
+ ]
+}
