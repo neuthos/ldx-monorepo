@@ -141,8 +141,8 @@ For every row of the heuristics checklist (the section above), record its status
 5. Cap 8 TCs per REQ; overflow merges same-`jenis` cases into one TC with `test_data` as an array of variants.
 6. Deterministic order and IDs. Matrix entries: sort by the four group columns (requirement → primary → secondary → tertiary), then checklist order; IDs `ID-CHECK-001, ID-CHECK-002, ...` sequential. Test cases: ordered by their first `tm_ids` entry; within a group: `positive → boundary → negative → interrupt → multi-user → flood → count → combination → non-functional`; IDs `TC-Auto-{MODULE}-001, TC-Auto-{MODULE}-002, ...` where MODULE is ONE 2–4 uppercase-letter code derived from the feature domain (e.g. `CO` for Customer Order, `PP` for Purchase Plan, `INV` for Invoice), chosen once and used for every TC in this design. Answer keys: `AK-001...` sequential. TC titles use the `Should (not) be able to …` convention, with scope details in parentheses — e.g. `Should be able to create customer order use New Add with valid data until register slip (Draft created, RO number issued, returned to list)`. Same input → byte-identical output.
 7. `automation_candidate: true` only when the expectation is objectively checkable and all steps deterministic (this suite is destined for automation — UT/TDD context for BE and FE).
-8. **Answer keys are emitted only for cases that need them:** non-trivial data preparation, multi-table DB assertions, or multi-step flows. A simple UI check needs none — its `steps` + `expected_result` already are the repro. Target: answer keys for the complex subset, not every TC.
-9. Answer key assertion guidance must be concrete and data-level: "after action A, table `promo_usage` gains row (user X, promo Y)" — with an `example_table` (array of objects, before/after) when it clarifies.
+8. **Answer keys are emitted only for cases that need them:** non-trivial data preparation, multi-record assertions, or multi-step flows. A simple check needs none — its `steps` + `expected_result` already are the repro. Target: answer keys for the complex subset, not every TC.
+9. **Answer-key format — an executable script**, ordered `sections[]`, each section one step a human or automation can follow: `title` (imperative: "Create Customer Master", "Ensure Sales Default Tax on the Tax Master"), `kv` = concrete key→value rows (field names and EXACT input values; derive unique values from the tc_id, e.g. `Cust-TC-Auto-CO-001-timestamp`), optional `table` for repeated/tabular data (`headers` + `rows` — e.g. several product masters or order lines in one step), and `expectation` = the check for THAT section ("Customer Master created successfully."). The final section carries the actual execution and its pass/fail assertions. Header fields: `testcase_name` (copy of the TC title), `expected` = "Match with answerkey", `result` = "" (the executor fills OK/NG after running).
 10. Language: all narrative fields in English; PRD/code quotes stay verbatim in their source language.
 
 ## Output schema — follow exactly
@@ -205,6 +205,7 @@ For every row of the heuristics checklist (the section above), record its status
       "conflict_with": [],
       "change_expected": false,
       "risk": "H",
+      "status": "Pending",
       "notes": ""
     }
   ],
@@ -234,20 +235,27 @@ For every row of the heuristics checklist (the section above), record its status
     {
       "ak_id": "AK-001",
       "tc_id": "TC-Auto-CO-014",
-      "why": "Requires multi-table DB assertions across promo and usage tables",
-      "prep": [
-        "Insert promo row (code TESTPROMO, percentOff 20, no campaign)",
-        "Insert user with clean promo_usage"
-      ],
-      "execution": ["Apply code twice in sequence as the same user"],
-      "assertions": [
-        "1st call: HTTP 200, discount = min(20% of total, 50% of total)",
-        "2nd call: HTTP 422, error ALREADY_USED",
-        "After: table promo_usage has exactly 1 row (userId, promoId)"
-      ],
-      "example_table": [
-        {"step": "after 1st apply", "promo_usage_rows": 1, "discount": 40000},
-        {"step": "after 2nd apply", "promo_usage_rows": 1, "discount": null}
+      "testcase_name": "Should not be able to reuse a promo code already used by the account",
+      "expected": "Match with answerkey",
+      "result": "",
+      "sections": [
+        {
+          "title": "Prepare promo and user",
+          "kv": [
+            ["Promo Code", "TESTPROMO"],
+            ["percentOff", "20"],
+            ["Campaign", "none"],
+            ["User state", "one existing promo_usage row for this user+promo"]
+          ],
+          "table": null,
+          "expectation": "Promo and user exist exactly as specified."
+        },
+        {
+          "title": "Apply the code a second time as the same user",
+          "kv": [["Request", "POST /api/promo/apply with code TESTPROMO"]],
+          "table": {"headers": ["check", "expected"], "rows": [["HTTP status", "422"], ["error", "ALREADY_USED"], ["promo_usage rows", "still exactly 1"]]},
+          "expectation": "Reuse is rejected; no second usage row is created."
+        }
       ]
     }
   ],

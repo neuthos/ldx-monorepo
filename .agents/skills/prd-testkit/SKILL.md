@@ -26,14 +26,14 @@ Trigger: user provides a PRD file (pdf/docx/md/txt) or says to process a new PRD
 1. **Resolve folder.** PRD name becomes the folder slug under `docs/` (e.g. `ringi-157` from the file/ringi name; reuse the user's wording — if they name a folder, use it exactly).
 2. **Extract text** into `docs/{prd}/prd.txt`. PDF: use the pdf document tools (`open_document` + `read_document`) or `pdftotext -layout`. DOCX: use the docx document tools or `textutil -convert txt`. MD/TXT: copy as-is. If extraction yields garbage, stop and report — do not hand-wave a PRD.
 3. **Dispatch the `requirement-extractor` agent** with input `docs/{prd}/prd.txt` (absolute path) and output directory `docs/{prd}/` (absolute path). Wait for its result and verify `requirements.json` exists and parses.
-4. **Render the page.** Read `assets/template.html`, then replace the marker `/*__DATA__*/null` with a JSON literal of this payload (compact, single line is fine):
+4. **Render the page.** Read `assets/template.html`, then replace the expression `/*__DATA__*/ null` (exactly as formatted, space included) with a JSON literal of this payload (compact, single line is fine):
 
 ```json
 { "prd_name": "<PRD name>", "docs_dir": "docs/<prd>", "requirements": <contents of requirements.json>, "design": null }
 ```
 
-   When embedding, escape the string `</script>` inside the JSON as `<\/script>` (test data contains injection probes). Write the result to `docs/{prd}/index.html`.
-5. **Offer the save server** (makes Save write directly to requirements.json): run in background `python3 <skill-dir>/scripts/serve.py docs/{prd}` and tell the user to open `http://127.0.0.1:8765/index.html`. If they prefer opening the file directly, the Save button falls back to downloading `requirements.json` — instruct them to replace the file in `docs/{prd}/`.
+   When embedding, escape the string `</script>` inside the JSON as `<\/script>` (test data contains injection probes) and `/*__THEME__*/` as the theme CSS (leave the marker when `assets/theme.css` is absent — the baseline CSS is the working floor). Write the result to `docs/{prd}/index.html`.
+5. **Start the save server (mandatory):** run in background `python3 <skill-dir>/scripts/serve.py docs/{prd} 8765` (use 8766+ if the port is busy) and give the user `http://127.0.0.1:8765/index.html`. The page saves via POST only — there is NO download fallback; if the user opens the file as `file://`, the page shows a banner with the exact serve command.
 6. **Report** requirement counts, the not-testable ones, and the top ambiguity questions. Then STOP — no test design in this mode. Tell the user: review the Requirement tab (edit / add / delete; anything not deleted counts as approved), press Save, then invoke this skill again to continue.
 
 ## Mode 2 — continue → test design tabs
@@ -56,6 +56,18 @@ The review page is an **app screen** (a working review tool: tabs, tables, modal
 3. On every render, inline `assets/theme.css` into the `<style id="theme">` block by replacing the marker `/*__THEME__*/` (if theme.css is absent, leave the marker — the template's baseline CSS is a working floor).
 4. Theme overrides presentation only: NEVER rename element IDs, classes, or script hooks (`__PRDTESTKIT__` data marker, `/*__DATA__*/`, tab/nav structure, save button, copy buttons, modal) — tabs, save, copy-CSV/TSV, copy-LLM-context and the answer-key modal depend on them.
 5. After the first themed render, follow the app-screen run's look-and-fix loop (screenshot + `inspect.mjs --app`) once per repo, not per PRD.
+
+## Mode 0 — re-render only
+
+Trigger: the user says refresh / re-render / update the page, and `docs/{prd}/requirements.json` exists. Skip the agents entirely: read the JSONs and rebuild `index.html` (Mode 1 step 4, with `"design"` set to the parsed `design.json` or `null`). Use this after an ingest prompt has updated a JSON elsewhere.
+
+## The ingest loop (how the team's informal inputs become clean artifacts)
+
+The review page's **Copy Prompt to Update Ingest …** buttons produce a ready-to-paste prompt for a NEW agent session in this repo. When the user runs it, that agent:
+- validates every ambiguity `answer`, every Q&A and MOM note, and every supporting document against the PRD text and the code, folds what holds into clean English REQ entries, and empties the processed buckets;
+- for TM & TC: cleans user edits/notes into house-style entries, reconciles matrix↔cases↔answer keys, and renumbers.
+
+After that agent has rewritten the JSON, re-render with Mode 0. Mode 2 still backs `design.json` up to `design.backup.json` before regenerating with the test-designer agent.
 
 ## Rules
 
