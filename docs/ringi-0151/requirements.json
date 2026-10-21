@@ -1,0 +1,171 @@
+{
+  "meta": {
+    "prd_name": "RINGI No. 0151 - Filter Addition and Item Addition (Invoice Type)",
+    "source": "/Users/galangkeda/Documents/Keda/ldx-monorepo/docs/ringi-0151/prd.txt",
+    "extracted_at": "2026-10-21",
+    "counts": {
+      "requirements": 13,
+      "testable": 12,
+      "not_testable": 1,
+      "ambiguities": 4,
+      "by_kind": {
+        "contradiction": 0,
+        "unmeasurable": 1,
+        "fudge": 0,
+        "absence": 3
+      }
+    }
+  },
+  "requirements": [
+    {
+      "req_id": "REQ-001",
+      "requirement": "The Invoice List screen (INV-060-013) shows an \"Invoice Type\" filter item in the search condition area.",
+      "quote": "Add \"Invoice Type\" to the filter",
+      "section": "3.2",
+      "type": "flow",
+      "testable": true
+    },
+    {
+      "req_id": "REQ-002",
+      "requirement": "The Invoice List search result detail table includes an \"Invoice Type\" column.",
+      "quote": "Add \"Invoice Type\" to the detail items",
+      "section": "3.2",
+      "type": "flow",
+      "testable": true
+    },
+    {
+      "req_id": "REQ-003",
+      "requirement": "The Invoice List download data includes an \"Invoice Type\" item.",
+      "quote": "Add \"Invoice Type\" to the download data",
+      "section": "3.2",
+      "type": "flow",
+      "testable": true
+    },
+    {
+      "req_id": "REQ-004",
+      "requirement": "The \"Invoice Type\" filter options are the Invoice Type values set in the Billing To master.",
+      "quote": "Display the \"Invoice Type\" of the Billing To master",
+      "section": "4.1",
+      "type": "business-rule",
+      "testable": true
+    },
+    {
+      "req_id": "REQ-005",
+      "requirement": "Each row in the detail list displays the Invoice Type linked to that row's Invoice Number.",
+      "quote": "Display the Invoice Type of the Invoice Number",
+      "section": "4.2",
+      "type": "business-rule",
+      "testable": true
+    },
+    {
+      "req_id": "REQ-006",
+      "requirement": "In the download file, the new \"Invoice Type\" column is placed immediately to the right of the \"Billing To\" column.",
+      "quote": "Insert immediately to the right of Billing To",
+      "section": "4.3",
+      "type": "flow",
+      "testable": true
+    },
+    {
+      "req_id": "REQ-007",
+      "requirement": "Guest user permissions on the Invoice List remain unchanged by this modification (display, search, and download work as before).",
+      "quote": "Guest user permissions: No change",
+      "section": "4.4",
+      "type": "permission",
+      "testable": true
+    },
+    {
+      "req_id": "REQ-008",
+      "requirement": "The archive function is not affected by this modification.",
+      "quote": "Archive: No change",
+      "section": "4.4",
+      "type": "constraint",
+      "testable": true
+    },
+    {
+      "req_id": "REQ-009",
+      "requirement": "The closing process is not affected by this modification.",
+      "quote": "Closing process: No change",
+      "section": "4.4",
+      "type": "constraint",
+      "testable": true
+    },
+    {
+      "req_id": "REQ-010",
+      "requirement": "Time zone display behavior is not affected by this modification.",
+      "quote": "Time zone: No change",
+      "section": "4.4",
+      "type": "constraint",
+      "testable": true
+    },
+    {
+      "req_id": "REQ-011",
+      "requirement": "Performance of Invoice List screen display, search, and download is maintained at the current level.",
+      "quote": "Performance: Maintain current level",
+      "section": "4.4",
+      "type": "non-functional",
+      "testable": false
+    },
+    {
+      "req_id": "REQ-012",
+      "requirement": "When a user selects an Invoice Type option and clicks Search, only invoice data matching the selected Invoice Type is displayed in the detail list.",
+      "quote": "Only invoice data matching the selected \"Invoice Type\" must be displayed in the detail list.",
+      "section": "5 (T-003)",
+      "type": "flow",
+      "testable": true
+    },
+    {
+      "req_id": "REQ-013",
+      "requirement": "Each row of the downloaded file outputs the same Invoice Type value as shown on the screen.",
+      "quote": "The same correct value as the \"Invoice Type\" on the screen must be output in each row.",
+      "section": "5 (T-007)",
+      "type": "flow",
+      "testable": true
+    }
+  ],
+  "ambiguities": [
+    {
+      "amb_id": "AMB-001",
+      "req_refs": [
+        "REQ-011"
+      ],
+      "kind": "unmeasurable",
+      "issue": "Performance is specified only as \"Maintain current level\" and \"no significant delay\", with no baseline or numeric threshold; the Purpose section also claims \"instant searching\" without a measure.",
+      "question": "What measurable performance threshold applies to Invoice List display, search, and download (e.g., a maximum response time in seconds, or a maximum allowed degradation percentage versus the current release)?",
+      "answer": "No Need"
+    },
+    {
+      "amb_id": "AMB-002",
+      "req_refs": [
+        "REQ-004",
+        "REQ-005",
+        "REQ-013"
+      ],
+      "kind": "absence",
+      "issue": "The PRD does not specify behavior when an invoice has no Invoice Type value (e.g., the Billing To master has none set) for the filter options, the detail column, and the download file.",
+      "question": "When an invoice has no Invoice Type value, what should appear in the detail list and download file (blank, a placeholder such as N/A, an error, or exclusion from filtered results)?",
+      "answer": "blank"
+    },
+    {
+      "amb_id": "AMB-003",
+      "req_refs": [
+        "REQ-004",
+        "REQ-005"
+      ],
+      "kind": "absence",
+      "issue": "Filter options come from the current Billing To master (4.1) while detail rows show the Invoice Type of the Invoice Number (4.2); the PRD does not state which value applies if the master value is changed after invoices exist.",
+      "question": "If a Billing To master's Invoice Type is changed after invoices were issued, should existing invoices display the Invoice Type held at issuance or the current Billing To master value in the detail list and download file?",
+      "answer": "Ikut terupdate karena relasinya dari id. "
+    },
+    {
+      "amb_id": "AMB-004",
+      "req_refs": [
+        "REQ-003",
+        "REQ-006"
+      ],
+      "kind": "absence",
+      "issue": "Section 3.3 lists \"Invoice List\" under Reports to Modify, but the modification details only specify the list download file; it is unclear whether a separate report artifact also needs the Invoice Type column.",
+      "question": "Does \"Reports to Modify: Invoice List\" (section 3.3) refer only to the list download data, or is there a separate report layout or print format that also requires the Invoice Type column?",
+      "answer": "List and Download only"
+    }
+  ]
+}

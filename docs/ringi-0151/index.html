@@ -1,0 +1,1312 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PRD Test Kit</title>
+    <style>
+      :root {
+        --ink: #1a2233;
+        --mut: #68738a;
+        --line: #dfe4ee;
+        --bg: #f6f8fc;
+        --acc: #2456d6;
+        --ok: #0d7a4f;
+        --warn: #b3540a;
+        --bad: #b3261e;
+        --chipbg: #eef2fb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font:
+          14px/1.45 -apple-system,
+          "Segoe UI",
+          Roboto,
+          Arial,
+          sans-serif;
+        color: var(--ink);
+        background: var(--bg);
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+        padding: 10px 18px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 22px;
+        align-items: center;
+      }
+      header h1 {
+        font-size: 16px;
+        margin: 0;
+      }
+      header .meta {
+        color: var(--mut);
+        font-size: 12px;
+      }
+      header .spacer {
+        flex: 1;
+      }
+      button {
+        font: inherit;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 7px;
+        padding: 5px 12px;
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: var(--acc);
+        color: var(--acc);
+      }
+      button.primary {
+        background: var(--acc);
+        border-color: var(--acc);
+        color: #fff;
+      }
+      button.primary:hover {
+        opacity: 0.9;
+        color: #fff;
+      }
+      select.filter {
+        font: inherit;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 4px 8px;
+        background: #fff;
+      }
+      #save-status {
+        font-size: 12px;
+        color: var(--mut);
+      }
+      nav {
+        display: flex;
+        gap: 4px;
+        padding: 8px 18px 0;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+        position: sticky;
+        top: 57px;
+        z-index: 19;
+      }
+      nav button {
+        border: none;
+        border-radius: 8px 8px 0 0;
+        padding: 8px 16px;
+        color: var(--mut);
+        background: none;
+      }
+      nav button.on {
+        color: var(--acc);
+        font-weight: 600;
+        box-shadow: inset 0 -2px 0 var(--acc);
+      }
+      main {
+        padding: 16px 18px 60px;
+        max-width: 1500px;
+      }
+      section {
+        display: none;
+      }
+      section.on {
+        display: block;
+      }
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin: 0 0 10px;
+      }
+      .bar .hint {
+        color: var(--mut);
+        font-size: 12px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        border-right: 1px solid var(--line);
+        padding: 7px 10px;
+        text-align: left;
+        vertical-align: top;
+        font-size: 13px;
+      }
+      th {
+        background: var(--chipbg);
+        font-size: 12px;
+        letter-spacing: 0.02em;
+        color: var(--mut);
+        position: sticky;
+        top: 0;
+      }
+      td:last-child,
+      th:last-child {
+        border-right: none;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      td.id,
+      td.ctr {
+        white-space: nowrap;
+        color: var(--mut);
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 12px;
+      }
+      .chip {
+        display: inline-block;
+        border-radius: 20px;
+        padding: 1px 9px;
+        font-size: 11px;
+        background: var(--chipbg);
+        color: var(--ink);
+        white-space: nowrap;
+      }
+      .chip.flow {
+        background: #e7f0ff;
+      }
+      .chip.validation {
+        background: #efe7ff;
+      }
+      .chip.business-rule {
+        background: #e7fff1;
+      }
+      .chip.permission {
+        background: #fff2e0;
+      }
+      .chip.non-functional {
+        background: #fdeaf6;
+      }
+      .chip.constraint {
+        background: #eef1f5;
+      }
+      .chip.P0 {
+        background: #fde5e2;
+        color: var(--bad);
+      }
+      .chip.P1 {
+        background: #fff0d9;
+        color: var(--warn);
+      }
+      .chip.P2 {
+        background: #e7f0ff;
+      }
+      .chip.P3 {
+        background: #eef1f5;
+      }
+      .chip.yes {
+        background: #e2f5ea;
+        color: var(--ok);
+      }
+      .chip.no {
+        background: #fde5e2;
+        color: var(--bad);
+      }
+      .chip.applied {
+        background: #e2f5ea;
+        color: var(--ok);
+      }
+      .chip.na {
+        background: #eef1f5;
+        color: var(--mut);
+      }
+      .chip.deferred {
+        background: #fff0d9;
+        color: var(--warn);
+      }
+      .chip.H {
+        background: #fde5e2;
+        color: var(--bad);
+      }
+      .chip.M {
+        background: #fff0d9;
+        color: var(--warn);
+      }
+      .chip.L {
+        background: #eef1f5;
+        color: var(--mut);
+      }
+      .chip.change {
+        background: #fde5e2;
+        color: var(--bad);
+      }
+      .rowbtns {
+        white-space: nowrap;
+      }
+      .rowbtns button {
+        padding: 2px 8px;
+        font-size: 12px;
+      }
+      input,
+      select,
+      textarea {
+        font: inherit;
+        width: 100%;
+        padding: 4px 6px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+      }
+      textarea {
+        min-height: 44px;
+        resize: vertical;
+      }
+      #modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(20, 26, 40, 0.45);
+        display: none;
+        z-index: 50;
+        overflow: auto;
+        padding: 40px 16px;
+      }
+      #modal.on {
+        display: block;
+      }
+      #modal .card {
+        background: #fff;
+        max-width: 920px;
+        margin: 0 auto;
+        border-radius: 12px;
+        padding: 20px 24px 28px;
+      }
+      #modal h2 {
+        margin: 0 0 4px;
+        font-size: 16px;
+      }
+      #modal .sub {
+        color: var(--mut);
+        margin: 0 0 14px;
+        font-size: 12px;
+      }
+      #modal .close {
+        float: right;
+      }
+      .kv {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 6px 14px;
+        margin: 8px 0;
+      }
+      .kv dt {
+        color: var(--mut);
+        font-size: 12px;
+      }
+      .kv dd {
+        margin: 0;
+      }
+      #modal h3 {
+        font-size: 13px;
+        margin: 18px 0 6px;
+        color: var(--acc);
+      }
+      #modal ul {
+        margin: 6px 0;
+        padding-left: 20px;
+      }
+      h2.tab-title {
+        font-size: 15px;
+        margin: 14px 0 8px;
+      }
+      .subtable {
+        margin: 4px 0 14px;
+      }
+      .grp {
+        font-weight: 600;
+      }
+    </style>
+    <style id="theme">
+      /* prd-testkit theme — "framed-sheet" dealt by design-taste-frontend (seed 1426014804)
+   Move: one tinted frame holds the header and the tab row with no rule between them;
+   the work sits on a white sheet with a 1px edge and 16px corners, no shadow.
+   Accent (#1b6c80) is budgeted to the active tab underline, modal section titles and focus. */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --ink:#131416; --mut:#5d5f60; --line:#e8eaec; --bg:#f9fbfc; --acc:#1b6c80;
+  --ok:#1e7b4f; --warn:#92400e; --bad:#c4242a; --chipbg:#ebedee;
+  --rule:#f0f1f2; --control:#cdced1; --raised:#f4f6f8;
+}
+body{font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg)}
+table{font-variant-numeric:tabular-nums}
+
+/* frame: header + tabs share the tinted ground, seam invisible */
+header{background:var(--bg);border-bottom:1px solid var(--bg)}
+header h1{font-weight:600}
+nav{background:var(--bg);border-bottom:1px solid var(--line);padding:0 18px}
+nav button{border-radius:0;padding:9px 16px 11px;font-weight:500;color:var(--mut)}
+nav button.on{color:var(--ink);font-weight:600;box-shadow:inset 0 -2px 0 var(--acc)}
+
+/* work on a white sheet */
+main{background:#fff;border:1px solid var(--line);border-radius:16px;margin:16px auto 40px;padding:20px 24px 44px}
+@media(max-width:640px){main{margin:8px 8px 24px;padding:14px 14px 32px;border-radius:12px}}
+
+/* tables: rules and alignment, no card, no header band */
+main{overflow-x:clip}
+table{background:transparent;border:none;border-radius:0;display:block;overflow-x:auto;max-width:100%}
+th{background:#fff;color:var(--mut);font-weight:500;letter-spacing:0;border-bottom:1px solid var(--line)}
+th,td{border-bottom:1px solid var(--rule)}
+td.id,td.ctr{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;color:var(--mut)}
+h2.tab-title{font-weight:600}
+
+/* chips: neutral for categories, pale tint pairs for status only */
+.chip{background:var(--chipbg);color:#353736;font-weight:500;padding:2px 9px}
+.chip.flow,.chip.validation,.chip.business-rule,.chip.permission,.chip.non-functional,.chip.constraint{background:#ebedee;color:#353736}
+.chip.yes,.chip.applied{background:#dcfae5;color:#04250e}
+.chip.no{background:#ffedea;color:#831c1e}
+.chip.P0,.chip.H{background:#ffedea;color:#831c1e}
+.chip.P1,.chip.M,.chip.deferred{background:#fffbeb;color:#92400e}
+.chip.P2,.chip.P3,.chip.L,.chip.na{background:#ebedee;color:#353736}
+
+/* controls: white with a 1px border, near-black primary */
+button{border-radius:6px;border-color:var(--control);font-weight:500}
+button:hover{border-color:#a9aeb4;color:var(--ink);background:#fff}
+button.primary{background:#131416;border-color:#131416;color:#fff}
+button.primary:hover{background:#2a2d30;opacity:1;color:#fff}
+input,select,textarea{border-color:var(--control);border-radius:6px;background:#fff}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+
+/* what floats may have a shadow */
+#modal .card{border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 28px rgba(19,20,22,.16)}
+#modal h3{color:var(--acc)}
+.note{background:var(--raised);border-color:var(--control);color:var(--mut)}
+
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1 id="hdr-name">PRD Test Kit</h1>
+      <span class="meta" id="hdr-meta"></span>
+      <span class="spacer"></span>
+      <span id="save-status"></span>
+      <button id="btn-save" class="primary">Save requirements</button>
+    </header>
+    <nav id="tabs"></nav>
+    <main>
+      <section id="sec-req">
+        <div class="bar" id="req-bar"></div>
+        <div id="req-wrap"></div>
+        <div id="amb-bar"></div>
+        <div id="amb-wrap"></div>
+      </section>
+      <section id="sec-tm">
+        <div class="bar" id="tm-bar"></div>
+        <div id="tm-wrap"></div>
+      </section>
+      <section id="sec-tc">
+        <div class="bar" id="tc-bar"></div>
+        <div id="tc-wrap"></div>
+      </section>
+      <section id="sec-audit"><div id="audit-wrap"></div></section>
+    </main>
+    <div id="modal"><div class="card" id="modal-card"></div></div>
+
+    <script id="app-data">
+      window.__PRDTESTKIT__ = {"prd_name":"RINGI No. 0151 - Filter Addition and Item Addition (Invoice Type)","docs_dir":"docs/ringi-0151","requirements":{"meta":{"prd_name":"RINGI No. 0151 - Filter Addition and Item Addition (Invoice Type)","source":"/Users/galangkeda/Documents/Keda/ldx-monorepo/docs/ringi-0151/prd.txt","extracted_at":"2026-10-21","counts":{"requirements":13,"testable":12,"not_testable":1,"ambiguities":4,"by_kind":{"contradiction":0,"unmeasurable":1,"fudge":0,"absence":3}}},"requirements":[{"req_id":"REQ-001","requirement":"The Invoice List screen (INV-060-013) shows an \"Invoice Type\" filter item in the search condition area.","quote":"Add \"Invoice Type\" to the filter","section":"3.2","type":"flow","testable":true},{"req_id":"REQ-002","requirement":"The Invoice List search result detail table includes an \"Invoice Type\" column.","quote":"Add \"Invoice Type\" to the detail items","section":"3.2","type":"flow","testable":true},{"req_id":"REQ-003","requirement":"The Invoice List download data includes an \"Invoice Type\" item.","quote":"Add \"Invoice Type\" to the download data","section":"3.2","type":"flow","testable":true},{"req_id":"REQ-004","requirement":"The \"Invoice Type\" filter options are the Invoice Type values set in the Billing To master.","quote":"Display the \"Invoice Type\" of the Billing To master","section":"4.1","type":"business-rule","testable":true},{"req_id":"REQ-005","requirement":"Each row in the detail list displays the Invoice Type linked to that row's Invoice Number.","quote":"Display the Invoice Type of the Invoice Number","section":"4.2","type":"business-rule","testable":true},{"req_id":"REQ-006","requirement":"In the download file, the new \"Invoice Type\" column is placed immediately to the right of the \"Billing To\" column.","quote":"Insert immediately to the right of Billing To","section":"4.3","type":"flow","testable":true},{"req_id":"REQ-007","requirement":"Guest user permissions on the Invoice List remain unchanged by this modification (display, search, and download work as before).","quote":"Guest user permissions: No change","section":"4.4","type":"permission","testable":true},{"req_id":"REQ-008","requirement":"The archive function is not affected by this modification.","quote":"Archive: No change","section":"4.4","type":"constraint","testable":true},{"req_id":"REQ-009","requirement":"The closing process is not affected by this modification.","quote":"Closing process: No change","section":"4.4","type":"constraint","testable":true},{"req_id":"REQ-010","requirement":"Time zone display behavior is not affected by this modification.","quote":"Time zone: No change","section":"4.4","type":"constraint","testable":true},{"req_id":"REQ-011","requirement":"Performance of Invoice List screen display, search, and download is maintained at the current level.","quote":"Performance: Maintain current level","section":"4.4","type":"non-functional","testable":false},{"req_id":"REQ-012","requirement":"When a user selects an Invoice Type option and clicks Search, only invoice data matching the selected Invoice Type is displayed in the detail list.","quote":"Only invoice data matching the selected \"Invoice Type\" must be displayed in the detail list.","section":"5 (T-003)","type":"flow","testable":true},{"req_id":"REQ-013","requirement":"Each row of the downloaded file outputs the same Invoice Type value as shown on the screen.","quote":"The same correct value as the \"Invoice Type\" on the screen must be output in each row.","section":"5 (T-007)","type":"flow","testable":true}],"ambiguities":[{"amb_id":"AMB-001","req_refs":["REQ-011"],"kind":"unmeasurable","issue":"Performance is specified only as \"Maintain current level\" and \"no significant delay\", with no baseline or numeric threshold; the Purpose section also claims \"instant searching\" without a measure.","question":"What measurable performance threshold applies to Invoice List display, search, and download (e.g., a maximum response time in seconds, or a maximum allowed degradation percentage versus the current release)?","answer":"No Need"},{"amb_id":"AMB-002","req_refs":["REQ-004","REQ-005","REQ-013"],"kind":"absence","issue":"The PRD does not specify behavior when an invoice has no Invoice Type value (e.g., the Billing To master has none set) for the filter options, the detail column, and the download file.","question":"When an invoice has no Invoice Type value, what should appear in the detail list and download file (blank, a placeholder such as N/A, an error, or exclusion from filtered results)?","answer":"blank"},{"amb_id":"AMB-003","req_refs":["REQ-004","REQ-005"],"kind":"absence","issue":"Filter options come from the current Billing To master (4.1) while detail rows show the Invoice Type of the Invoice Number (4.2); the PRD does not state which value applies if the master value is changed after invoices exist.","question":"If a Billing To master's Invoice Type is changed after invoices were issued, should existing invoices display the Invoice Type held at issuance or the current Billing To master value in the detail list and download file?","answer":"Ikut terupdate karena relasinya dari id. "},{"amb_id":"AMB-004","req_refs":["REQ-003","REQ-006"],"kind":"absence","issue":"Section 3.3 lists \"Invoice List\" under Reports to Modify, but the modification details only specify the list download file; it is unclear whether a separate report artifact also needs the Invoice Type column.","question":"Does \"Reports to Modify: Invoice List\" (section 3.3) refer only to the list download data, or is there a separate report layout or print format that also requires the Invoice Type column?","answer":"List and Download only"}]},"design":{"meta":{"prd_name":"RINGI No. 0151 - Filter Addition and Item Addition (Invoice Type)","source":"/Users/galangkeda/Documents/Keda/ldx-monorepo/docs/ringi-0151/requirements.json","code_roots":{"be":"/Users/galangkeda/Documents/Keda/L-DX_Backend","fe":"not-available"},"generated_at":"2026-10-21","counts":{"requirements_in":13,"requirements_used":13,"skipped_untestable":[],"matrix_entries":38,"test_cases":38,"answer_keys":7,"expected_changes":5,"by_jenis":{"positive":9,"boundary":3,"negative":8,"interrupt":10,"multi-user":1,"flood":1,"count":2,"combination":3,"non-functional":1},"by_priority":{"P0":0,"P1":11,"P2":27,"P3":0},"by_layer":{"be-unit":5,"fe-unit":0,"api-integration":25,"e2e":8},"flagged_with_ambiguity":20,"oracle_pending":0,"heuristic_checklist":{"applied":35,"na":6,"deferred":2}},"expected_changes":[{"id":"EX-001","where":"FE application (repo unavailable: FE.txt PWD resolves to /Users/galangkeda/Documents/Keda/L-DX_Backend, branch feat/ringi-156 does not exist there)","prd_says":"Invoice List screen (INV-060-013) shows an Invoice Type filter item in the search condition area and an Invoice Type column in the detail table (REQ-001, REQ-002)","code_shows":"No FE source locatable; only the BE-side download contract payload (docs/tests/download_excel_unit_testing_payloads/invoice_list.json) documents the intended FE headers and convert labels","linked_tms":["ID-CHECK-013","ID-CHECK-021","ID-CHECK-028"]},{"id":"EX-002","where":"ldx_addons/ldx_core/transactions/sales_billing_invoice.py — deprecated invoice_type field; FE label history","prd_says":"The new filter and column bind the Billing To master Invoice Type (REQ-004, REQ-005)","code_shows":"sales.billing.invoice still carries a deprecated invoice_type selection (payment/advance_payment) with string='Invoice Type', and the download payload _comment records that the FE label 'Invoice Type' previously belonged to sales_billing_category (now labeled 'Credit Sales/Prepayment') — a live misbinding risk for the FE","linked_tms":["ID-CHECK-015"]},{"id":"EX-003","where":"BE filter-options surface: no dedicated options endpoint; options derive from fields_get selection of sales_billing_to_invoice_type / billing.to.master.invoice_print_type","prd_says":"Filter options are the Invoice Type values set in the Billing To master (REQ-004)","code_shows":"fields_get always exposes all 7 selection values regardless of what masters carry; no code path restricts options to values actually set on billing.to.master records — if the PRD means 'values actually set', a new options source is needed in FE or BE","linked_tms":["ID-CHECK-013","ID-CHECK-014","ID-CHECK-016"]},{"id":"EX-004","where":"sales.billing.invoice.sales_billing_to_invoice_type (stored related field) returns False for masterless invoices and cleared master types","prd_says":"Invoices with no Invoice Type display blank in the detail list and download file (AMB-002 answer: 'blank') (REQ-005, REQ-013)","code_shows":"BE stores and returns False; rendering False as a blank cell is delegated to the FE, which is unverified (FE repo unavailable)","linked_tms":["ID-CHECK-019","ID-CHECK-025"]},{"id":"EX-005","where":"ldx_addons/ldx_core/security/ir_rule_guest.xml and ir.model.access.csv — guest access to sales.billing.invoice via /api/dataset/* endpoints","prd_says":"Guest user permissions: No change — display, search, and download work as before (REQ-007)","code_shows":"No guest row-level rule exists for sales.billing.invoice and no current test exercises guest access to this model; the pre-change permission baseline must be captured before the PR lands or 'no change' cannot be verified","linked_tms":["ID-CHECK-032","ID-CHECK-033"]}]},"traceability_matrix":[{"tm_id":"ID-CHECK-001","group_requirement":"Should be able to display only invoice data matching the selected Invoice Type in the detail list","group_primary":"Search","group_secondary":"Filter","group_tertiary":"Filtered Result Set","behaviour":"Able to display only invoice rows whose Invoice Type equals the selected filter value after clicking Search","req_ids":["REQ-012"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"H","notes":"Filter matching logic is the BE domain on sales.billing.invoice; FE supplies the domain."},{"tm_id":"ID-CHECK-002","group_requirement":"Should be able to display only invoice data matching the selected Invoice Type in the detail list","group_primary":"Search","group_secondary":"Filter","group_tertiary":"Filtered Result Set","behaviour":"Not able to see non-matching invoices when an Invoice Type filter is active; a zero-match filter returns an empty list, not an error","req_ids":["REQ-012"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Contrary probe for ID-CHECK-001 plus the zero-match edge."},{"tm_id":"ID-CHECK-003","group_requirement":"Should be able to display only invoice data matching the selected Invoice Type in the detail list","group_primary":"Search","group_secondary":"Filter","group_tertiary":"Filtered Result Set","behaviour":"Able to obtain the identical filtered result set after a mid-flow refresh and after rapid repeated Search clicks (no duplication, no error)","req_ids":["REQ-012"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Flow-mandatory interrupt (refresh / double-submit)."},{"tm_id":"ID-CHECK-004","group_requirement":"Should be able to display only invoice data matching the selected Invoice Type in the detail list","group_primary":"Search","group_secondary":"Filter","group_tertiary":"Filtered Result Set","behaviour":"Not able to view filtered invoice data after session loss mid-search; the flow resumes correctly after re-login","req_ids":["REQ-012"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Flow-mandatory interrupt (session loss)."},{"tm_id":"ID-CHECK-005","group_requirement":"Should be able to display only invoice data matching the selected Invoice Type in the detail list","group_primary":"Search","group_secondary":"Filter","group_tertiary":"Filtered Result Set","behaviour":"Verify a download executed from a filter-active list state contains exactly the on-screen matching rows with matching Invoice Type values","req_ids":["REQ-012","REQ-013"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Cross-REQ interaction REQ-012 x REQ-013: 'the same correct value as on the screen must be output in each row' anchors the file to the filtered screen."},{"tm_id":"ID-CHECK-006","group_requirement":"Should be able to download Invoice List data including the Invoice Type item","group_primary":"Download","group_secondary":"List","group_tertiary":"Download Data Content","behaviour":"Able to download the Invoice List file containing the Invoice Type item for every exported row","req_ids":["REQ-003"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"H","notes":""},{"tm_id":"ID-CHECK-007","group_requirement":"Should be able to download Invoice List data including the Invoice Type item","group_primary":"Download","group_secondary":"List","group_tertiary":"Download Data Content","behaviour":"Not able to find the Invoice Type item added to any artifact other than the Invoice List screen and its download file","req_ids":["REQ-003"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Constraint confirmation per AMB-004 answer: 'List and Download only'."},{"tm_id":"ID-CHECK-008","group_requirement":"Should be able to download Invoice List data including the Invoice Type item","group_primary":"Download","group_secondary":"List","group_tertiary":"Download Data Content","behaviour":"Able to receive complete well-formed files when Download is triggered twice in rapid succession","req_ids":["REQ-003"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Flow-mandatory interrupt (double-submit mid-flow)."},{"tm_id":"ID-CHECK-009","group_requirement":"Should be able to download Invoice List data including the Invoice Type item","group_primary":"Download","group_secondary":"List","group_tertiary":"Download Data Content","behaviour":"Not able to download invoice data with an expired session; the request is rejected cleanly and retry after re-login succeeds","req_ids":["REQ-003"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Flow-mandatory interrupt (session loss)."},{"tm_id":"ID-CHECK-010","group_requirement":"Should be able to download the Invoice List file with Invoice Type placed immediately right of Billing To","group_primary":"Download","group_secondary":"List","group_tertiary":"Download Column Order","behaviour":"Able to download a file whose Invoice Type column is placed immediately to the right of the Billing To column","req_ids":["REQ-006"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"H","notes":""},{"tm_id":"ID-CHECK-011","group_requirement":"Should be able to download the Invoice List file with Invoice Type placed immediately right of Billing To","group_primary":"Download","group_secondary":"List","group_tertiary":"Download Column Order","behaviour":"Verify all columns other than the inserted Invoice Type keep their previous relative order (no shift beyond the single insertion point)","req_ids":["REQ-006"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Position boundary probe: one column inserted, exactly one position, nothing else moves."},{"tm_id":"ID-CHECK-012","group_requirement":"Should be able to download the Invoice List file with Invoice Type placed immediately right of Billing To","group_primary":"Download","group_secondary":"List","group_tertiary":"Download Column Order","behaviour":"Able to see a stable Invoice Type column position when the download is triggered repeatedly","req_ids":["REQ-006"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Flow-mandatory interrupt (repeated trigger)."},{"tm_id":"ID-CHECK-013","group_requirement":"Should be able to filter using the Invoice Type values set in the Billing To master","group_primary":"Search","group_secondary":"Filter","group_tertiary":"Filter Options Source","behaviour":"Able to select filter options that are the Invoice Type values set in the Billing To master","req_ids":["REQ-004"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":true,"risk":"H","notes":"Safety net for upcoming FE/BE work: EX-001 (FE repo unavailable) and EX-003 (options source not implemented as a dedicated surface)."},{"tm_id":"ID-CHECK-014","group_requirement":"Should be able to filter using the Invoice Type values set in the Billing To master","group_primary":"Search","group_secondary":"Filter","group_tertiary":"Filter Options Source","behaviour":"Verify the full Invoice Type value set of the master is selectable (first, last, and all values of the master field)","req_ids":["REQ-004"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":true,"risk":"M","notes":"Boundary on the rule's own value set (the rule carries no numbers). EX-003."},{"tm_id":"ID-CHECK-015","group_requirement":"Should be able to filter using the Invoice Type values set in the Billing To master","group_primary":"Search","group_secondary":"Filter","group_tertiary":"Filter Options Source","behaviour":"Not able to select or inject Invoice Type options that are not values of the Billing To master (foreign values, including the deprecated payment/advance_payment values, never appear and never match)","req_ids":["REQ-004"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":true,"risk":"H","notes":"EX-002: 'Invoice Type' label historically belonged to other fields (sales_billing_category label, deprecated invoice_type field) — this entry guards the binding."},{"tm_id":"ID-CHECK-016","group_requirement":"Should be able to filter using the Invoice Type values set in the Billing To master","group_primary":"Search","group_secondary":"Filter","group_tertiary":"Filter Options Source","behaviour":"Verify filter options track 0, 1, and many distinct Invoice Type values set on Billing To masters","req_ids":["REQ-004"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":true,"risk":"M","notes":"Count on the governed entity (the master's option set). EX-003."},{"tm_id":"ID-CHECK-017","group_requirement":"Should be able to filter using the Invoice Type values set in the Billing To master","group_primary":"Search","group_secondary":"Filter","group_tertiary":"Filter Options Source","behaviour":"Verify options and row values follow the same master after its Invoice Type is edited (relation by id)","req_ids":["REQ-004","REQ-005"],"layer_targets":["be"],"conflict_with":[],"change_expected":false,"risk":"H","notes":"Cross-REQ interaction REQ-004 x REQ-005; oracle per AMB-003 answer ('Ikut terupdate karena relasinya dari id')."},{"tm_id":"ID-CHECK-018","group_requirement":"Should be able to output the same Invoice Type value as the screen in each downloaded row","group_primary":"Download","group_secondary":"List","group_tertiary":"Screen-Download Parity","behaviour":"Able to output in each downloaded row the same Invoice Type value shown on the screen for that Invoice Number","req_ids":["REQ-013"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"H","notes":"Parity asserted per locale; exact label text is locale-dependent, equality across surfaces is the oracle."},{"tm_id":"ID-CHECK-019","group_requirement":"Should be able to output the same Invoice Type value as the screen in each downloaded row","group_primary":"Download","group_secondary":"List","group_tertiary":"Screen-Download Parity","behaviour":"Not able to see a substituted value for invoices without an Invoice Type: blank on screen and blank in the downloaded row","req_ids":["REQ-013"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":true,"risk":"M","notes":"AMB-002 answer: 'blank'. EX-004: blank rendering of False is FE-delegated and unverified."},{"tm_id":"ID-CHECK-020","group_requirement":"Should be able to output the same Invoice Type value as the screen in each downloaded row","group_primary":"Download","group_secondary":"List","group_tertiary":"Screen-Download Parity","behaviour":"Verify the downloaded value follows the current master when the Invoice Type is edited between viewing the screen and downloading","req_ids":["REQ-013","REQ-005"],"layer_targets":["be"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Sequencing probe (view at T1, master edit at T2, download at T3); oracle per AMB-003."},{"tm_id":"ID-CHECK-021","group_requirement":"Should be able to see an Invoice Type column in the Invoice List detail table","group_primary":"Display","group_secondary":"List","group_tertiary":"Invoice Type Column","behaviour":"Able to see the Invoice Type column in the Invoice List search result detail table","req_ids":["REQ-002"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":true,"risk":"M","notes":"EX-001: FE rendering unverifiable until the FE repo is locatable."},{"tm_id":"ID-CHECK-022","group_requirement":"Should be able to see an Invoice Type column in the Invoice List detail table","group_primary":"Display","group_secondary":"List","group_tertiary":"Invoice Type Column","behaviour":"Able to see the Invoice Type column persist with unchanged values after refreshing the search result view","req_ids":["REQ-002"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Flow-mandatory interrupt (refresh)."},{"tm_id":"ID-CHECK-023","group_requirement":"Should be able to see an Invoice Type column in the Invoice List detail table","group_primary":"Display","group_secondary":"List","group_tertiary":"Invoice Type Column","behaviour":"Not able to see invoice data after session loss mid-view; the user is redirected and the result area exposes nothing","req_ids":["REQ-002"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Flow-mandatory interrupt (session loss)."},{"tm_id":"ID-CHECK-024","group_requirement":"Should be able to see each Invoice List row display the Invoice Type of its Invoice Number","group_primary":"Display","group_secondary":"List","group_tertiary":"Row Value Resolution","behaviour":"Able to see each row display the Invoice Type linked to that row's Invoice Number (via its Billing To master)","req_ids":["REQ-005"],"layer_targets":["be"],"conflict_with":[],"change_expected":false,"risk":"H","notes":"Value resolution is pure BE (stored related field on sales.billing.invoice)."},{"tm_id":"ID-CHECK-025","group_requirement":"Should be able to see each Invoice List row display the Invoice Type of its Invoice Number","group_primary":"Display","group_secondary":"List","group_tertiary":"Row Value Resolution","behaviour":"Verify an invoice with no resolvable Invoice Type (masterless or cleared master type) displays blank, not an error and not a default label","req_ids":["REQ-005"],"layer_targets":["be"],"conflict_with":[],"change_expected":true,"risk":"M","notes":"Edge of the value domain; AMB-002 answer: 'blank'. EX-004."},{"tm_id":"ID-CHECK-026","group_requirement":"Should be able to see each Invoice List row display the Invoice Type of its Invoice Number","group_primary":"Display","group_secondary":"List","group_tertiary":"Row Value Resolution","behaviour":"Verify row value resolution for 0, 1, and many invoices (empty list; single row; many rows across different masters each showing its own master's type)","req_ids":["REQ-005"],"layer_targets":["be"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Count on the governed entity (invoice rows)."},{"tm_id":"ID-CHECK-027","group_requirement":"Should be able to see each Invoice List row display the Invoice Type of its Invoice Number","group_primary":"Display","group_secondary":"List","group_tertiary":"Row Value Resolution","behaviour":"Verify existing invoice rows display the CURRENT Billing To master Invoice Type after a master edit or master reassignment (relation by id, not the value at issuance)","req_ids":["REQ-005"],"layer_targets":["be"],"conflict_with":[],"change_expected":false,"risk":"H","notes":"Combination with the master-update rule; oracle per AMB-003 answer."},{"tm_id":"ID-CHECK-028","group_requirement":"Should be able to use an Invoice Type filter item in the Invoice List search condition area","group_primary":"Search","group_secondary":"Manual","group_tertiary":"Invoice Type Filter Item","behaviour":"Able to see and operate the Invoice Type filter item in the Invoice List (INV-060-013) search condition area","req_ids":["REQ-001"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":true,"risk":"M","notes":"EX-001: FE rendering unverifiable until the FE repo is locatable."},{"tm_id":"ID-CHECK-029","group_requirement":"Should be able to use an Invoice Type filter item in the Invoice List search condition area","group_primary":"Search","group_secondary":"Manual","group_tertiary":"Invoice Type Filter Item","behaviour":"Able to recover the filter flow after a mid-configuration refresh or rapid repeated Search clicks (filter item still present, search re-runs cleanly)","req_ids":["REQ-001"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Flow-mandatory interrupt (refresh / double-submit)."},{"tm_id":"ID-CHECK-030","group_requirement":"Should be able to use an Invoice Type filter item in the Invoice List search condition area","group_primary":"Search","group_secondary":"Manual","group_tertiary":"Invoice Type Filter Item","behaviour":"Not able to continue configuring the filter after session loss; re-login restores the filter item","req_ids":["REQ-001"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Flow-mandatory interrupt (session loss)."},{"tm_id":"ID-CHECK-031","group_requirement":"Should keep Invoice List display, search, and download performance at the current level","group_primary":"Display","group_secondary":"List","group_tertiary":"Performance Level","behaviour":"Verify Invoice List display, search, and download complete at the current performance level (no significant delay versus the pre-change baseline)","req_ids":["REQ-011"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"testable:false REQ designed anyway: behaviour observable, threshold waived by PM (AMB-001 answer: 'No Need'). No invented number; baseline comparison is the oracle."},{"tm_id":"ID-CHECK-032","group_requirement":"Should keep guest user permissions on the Invoice List unchanged","group_primary":"Permission","group_secondary":"Manual","group_tertiary":"Guest Access","behaviour":"Able to display, search (with the Invoice Type filter), and download as a guest user exactly as before the modification","req_ids":["REQ-007"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":true,"risk":"H","notes":"Permission positive. EX-005: guest baseline for this model is not captured anywhere in current code or tests."},{"tm_id":"ID-CHECK-033","group_requirement":"Should keep guest user permissions on the Invoice List unchanged","group_primary":"Permission","group_secondary":"Manual","group_tertiary":"Guest Access","behaviour":"Not able to access Invoice List display, search, or download without Invoice List permission; rejection is unchanged and the new field opens no new access path","req_ids":["REQ-007"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":true,"risk":"H","notes":"Permission negative for excluded actor. EX-005."},{"tm_id":"ID-CHECK-034","group_requirement":"Should keep guest user permissions on the Invoice List unchanged","group_primary":"Permission","group_secondary":"Manual","group_tertiary":"Guest Access","behaviour":"Verify two guest accounts using the Invoice List simultaneously receive the same correct Invoice Type data with no cross-session interference","req_ids":["REQ-007"],"layer_targets":["be"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Permission multi-user (two accounts, same resource)."},{"tm_id":"ID-CHECK-035","group_requirement":"Should keep guest user permissions on the Invoice List unchanged","group_primary":"Permission","group_secondary":"Manual","group_tertiary":"Guest Access","behaviour":"Verify rapid repeated guest searches and downloads return consistent results without errors, escalation, or corrupted exports","req_ids":["REQ-007"],"layer_targets":["be"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Permission flood (rapid-fire same action)."},{"tm_id":"ID-CHECK-036","group_requirement":"Should keep the archive function unaffected by this modification","group_primary":"Delete","group_secondary":"List","group_tertiary":"Archive Regression","behaviour":"Not able to observe any archive behavior change: archiving from the Invoice List behaves identically to the pre-change baseline and archived invoices leave the list and download exactly as before","req_ids":["REQ-008"],"layer_targets":["be"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Constraint confirmation: the excluded behaviour is 'this modification affects archive'."},{"tm_id":"ID-CHECK-037","group_requirement":"Should keep the closing process unaffected by this modification","group_primary":"Confirm","group_secondary":"Batch","group_tertiary":"Closing Regression","behaviour":"Not able to observe any closing process change on data carrying Invoice Type: closing completes identically to the pre-change baseline and Invoice Type still resolves afterwards","req_ids":["REQ-009"],"layer_targets":["be"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Constraint confirmation."},{"tm_id":"ID-CHECK-038","group_requirement":"Should keep time zone display behavior unaffected by this modification","group_primary":"Display","group_secondary":"List","group_tertiary":"Timezone Regression","behaviour":"Not able to observe any time zone display change: datetime columns render in the user's time zone exactly as before, and the Invoice Type value is identical across time zones","req_ids":["REQ-010"],"layer_targets":["be","fe"],"conflict_with":[],"change_expected":false,"risk":"M","notes":"Constraint confirmation."}],"test_cases":[{"tc_id":"TC-Auto-INV-001","title":"Should be able to display only invoices matching the selected Invoice Type after Search (per-type result sets)","tm_ids":["ID-CHECK-001"],"req_ids":["REQ-012"],"jenis":"positive","priority":"P1","layer":"api-integration","preconditions":["Invoice List (INV-060-013) accessible with a valid session","Billing To masters with distinct Invoice Types exist: BTM-A=super_simple, BTM-B=detailed, BTM-C=direct_debit","At least one invoice issued per master"],"steps":["POST /api/dataset/sales.billing.invoice/search_read with domain [('sales_billing_to_invoice_type','=','super_simple')]","Repeat the same call for 'detailed' and for 'direct_debit'","For each response, check every returned record's sales_billing_to_invoice_type value"],"test_data":{"filter_values":["super_simple","detailed","direct_debit"]},"expected_result":"Each search returns HTTP 200 and only invoices whose Invoice Type equals the selected value; no invoice of another type appears in any result set","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-002","title":"Should not be able to see non-matching invoices or an error on a zero-match Invoice Type filter (empty list, clean exclusion)","tm_ids":["ID-CHECK-002"],"req_ids":["REQ-012"],"jenis":"negative","priority":"P2","layer":"api-integration","preconditions":["Dataset contains invoices of types super_simple, detailed, direct_debit","No invoice of type credit_card exists"],"steps":["POST search_read with domain [('sales_billing_to_invoice_type','=','credit_card')]","POST search_read with domain [('sales_billing_to_invoice_type','=','super_simple')] on the mixed dataset","Inspect returned records for non-matching types"],"test_data":{"zero_match_value":"credit_card","mixed_types":["super_simple","detailed","direct_debit"]},"expected_result":"The zero-match domain returns HTTP 200 with an empty record list (no error, no crash); the filtered mixed dataset contains no row of a type other than the filtered value","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-003","title":"Should be able to get the identical filtered result set after refresh and repeated Search clicks (no duplication or error)","tm_ids":["ID-CHECK-003"],"req_ids":["REQ-012"],"jenis":"interrupt","priority":"P2","layer":"e2e","preconditions":["Invoice List screen open with invoices of multiple Invoice Types"],"steps":["Select Invoice Type super_simple in the filter and click Search","Browser-refresh the page, then run the same search again","Click Search 5 times in rapid succession on the filtered state","Compare the row sets of every execution"],"test_data":{"filter_value":"super_simple","rapid_clicks":5},"expected_result":"The screen re-renders without error after refresh; every repeated search returns the identical row set for the same filter; no duplicated rows and no error messages","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-004","title":"Should not be able to view filtered invoice data after session loss mid-search (auth redirect, no data leak)","tm_ids":["ID-CHECK-004"],"req_ids":["REQ-012"],"jenis":"interrupt","priority":"P2","layer":"e2e","preconditions":["User is on the Invoice List with an Invoice Type value already selected but Search not yet clicked"],"steps":["Expire the session (clear the session cookie / invalidate the token)","Click Search","Re-login and repeat the same filtered search"],"test_data":{"filter_value":"super_simple"},"expected_result":"The search attempt results in an authentication error or login redirect and returns no invoice data; after re-login the same filter search works and returns the correct matching rows","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-005","title":"Should be able to download exactly the on-screen matching rows from a filter-active list (screen and file agree)","tm_ids":["ID-CHECK-005"],"req_ids":["REQ-012","REQ-013"],"jenis":"combination","priority":"P2","layer":"api-integration","preconditions":["Invoices exist for at least two different Invoice Types","The list is currently filtered by one Invoice Type value"],"steps":["POST search_read with domain [('sales_billing_to_invoice_type','=','super_simple')] and record the screen rows","POST /api/dataset/sales.billing.invoice/download_excel with the same domain","Parse the workbook and compare row set and Invoice Type cells against the screen rows"],"test_data":{"filter_value":"super_simple"},"expected_result":"The downloaded file contains exactly the invoices currently displayed (only matching rows), and each row's Invoice Type cell equals the value shown on screen for that Invoice Number","automation_candidate":true,"ambiguity_refs":["AMB-002"]},{"tc_id":"TC-Auto-INV-006","title":"Should be able to download Invoice List data that includes the Invoice Type item in every row","tm_ids":["ID-CHECK-006"],"req_ids":["REQ-003"],"jenis":"positive","priority":"P1","layer":"api-integration","preconditions":["At least two invoices with different Invoice Types exist"],"steps":["POST download_excel for sales.billing.invoice with the standard Invoice List headers including Invoice Type","Parse the workbook header row and every data row"],"test_data":{"model":"sales.billing.invoice","expected_header":"Invoice Type"},"expected_result":"HTTP 200; the workbook contains an 'Invoice Type' column and every exported row carries its Invoice Type value in that column","automation_candidate":true,"ambiguity_refs":["AMB-004"]},{"tc_id":"TC-Auto-INV-007","title":"Should not be able to find the Invoice Type item added to any artifact other than the Invoice List screen and its download file (List and Download only)","tm_ids":["ID-CHECK-007"],"req_ids":["REQ-003"],"jenis":"negative","priority":"P2","layer":"api-integration","preconditions":["An invoice with a Billing To master Invoice Type exists","Pre-change baseline of the billing invoice PDF report is available"],"steps":["Render the existing billing invoice PDF report for the seeded invoice","Compare the PDF output and its layout keys against the pre-change baseline","Check the other invoice-related report artifacts exposed by this screen family for any new Invoice Type item"],"test_data":{"invoice":"INV-LDX-000"},"expected_result":"No report or print artifact other than the Invoice List screen and its download file contains the new Invoice Type item; the invoice PDF output is unchanged versus the pre-change baseline (AMB-004 answer: 'List and Download only')","automation_candidate":true,"ambiguity_refs":["AMB-004"]},{"tc_id":"TC-Auto-INV-008","title":"Should be able to receive complete well-formed files when Download is triggered twice in rapid succession (double-submit)","tm_ids":["ID-CHECK-008"],"req_ids":["REQ-003"],"jenis":"interrupt","priority":"P2","layer":"api-integration","preconditions":["A filter-neutral invoice dataset exists"],"steps":["Fire two download_excel requests back-to-back without waiting for the first to finish","Parse both returned workbooks completely"],"test_data":{"concurrent_downloads":2},"expected_result":"Both responses are HTTP 200; each parsed workbook is complete and well-formed (no truncated or corrupted output) and both contain the same rows including the Invoice Type column","automation_candidate":true,"ambiguity_refs":["AMB-004"]},{"tc_id":"TC-Auto-INV-009","title":"Should not be able to download invoice data with an expired session (clean rejection, retry succeeds)","tm_ids":["ID-CHECK-009"],"req_ids":["REQ-003"],"jenis":"interrupt","priority":"P2","layer":"api-integration","preconditions":["A valid session exists and a download was just configured"],"steps":["Expire the session before starting the download","POST download_excel with the expired session","Re-login and retry the identical download"],"test_data":{"endpoint":"/api/dataset/sales.billing.invoice/download_excel"},"expected_result":"The expired-session download is rejected with an authentication error and no file is produced; after re-login the same download succeeds and contains the Invoice Type column","automation_candidate":true,"ambiguity_refs":["AMB-004"]},{"tc_id":"TC-Auto-INV-010","title":"Should be able to download with the Invoice Type column placed immediately to the right of the Billing To column (exact adjacency)","tm_ids":["ID-CHECK-010"],"req_ids":["REQ-006"],"jenis":"positive","priority":"P1","layer":"api-integration","preconditions":["At least one invoice exists so the download produces a header row"],"steps":["POST download_excel with the standard Invoice List headers","Parse the header row and compute index('Invoice Type') and index('Billing To')"],"test_data":{"left_neighbor":"Billing To","inserted_column":"Invoice Type"},"expected_result":"The header row of the downloaded file places 'Invoice Type' exactly one position after 'Billing To' (index difference of exactly 1)","automation_candidate":true,"ambiguity_refs":["AMB-004"]},{"tc_id":"TC-Auto-INV-011","title":"Should be able to keep every other column in its previous relative order (single insertion, no collateral shift)","tm_ids":["ID-CHECK-011"],"req_ids":["REQ-006"],"jenis":"boundary","priority":"P2","layer":"api-integration","preconditions":["Pre-change baseline column list of the Invoice List download is recorded"],"steps":["Download the file and extract the full ordered header list","Remove the inserted 'Invoice Type' column from the list","Compare the remaining sequence with the pre-change baseline order"],"test_data":{"inserted_column":"Invoice Type"},"expected_result":"After removing exactly one 'Invoice Type' occurrence, the remaining columns match the pre-change baseline order; only one new column exists and it sits between 'Billing To' and the column that previously followed it","automation_candidate":true,"ambiguity_refs":["AMB-004"]},{"tc_id":"TC-Auto-INV-012","title":"Should be able to see a stable Invoice Type column position when the download is triggered repeatedly","tm_ids":["ID-CHECK-012"],"req_ids":["REQ-006"],"jenis":"interrupt","priority":"P2","layer":"api-integration","preconditions":["Invoice dataset unchanged between requests"],"steps":["Trigger download_excel three times in sequence","Parse each header row and record the position of 'Invoice Type' relative to 'Billing To'"],"test_data":{"repeats":3},"expected_result":"Every response places 'Invoice Type' immediately right of 'Billing To'; the layout is deterministic across repeated triggers","automation_candidate":true,"ambiguity_refs":["AMB-004"]},{"tc_id":"TC-Auto-INV-013","title":"Should be able to select Invoice Type filter options that are the Invoice Type values set in the Billing To master","tm_ids":["ID-CHECK-013"],"req_ids":["REQ-004"],"jenis":"positive","priority":"P1","layer":"api-integration","preconditions":["Billing To masters exist carrying Invoice Type values (e.g. super_simple, detailed, direct_debit)"],"steps":["Read the option list the Invoice List filter exposes (selection of the invoice list Invoice Type field / values from the Billing To master)","Compare the offered options with the Invoice Type values set on the masters","Search once per offered option"],"test_data":{"master_types":["super_simple","detailed","direct_debit"]},"expected_result":"The filter offers exactly the Invoice Type values set on the Billing To master; every offered value is accepted by search (matched rows or a clean empty set)","automation_candidate":true,"ambiguity_refs":["AMB-002","AMB-003"]},{"tc_id":"TC-Auto-INV-014","title":"Should be able to select every Invoice Type value the master defines (first, last, and all values of the master field)","tm_ids":["ID-CHECK-014"],"req_ids":["REQ-004"],"jenis":"boundary","priority":"P1","layer":"api-integration","preconditions":["Billing To masters exist covering every Invoice Type value the master field defines"],"steps":["Read the exposed filter options","For each of the seven master values, select it and run a search"],"test_data":{"all_values":["detailed","simple","direct_debit","credit_card","envelope","envelope_simple","super_simple"]},"expected_result":"All Invoice Type values defined on the Billing To master field are selectable (first, last, and everything between), and each search completes successfully with only matching rows or a clean empty set","automation_candidate":true,"ambiguity_refs":["AMB-002","AMB-003"]},{"tc_id":"TC-Auto-INV-015","title":"Should not be able to select or inject Invoice Type options that are not values of the Billing To master (foreign and deprecated values never offered, never match)","tm_ids":["ID-CHECK-015"],"req_ids":["REQ-004"],"jenis":"negative","priority":"P1","layer":"api-integration","preconditions":["Masters carry only genuine Billing To Invoice Type values","Invoices exist whose deprecated invoice_type (payment/advance_payment) differs from their Billing To Invoice Type"],"steps":["Inspect every exposed filter option for foreign values","Force a search with each foreign value as domain","Verify no invoice is returned by a foreign value"],"test_data":{"foreign_values":["payment","advance_payment","all","detailed_typo",""]},"expected_result":"None of the foreign values (including the deprecated payment/advance_payment invoice type values) appear as filter options, and a search forced with any of them returns no invoice rows — filtering never matches on a field other than the Billing To master Invoice Type","automation_candidate":true,"ambiguity_refs":["AMB-002","AMB-003"]},{"tc_id":"TC-Auto-INV-016","title":"Should be able to see filter options track 0, 1, and many distinct Invoice Type values set on Billing To masters","tm_ids":["ID-CHECK-016"],"req_ids":["REQ-004"],"jenis":"count","priority":"P2","layer":"api-integration","preconditions":["Database states can be prepared: no masters with a type; one master with one type; many masters covering all types"],"steps":["State A: no Billing To master carries an Invoice Type — read the filter options","State B: exactly one master with one type — read the options","State C: many masters with all distinct types — read the options"],"test_data":{"states":["0_typed_masters","1_typed_master","many_typed_masters"]},"expected_result":"With no typed masters the filter exposes no Invoice Type value to select; with one typed master exactly that value; with many masters the union of their distinct values — options never include a value not set in the Billing To master and never duplicate a value","automation_candidate":true,"ambiguity_refs":["AMB-002","AMB-003"]},{"tc_id":"TC-Auto-INV-017","title":"Should be able to see options and rows follow the same master after its Invoice Type is edited (relation by id)","tm_ids":["ID-CHECK-017"],"req_ids":["REQ-004","REQ-005"],"jenis":"combination","priority":"P2","layer":"be-unit","preconditions":["Master BTM-A with invoice_print_type super_simple and an issued invoice INV-A"],"steps":["Write BTM-A.invoice_print_type = 'direct_debit' and flush","Read INV-A's Invoice Type and re-read the option membership","Search by the old value super_simple, then by the new value direct_debit"],"test_data":{"master":"BTM-A","from":"super_simple","to":"direct_debit"},"expected_result":"After the edit, the invoice row and the filterable value follow the current master value (relation by id per AMB-003); the old value no longer returns the invoice and the new value does; options and rows never disagree","automation_candidate":true,"ambiguity_refs":["AMB-002","AMB-003"]},{"tc_id":"TC-Auto-INV-018","title":"Should be able to output the same Invoice Type value as the screen in each downloaded row (parity across surfaces, en and ja locales)","tm_ids":["ID-CHECK-018"],"req_ids":["REQ-013"],"jenis":"positive","priority":"P1","layer":"api-integration","preconditions":["Invoices with at least two different Invoice Types exist","en_US and ja_JP locales are active"],"steps":["In en_US: read the list values per Invoice Number, then download and compare each Invoice Type cell","In ja_JP: repeat both reads and compare again","Flag any Invoice Number where screen and file disagree"],"test_data":{"locales":["en_US","ja_JP"]},"expected_result":"For every Invoice Number, the downloaded Invoice Type cell equals the value displayed on the screen in the same locale; parity holds in both en_US and ja_JP with no row mismatch","automation_candidate":true,"ambiguity_refs":["AMB-002"]},{"tc_id":"TC-Auto-INV-019","title":"Should not be able to see a substituted value for invoices without an Invoice Type (blank on screen and blank in the file)","tm_ids":["ID-CHECK-019"],"req_ids":["REQ-013"],"jenis":"negative","priority":"P2","layer":"api-integration","preconditions":["A masterless invoice exists","An invoice whose master's Invoice Type was cleared exists"],"steps":["Read both invoices' Invoice Type on the list","Download the same dataset and read both rows' Invoice Type cells"],"test_data":{"no_type_invoices":["masterless_invoice","cleared_master_invoice"]},"expected_result":"Both surfaces show blank for invoices without an Invoice Type — no placeholder, no default label, no error (AMB-002 answer: 'blank'); screen and file stay consistent","automation_candidate":true,"ambiguity_refs":["AMB-002"]},{"tc_id":"TC-Auto-INV-020","title":"Should be able to see the downloaded value follow the current master when the type is edited between viewing the screen and downloading","tm_ids":["ID-CHECK-020"],"req_ids":["REQ-013","REQ-005"],"jenis":"interrupt","priority":"P2","layer":"api-integration","preconditions":["Master BTM-A (super_simple) with invoice INV-A","Screen list rendered at time T1"],"steps":["Render the list showing INV-A's Invoice Type (T1)","Edit BTM-A.invoice_print_type to 'direct_debit' (T2) without refreshing the screen","Download the dataset (T3) and read INV-A's Invoice Type cell","Refresh the screen and re-read INV-A's value"],"test_data":{"master":"BTM-A","from":"super_simple","to":"direct_debit"},"expected_result":"The downloaded cell reflects the master's current Invoice Type at download time (direct_debit per AMB-003); the stale screen shows the old value until refreshed; no mixed or partial value appears anywhere","automation_candidate":true,"ambiguity_refs":["AMB-002","AMB-003"]},{"tc_id":"TC-Auto-INV-021","title":"Should be able to see an Invoice Type column in the Invoice List search result detail table (INV-060-013)","tm_ids":["ID-CHECK-021"],"req_ids":["REQ-002"],"jenis":"positive","priority":"P1","layer":"e2e","preconditions":["Invoice List screen opened with a search executed"],"steps":["Open the Invoice List and run any search returning rows","Inspect the detail table header for the Invoice Type column","Confirm the column shows a value on populated rows"],"test_data":{"screen":"INV-060-013","column_label":"Invoice Type"},"expected_result":"The search result detail table renders a column labeled 'Invoice Type' and populated rows display a value in it","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-022","title":"Should be able to see the Invoice Type column persist with unchanged values after refreshing the result view","tm_ids":["ID-CHECK-022"],"req_ids":["REQ-002"],"jenis":"interrupt","priority":"P2","layer":"e2e","preconditions":["Search results with Invoice Type values are on screen"],"steps":["Record the visible Invoice Type values per row","Browser-refresh the result view","Re-run the same search and compare values"],"test_data":{"refresh_target":"search_result_view"},"expected_result":"After refresh the detail table re-renders with the Invoice Type column present and the same values per Invoice Number; no error and no missing column","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-023","title":"Should not be able to see invoice data after session loss mid-view (redirect, empty result area)","tm_ids":["ID-CHECK-023"],"req_ids":["REQ-002"],"jenis":"interrupt","priority":"P2","layer":"e2e","preconditions":["Search results including Invoice Type values are displayed"],"steps":["Expire the session while the results are on screen","Attempt any interaction with the result table (sort, page, re-search)","Re-login and verify the results reappear"],"test_data":{"interrupt":"session_expiry"},"expected_result":"Interaction attempts redirect to login or return an authentication error; no invoice rows or Invoice Type values remain accessible; after re-login the same search restores the view","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-024","title":"Should be able to see each row display the Invoice Type linked to that row's Invoice Number (via its Billing To master)","tm_ids":["ID-CHECK-024"],"req_ids":["REQ-005"],"jenis":"positive","priority":"P1","layer":"be-unit","preconditions":["Invoices exist under masters with different Invoice Types"],"steps":["Read every invoice's Invoice Type value (sales_billing_to_invoice_type)","Read each invoice's Billing To master's Invoice Type","Compare per Invoice Number"],"test_data":{"invoice_master_pairs":3},"expected_result":"For every invoice row, the displayed Invoice Type equals the Invoice Type of the Billing To master linked to that Invoice Number","automation_candidate":true,"ambiguity_refs":["AMB-002","AMB-003"]},{"tc_id":"TC-Auto-INV-025","title":"Should be able to see blank (not an error or default label) for an invoice with no resolvable Invoice Type","tm_ids":["ID-CHECK-025"],"req_ids":["REQ-005"],"jenis":"boundary","priority":"P2","layer":"be-unit","preconditions":["A masterless invoice exists","An invoice whose master's Invoice Type is cleared (False) exists"],"steps":["Read the Invoice Type value of the masterless invoice","Read the Invoice Type value of the invoice with the cleared-type master","Render both rows on the list"],"test_data":{"no_type_invoices":["masterless_invoice","cleared_master_invoice"]},"expected_result":"Both rows display blank — no error is raised, no default label is substituted (AMB-002 answer: 'blank')","automation_candidate":true,"ambiguity_refs":["AMB-002","AMB-003"]},{"tc_id":"TC-Auto-INV-026","title":"Should be able to resolve row values for 0, 1, and many invoices (empty list, single row, many rows across types)","tm_ids":["ID-CHECK-026"],"req_ids":["REQ-005"],"jenis":"count","priority":"P2","layer":"be-unit","preconditions":["Three dataset states preparable: zero invoices, one invoice, many invoices under different masters"],"steps":["State 0: search invoices — expect empty list without error","State 1: one invoice — read its Invoice Type","State N: many invoices across masters — read every row's Invoice Type and compare with its own master"],"test_data":{"states":["0_invoices","1_invoice","many_invoices"]},"expected_result":"0 invoices yields an empty list without error; 1 invoice yields its master's type; many invoices yield each row showing its own master's type with no cross-row bleed","automation_candidate":true,"ambiguity_refs":["AMB-002","AMB-003"]},{"tc_id":"TC-Auto-INV-027","title":"Should be able to see existing invoices follow the CURRENT Billing To master value after edit or reassignment (relation by id)","tm_ids":["ID-CHECK-027"],"req_ids":["REQ-005"],"jenis":"combination","priority":"P2","layer":"be-unit","preconditions":["Master BTM-P (super_simple) with invoice INV-P","Master BTM-Q (detailed)"],"steps":["Variant 1: edit BTM-P to 'direct_debit', flush, read INV-P","Variant 2: reassign the billing to BTM-Q, flush, read INV-P; then edit old master BTM-P to 'credit_card' and read INV-P again","Variant 3: clear BTM-Q's Invoice Type (False), flush, read INV-P"],"test_data":{"masters":["BTM-P","BTM-Q"],"edits":["super_simple->direct_debit","reassign->BTM-Q","clear->False"]},"expected_result":"Each mutation recomputes INV-P's Invoice Type from the current master relation (AMB-003 answer: 'Ikut terupdate karena relasinya dari id'): after edit it shows direct_debit; after reassignment it shows detailed and later edits of the old master do not leak; after clearing it shows blank per AMB-002","automation_candidate":true,"ambiguity_refs":["AMB-002","AMB-003"]},{"tc_id":"TC-Auto-INV-028","title":"Should be able to use an Invoice Type filter item in the Invoice List search condition area (screen INV-060-013)","tm_ids":["ID-CHECK-028"],"req_ids":["REQ-001"],"jenis":"positive","priority":"P1","layer":"e2e","preconditions":["Invoice List screen (INV-060-013) opened by an authorized user"],"steps":["Inspect the search condition area for the Invoice Type filter item","Open the filter and select any offered value","Execute a search with the value selected"],"test_data":{"screen":"INV-060-013","filter_label":"Invoice Type"},"expected_result":"The search condition area shows an 'Invoice Type' filter item; its options are selectable and a search using the item executes normally","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-029","title":"Should be able to recover the filter flow after a mid-configuration refresh or rapid repeated Search clicks","tm_ids":["ID-CHECK-029"],"req_ids":["REQ-001"],"jenis":"interrupt","priority":"P2","layer":"e2e","preconditions":["Invoice List open, filter not yet used"],"steps":["Open the Invoice Type filter, then browser-refresh before searching","Verify the filter item is present after refresh","Select a value and click Search 5 times rapidly"],"test_data":{"rapid_clicks":5},"expected_result":"After refresh the Invoice Type filter item is present and a fresh search runs cleanly; 5 rapid Search submissions produce one consistent result set without duplicated rows or errors","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-030","title":"Should not be able to continue configuring the filter after session loss (auth redirect, no search executed)","tm_ids":["ID-CHECK-030"],"req_ids":["REQ-001"],"jenis":"interrupt","priority":"P2","layer":"e2e","preconditions":["User is mid-configuration: the Invoice Type dropdown is open or a value is chosen, Search not clicked"],"steps":["Expire the session","Attempt to select a value / click Search","Re-login and open the filter again"],"test_data":{"interrupt":"session_expiry"},"expected_result":"The attempt redirects to login or returns an authentication error and no search executes; after re-login the Invoice Type filter item is available again and works","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-031","title":"Should be able to keep Invoice List display, search, and download at the current performance level (no significant delay vs pre-change baseline)","tm_ids":["ID-CHECK-031"],"req_ids":["REQ-011"],"jenis":"non-functional","priority":"P2","layer":"api-integration","preconditions":["A volume invoice dataset is seeded (e.g. 10,000+ rows spanning multiple Invoice Types)","Pre-change baseline timings for list display, search, and download are captured in the same environment"],"steps":["Time an unfiltered list search_read on the volume dataset","Time a filtered search (by Invoice Type) on the same dataset","Time a full download of the same dataset and compare all three against the baseline"],"test_data":{"dataset_rows":10000,"operations":["list","filtered_search","download"]},"expected_result":"All three operations complete successfully (HTTP 200, valid file) with durations showing no significant degradation versus the pre-change baseline; PM confirmed no numeric threshold applies (AMB-001 answer: 'No Need'), so the baseline comparison is the oracle","automation_candidate":false,"ambiguity_refs":["AMB-001"]},{"tc_id":"TC-Auto-INV-032","title":"Should be able to display, search (with Invoice Type filter), and download as a guest user exactly as before the modification","tm_ids":["ID-CHECK-032"],"req_ids":["REQ-007"],"jenis":"positive","priority":"P1","layer":"api-integration","preconditions":["A guest account provisioned with the pre-change Invoice List permission set exists","Pre-change outcome baseline (allowed/denied per operation) is recorded"],"steps":["Log in as the guest account","Display the Invoice List, search with an Invoice Type filter, and download the result","Compare the three outcomes and the data with the pre-change baseline"],"test_data":{"actor":"guest_user","operations":["display","search","download"]},"expected_result":"Guest outcomes are identical to the pre-change baseline: operations allowed before still succeed and return the same data (including correct Invoice Type values); nothing the guest could not do before becomes possible or breaks","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-033","title":"Should not be able to access Invoice List display, search, or download without Invoice List permission (unchanged rejection, no new access path)","tm_ids":["ID-CHECK-033"],"req_ids":["REQ-007"],"jenis":"negative","priority":"P2","layer":"api-integration","preconditions":["A user (guest or internal) without Invoice List access exists"],"steps":["Attempt list search_read, Invoice Type-filtered search_read, and download_excel as this user","Compare rejections with the pre-change baseline"],"test_data":{"actor":"unauthorized_user","operations":["display","search","download"]},"expected_result":"All three operations are rejected exactly as before the modification; the new Invoice Type field and filter open no additional access path to invoice data","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-034","title":"Should be able to serve two guest accounts on the Invoice List simultaneously with the same correct Invoice Type data","tm_ids":["ID-CHECK-034"],"req_ids":["REQ-007"],"jenis":"multi-user","priority":"P2","layer":"api-integration","preconditions":["Two guest accounts with Invoice List access exist","Both target the same invoice dataset"],"steps":["Open two sessions (guest A and guest B)","Concurrently run the same Invoice Type-filtered search from both","Have guest A download while guest B searches","Compare results and data between sessions"],"test_data":{"sessions":["guest_a","guest_b"],"filter_value":"super_simple"},"expected_result":"Both sessions receive identical, correct results for the same filter with no cross-session data mixing, no blocking, and no errors","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-035","title":"Should be able to handle rapid repeated guest searches and downloads without errors, escalation, or inconsistent data","tm_ids":["ID-CHECK-035"],"req_ids":["REQ-007"],"jenis":"flood","priority":"P2","layer":"api-integration","preconditions":["Guest session with Invoice List access"],"steps":["Fire 10 rapid search requests (mixed unfiltered and Invoice Type-filtered) as the guest","Fire 3 rapid download requests","Inspect every response"],"test_data":{"search_requests":10,"download_requests":3},"expected_result":"All requests complete with consistent, correct results; no permission escalation, no server errors, no duplicated or corrupted exports","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-036","title":"Should not be able to observe any archive behavior change after the Invoice Type addition (archive regression)","tm_ids":["ID-CHECK-036"],"req_ids":["REQ-008"],"jenis":"negative","priority":"P2","layer":"api-integration","preconditions":["An invoice carrying a populated Invoice Type exists","The pre-change archive baseline for the same flow is recorded"],"steps":["Execute the Invoice List archive action on the invoice","Re-search the list for the archived invoice","Download the same dataset and check for the archived invoice","Compare all outcomes with the pre-change baseline"],"test_data":{"invoice":"INV-ARCH","action":"archive"},"expected_result":"Archive completes with the same outcome as the pre-change baseline; the archived invoice no longer appears in list or download exactly as before; the Invoice Type field neither blocks nor alters archiving and no error mentions it","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-037","title":"Should not be able to observe any closing process change on data carrying Invoice Type (closing regression)","tm_ids":["ID-CHECK-037"],"req_ids":["REQ-009"],"jenis":"negative","priority":"P2","layer":"api-integration","preconditions":["Billings with invoices carrying Invoice Type exist in an open period","The pre-change closing baseline for the same data shape is recorded"],"steps":["Run the closing process on the period containing these invoices","After closing, read the Invoice List and download the dataset","Compare closing outcome and post-closing display with the baseline"],"test_data":{"process":"closing","dataset":"invoices_with_invoice_type"},"expected_result":"The closing process completes with the same outcome as the pre-change baseline; afterwards the list and download still resolve each Invoice Type correctly and no closing error references the new field","automation_candidate":true,"ambiguity_refs":[]},{"tc_id":"TC-Auto-INV-038","title":"Should not be able to observe any time zone display change (datetime columns unchanged, Invoice Type TZ-invariant)","tm_ids":["ID-CHECK-038"],"req_ids":["REQ-010"],"jenis":"negative","priority":"P2","layer":"api-integration","preconditions":["User timezone settable (Asia/Tokyo and UTC)","Pre-change baseline rendering of datetime columns is recorded"],"steps":["Set user TZ to Asia/Tokyo: read the list and download; record datetime columns and Invoice Type cells","Switch TZ to UTC and repeat both reads","Compare datetime rendering with the baseline and Invoice Type values across TZs"],"test_data":{"timezones":["Asia/Tokyo","UTC"]},"expected_result":"Datetime columns render in the user's time zone exactly as before the modification in both list and download; the Invoice Type value is identical across time zones (TZ-invariant label)","automation_candidate":true,"ambiguity_refs":[]}],"answer_keys":[{"ak_id":"AK-001","tc_id":"TC-Auto-INV-001","why":"Requires multi-master/multi-invoice DB seeding and per-type filtered assertions (data-level verification)","prep":["Create billing.to.master rows: BTM-R151-A (invoice_print_type=super_simple), BTM-R151-B (detailed), BTM-R151-C (direct_debit)","Create one sales.billing per master (billing_category=invoice) and call _action_create_sales_bill_invoice() so each yields a sales.billing.invoice (INV-SS, INV-DT, INV-DD)"],"execution":["As admin, POST /api/dataset/sales.billing.invoice/search_read with domain [('sales_billing_to_invoice_type','=', '<value>')] once per value"],"assertions":["Each call returns HTTP 200","Domain super_simple returns exactly {INV-SS.id}; detailed returns {INV-DT.id}; direct_debit returns {INV-DD.id}","Every returned record's sales_billing_to_invoice_type equals the filtered value"],"example_table":[{"filter":"super_simple","returned_ids":["INV-SS"],"count":1},{"filter":"detailed","returned_ids":["INV-DT"],"count":1},{"filter":"direct_debit","returned_ids":["INV-DD"],"count":1}]},{"ak_id":"AK-002","tc_id":"TC-Auto-INV-005","why":"Two-surface comparison (filtered search_read + parsed workbook) with a zero-match control master","prep":["Seed as AK-001 plus master BTM-R151-D (credit_card) with no invoices","Record the screen rows: search_read with domain [('sales_billing_to_invoice_type','=','super_simple')]"],"execution":["POST /api/dataset/sales.billing.invoice/download_excel with the same domain and standard Invoice List headers","Parse the workbook rows and Invoice Type cells","Repeat both calls with domain credit_card (zero-match control)"],"assertions":["Filtered download row count equals the filtered search_read record count","Every downloaded row's Invoice Type cell matches the screen value for the same Invoice No (super_simple rows only)","INV-DT and INV-DD do not appear in the filtered file","Zero-match control: download returns HTTP 200 with a header row and zero data rows, mirroring the empty screen"],"example_table":[{"domain":"super_simple","screen_rows":1,"file_rows":1,"file_invoice_types":["super_simple"]},{"domain":"credit_card","screen_rows":0,"file_rows":0,"file_invoice_types":[]}]},{"ak_id":"AK-003","tc_id":"TC-Auto-INV-016","why":"Requires three DB population states and option-set assertions at each state","prep":["State A: fresh transaction with zero billing.to.master rows carrying an Invoice Type (archive or do not create any)","State B: create one master with invoice_print_type=simple","State C: add masters so all seven values are set across records"],"execution":["In each state, read the option values the Invoice List filter exposes (selection surface for sales_billing_to_invoice_type)","Compute the distinct set of invoice_print_type values present on billing.to.master"],"assertions":["State A: option set contains no Invoice Type value (0 typed masters -> nothing selectable)","State B: option set == {simple}","State C: option set == {detailed, simple, direct_debit, credit_card, envelope, envelope_simple, super_simple} with no duplicates","No state ever exposes a value absent from billing.to.master rows"],"example_table":[{"state":"A_0_masters","typed_master_values":0,"options_count":0,"options":[]},{"state":"B_1_master","typed_master_values":1,"options_count":1,"options":["simple"]},{"state":"C_many","typed_master_values":7,"options_count":7,"options":["detailed","simple","direct_debit","credit_card","envelope","envelope_simple","super_simple"]}]},{"ak_id":"AK-004","tc_id":"TC-Auto-INV-017","why":"Multi-step write/flush/read sequence verifying options and rows move together after a master edit","prep":["Create master BTM-X (invoice_print_type=super_simple) and invoice INV-X via sales.billing._action_create_sales_bill_invoice()"],"execution":["Write BTM-X.invoice_print_type = 'direct_debit'; flush","Read INV-X.sales_billing_to_invoice_type; re-read the filter option membership","ORM search [('sales_billing_to_invoice_type','=','super_simple')] and [('sales_billing_to_invoice_type','=','direct_debit')]"],"assertions":["INV-X reads direct_debit after the edit (relation by id, AMB-003)","Search by super_simple excludes INV-X; search by direct_debit includes INV-X","Option membership and row value agree on the same current master value"],"example_table":[{"step":"before edit","master_type":"super_simple","inv_x_type":"super_simple","search_super_simple_hits":1,"search_direct_debit_hits":0},{"step":"after edit","master_type":"direct_debit","inv_x_type":"direct_debit","search_super_simple_hits":0,"search_direct_debit_hits":1}]},{"ak_id":"AK-005","tc_id":"TC-Auto-INV-018","why":"Two-locale, two-surface parity matrix per Invoice Number","prep":["Seed masters super_simple and detailed with one invoice each","Activate ja_JP (lang install + terms load) alongside en_US"],"execution":["en_US: search_read values per invoice, then download_excel with en convert labels; build pairs","ja_JP: repeat with lang=ja_JP context and ja convert labels","Compare screen value vs file cell per Invoice Number per locale"],"assertions":["For every Invoice Number and locale: file cell == screen value (equality of the displayed label)","Locale change changes both surfaces consistently (no row where only one surface switches label)","Values are the localized labels in the active locale, never a raw mismatched-locale label"],"example_table":[{"locale":"en_US","invoice":"INV-SS","screen_value":"super_simple label (en)","file_cell":"same as screen","match":true},{"locale":"ja_JP","invoice":"INV-SS","screen_value":"super_simple label (ja)","file_cell":"same as screen","match":true}]},{"ak_id":"AK-006","tc_id":"TC-Auto-INV-027","why":"Three-mutation sequence with DB-level recompute assertions (edit, reassign, clear)","prep":["Create BTM-P (super_simple) and BTM-Q (detailed)","Create billing under BTM-P; generate invoice INV-P"],"execution":["Variant 1: BTM-P.invoice_print_type = 'direct_debit'; flush; read INV-P","Variant 2: billing.billing_to_master_id = BTM-Q; flush; read INV-P; then BTM-P.invoice_print_type = 'credit_card'; flush; read INV-P","Variant 3: BTM-Q.invoice_print_type = False; flush; read INV-P"],"assertions":["Variant 1: INV-P == direct_debit (current master value, AMB-003)","Variant 2: INV-P == detailed; stays detailed after the old master's later edit (no leak)","Variant 3: INV-P is False -> displays blank (AMB-002)","sales_billing_invoice table has no NULL sales_billing_to_invoice_type after each flush"],"example_table":[{"step":"after edit","inv_p_type":"direct_debit","displays":"direct_debit"},{"step":"after reassign + old master edit","inv_p_type":"detailed","displays":"detailed"},{"step":"after clear","inv_p_type":false,"displays":"blank"}]},{"ak_id":"AK-007","tc_id":"TC-Auto-INV-036","why":"Multi-step archive flow with post-action DB and export assertions against a captured baseline","prep":["Create master + billing + invoice INV-ARCH with a populated Invoice Type","Record the pre-change archive baseline for the identical flow (action outcome, post-archive visibility)"],"execution":["Execute the Invoice List archive action on INV-ARCH","search_read for INV-ARCH afterwards","download_excel the same dataset afterwards"],"assertions":["Archive action outcome equals the baseline (same success/failure and message set)","Post-archive search_read does not return INV-ARCH (matching baseline behavior)","Post-archive download contains no INV-ARCH row","No error or warning references Invoice Type or the new field"],"example_table":[{"step":"before archive","list_hits":1,"download_rows":1},{"step":"after archive","list_hits":0,"download_rows":0}]}],"coverage":{"reqs_without_tm":[],"tm_without_tc":[],"skipped_requirements":[],"conflicts_detected":[]},"heuristic_checklist":[{"hc_id":"HC-01","heuristic":"Numbers (Data Type Attacks)","status":"applied","evidence":"ID-CHECK-011 (column index adjacency, +1 exactly), ID-CHECK-016 (0/1/many option states), ID-CHECK-026 (0/1/many rows), TC-Auto-INV-031 volume sizing; no other numeric surface exists in this PRD"},{"hc_id":"HC-02","heuristic":"Strings (Data Type Attacks)","status":"applied","evidence":"Blank-vs-value edges (TC-Auto-INV-019, TC-Auto-INV-025) and multi-script label parity ja_JP (TC-Auto-INV-018); no free-text input surface exists (selection filter only)"},{"hc_id":"HC-03","heuristic":"Time & Date (Data Type Attacks)","status":"applied","evidence":"TC-Auto-INV-038 (TZ Asia/Tokyo vs UTC, TZ-invariant label), TC-Auto-INV-020 (read-edit-download ordering)"},{"hc_id":"HC-04","heuristic":"Paths/Files (Data Type Attacks)","status":"applied","evidence":"Download file integrity: TC-Auto-INV-008 (double download, well-formed workbook), TC-Auto-INV-012 (stable layout on repeat), TC-Auto-INV-009 (no partial file on session loss)"},{"hc_id":"HC-05","heuristic":"General (Data Type Attacks)","status":"applied","evidence":"Domain/uniqueness violations: foreign filter values never match (TC-Auto-INV-015), unauthorized access rejected (TC-Auto-INV-033)"},{"hc_id":"HC-06","heuristic":"Navigation (Web Tests)","status":"applied","evidence":"Refresh-after-search (TC-Auto-INV-003, TC-Auto-INV-022), refresh mid-configuration (TC-Auto-INV-029), back-to-flow after re-login (TC-Auto-INV-004, TC-Auto-INV-030)"},{"hc_id":"HC-07","heuristic":"Input (Web Tests)","status":"na","evidence":"No free-text or textarea input in scope: the Invoice Type filter is selection-based and the PRD adds no text entry (injection probes would test unchanged platform behavior)"},{"hc_id":"HC-08","heuristic":"Preferences (Web Tests)","status":"na","evidence":"PRD section 4.4 declares only Guest/Archive/Closing/Timezone/Performance as ambient concerns; JS-off/cookies-off and font/resize matrices are out of scope for a filter+column addition"},{"hc_id":"HC-09","heuristic":"Accessibility (Web Tests)","status":"deferred","evidence":"Keyboard operability and labeling of the new filter are designable but not verifiable now: FE repo unavailable (EX-001); redesign FE keyboard/focus TCs once the FE source is locatable"},{"hc_id":"HC-10","heuristic":"Seen and Heard (Ady Stokes)","status":"na","evidence":"No audio or screen-reader surface is part of this PRD; no audible content exists on the Invoice List"},{"hc_id":"HC-11","heuristic":"BINMEN (API Tests)","status":"applied","evidence":"Boundary (zero-match, TC-Auto-INV-002), Invalid (foreign values, TC-Auto-INV-015), NULL/Empty (blank type, TC-Auto-INV-019/025; empty result set, TC-Auto-INV-002); Method-verb variants are generic platform behavior untouched by RINGI-0151, excluded to avoid padding"},{"hc_id":"HC-12","heuristic":"POISED (API Tests)","status":"applied","evidence":"Parameters (domain variants, TC-Auto-INV-001/002), Output (file layout, TC-Auto-INV-010/011), Interop (locale labels, TC-Auto-INV-018), Security (TC-Auto-INV-032/033), Errors (zero-match, auth rejection), Data (0/1/many, TC-Auto-INV-016/026)"},{"hc_id":"HC-13","heuristic":"VADER (API Tests)","status":"applied","evidence":"Verbs (search_read/download_excel), authN/authZ (TC-Auto-INV-004/009/033), Data (locale and type variants), Errors (empty set, auth error), Responsiveness (TC-Auto-INV-031)"},{"hc_id":"HC-14","heuristic":"Mobile (Daniel Knott)","status":"na","evidence":"PRD and code cover the web admin Invoice List only; no mobile surface exists"},{"hc_id":"HC-15","heuristic":"Variable Analysis","status":"applied","evidence":"Enumerated before design: filter value, master type, master linkage, invoice count, locale, timezone, session state, actor type, request repetition, data volume — each varied in the matrix"},{"hc_id":"HC-16","heuristic":"TouchPoints","status":"applied","evidence":"Touchpoints enumerated in code sweep: /api/dataset/sales.billing.invoice/search_read, /download_excel, selection/options surface, billing.to.master, archive action, closing process, streaming export"},{"hc_id":"HC-17","heuristic":"Boundaries","status":"applied","evidence":"Adjacency approached and exact (TC-Auto-INV-010/011), zero-match at the empty boundary (TC-Auto-INV-002), first/last/all selection values (TC-Auto-INV-014)"},{"hc_id":"HC-18","heuristic":"Goldilocks","status":"applied","evidence":"Too small: 0 masters/0 invoices (TC-Auto-INV-016/026); just right: 1 row (TC-Auto-INV-011 single-row domain); too big: 10,000+ rows (TC-Auto-INV-031)"},{"hc_id":"HC-19","heuristic":"CRUD","status":"applied","evidence":"Read (list/download TCs), Update (master type edits TC-Auto-INV-017/027), Delete-equivalent (archive regression TC-Auto-INV-036); Create of invoices is prep-only — the PRD adds no create behavior"},{"hc_id":"HC-20","heuristic":"Follow the Data","status":"applied","evidence":"master -> billing -> invoice -> screen -> file chain verified at each step (TC-Auto-INV-017, TC-Auto-INV-020, TC-Auto-INV-027)"},{"hc_id":"HC-21","heuristic":"Count","status":"applied","evidence":"TC-Auto-INV-016 (0/1/many option values), TC-Auto-INV-026 (0/1/many invoice rows)"},{"hc_id":"HC-22","heuristic":"Selection","status":"applied","evidence":"Some (single filter value, TC-Auto-INV-001), none (zero-match, TC-Auto-INV-002), all (full value set, TC-Auto-INV-014)"},{"hc_id":"HC-23","heuristic":"Position","status":"applied","evidence":"Column position beginning/middle probing via exact adjacency and no-collateral-shift (TC-Auto-INV-010/011/012)"},{"hc_id":"HC-24","heuristic":"Dependencies","status":"applied","evidence":"billing.to.master -> sales.billing -> sales.billing.invoice tree walked with update/reassign/clear (TC-Auto-INV-027) and archive (TC-Auto-INV-036)"},{"hc_id":"HC-25","heuristic":"Constraints","status":"applied","evidence":"Required-blank analog (no-type master renders blank, TC-Auto-INV-025), invalid combinations (foreign filter values, TC-Auto-INV-015), scope constraint (List and Download only, TC-Auto-INV-007)"},{"hc_id":"HC-26","heuristic":"Input Method","status":"applied","evidence":"UI path (e2e select-in-dropdown: TC-Auto-INV-028/029) probed alongside direct API domain calls (TC-Auto-INV-001/002); depth limited by missing FE repo (EX-001)"},{"hc_id":"HC-27","heuristic":"Sequences","status":"applied","evidence":"Order varied: view-edit-download (TC-Auto-INV-020), edit-search (TC-Auto-INV-017), reassign-then-old-master-edit (TC-Auto-INV-027), repeat-search idempotence (TC-Auto-INV-003)"},{"hc_id":"HC-28","heuristic":"Sorting","status":"na","evidence":"PRD adds no sort behavior and changes no ordering; row ordering is unchanged list behavior guarded implicitly by the row-set equality assertions"},{"hc_id":"HC-29","heuristic":"Interruptions","status":"applied","evidence":"TC-Auto-INV-003/004 (search), 008/009 (download), 020 (mid-flow data change), 022/023 (view), 029/030 (filter configuration)"},{"hc_id":"HC-30","heuristic":"Starvation","status":"deferred","evidence":"Resource-starvation probes need a threshold or environment budget; PM waived numeric performance measurement (AMB-001 'No Need') and no load environment is specified"},{"hc_id":"HC-31","heuristic":"Configurations","status":"applied","evidence":"Locale configuration en/ja (TC-Auto-INV-018), timezone Asia/Tokyo/UTC (TC-Auto-INV-038)"},{"hc_id":"HC-32","heuristic":"Multi-User","status":"applied","evidence":"Two guest accounts, same resource, simultaneous (TC-Auto-INV-034)"},{"hc_id":"HC-33","heuristic":"Flood","status":"applied","evidence":"Rapid-fire guest requests (TC-Auto-INV-035), double download (TC-Auto-INV-008), 5x Search clicks (TC-Auto-INV-003/029)"},{"hc_id":"HC-34","heuristic":"State Analysis","status":"applied","evidence":"States mapped: master type set/edited/cleared, invoice masterless, session valid/expired, invoice active/archived, period open/closed (TC-Auto-INV-025/027/036/037, session TCs)"},{"hc_id":"HC-35","heuristic":"Map Making","status":"na","evidence":"Exploratory navigation aid, not a testable surface; base-state discipline is embedded in the seeded preconditions of every AK"},{"hc_id":"HC-36","heuristic":"Users & Scenarios / Seven Dwarfs / D&I","status":"applied","evidence":"Guest persona (TC-Auto-INV-032/034), unauthorized actor (TC-Auto-INV-033), impatient rapid-clicker (TC-Auto-INV-003/029/035), absent-minded refresher (TC-Auto-INV-022)"},{"hc_id":"HC-37","heuristic":"Wisdom: question per test","status":"applied","evidence":"All 38 matrix entries are single-question Able to / Not able to / Verify statements; each TC states the distinct information its failure would reveal"},{"hc_id":"HC-38","heuristic":"Wisdom: contrary approach","status":"applied","evidence":"Every positive has a violation: matching display vs zero-match (001/002), options present vs foreign values (013/015), value shown vs blank (024/025), download works vs session loss (006/009), no-change constraints attempted (036/037/038)"},{"hc_id":"HC-39","heuristic":"Wisdom: vary","status":"applied","evidence":"Sequences varied (TC-Auto-INV-017/020/027), configurations varied (018/038), data varied (014/016/026)"},{"hc_id":"HC-40","heuristic":"Judgement framework (Lyndsay)","status":"applied","evidence":"Absences/inconsistencies vs PRD recorded as EX-001..EX-005 (FE gap, label collision, options source, blank rendering, guest baseline) instead of being asserted as expected results"},{"hc_id":"HC-41","heuristic":"Wisdom: bugs cluster","status":"applied","evidence":"Deepened around two clusters: the Invoice-Type naming collision (EX-002 -> TC-Auto-INV-015 plus option TCs 013/014) and the FE/BE contract gap (EX-001/EX-003 -> e2e and options TCs)"},{"hc_id":"HC-42","heuristic":"RCRCRC (regression scope)","status":"applied","evidence":"Core (list/download happy paths), Risky (contract rename EX-002), Configuration-sensitive (locale/tz), all designed as baseline comparisons; no change-history doc exists, so Recent/Repaired items default to the branch's own ringi-0151 implementation notes"},{"hc_id":"HC-43","heuristic":"Wisdom: informative tests","status":"applied","evidence":"No padding: 38 TCs map 1:1 to 38 distinct behaviours; merged variants (locales, filter values, interrupt mechanisms) live inside single TCs as test_data arrays"}]}};
+    </script>
+    <script>
+      (function () {
+        "use strict";
+        var S = window.__PRDTESTKIT__;
+        if (!S) {
+          document.body.innerHTML =
+            "<p style='padding:20px'>Data payload missing — regenerate this page with the prd-testkit skill.</p>";
+          return;
+        }
+        var TYPES = [
+          "flow",
+          "validation",
+          "business-rule",
+          "permission",
+          "non-functional",
+          "constraint",
+        ];
+        var editing = {};
+
+        function el(tag, cls, text) {
+          var e = document.createElement(tag);
+          if (cls) e.className = cls;
+          if (text !== undefined && text !== null) e.textContent = String(text);
+          return e;
+        }
+        function chip(txt, extra) {
+          return el("span", "chip " + (extra || ""), txt);
+        }
+        function txt(v) {
+          return v === undefined || v === null ? "" : String(v);
+        }
+        function fmtList(arr) {
+          return Array.isArray(arr) ? arr.join(", ") : txt(arr);
+        }
+        function dl(parent, label, value) {
+          var dt = el("dt", null, label),
+            dd = el("dd");
+          dd.textContent = txt(value);
+          dd.style.whiteSpace = "pre-wrap";
+          parent.appendChild(dt);
+          parent.appendChild(dd);
+        }
+        function btn(label, fn, cls) {
+          var b = el("button", cls || "", label);
+          b.type = "button";
+          b.addEventListener("click", fn);
+          return b;
+        }
+
+        function tableInto(wrap, headers, rows) {
+          var t = document.createElement("table"),
+            thead = document.createElement("thead"),
+            tr = document.createElement("tr");
+          headers.forEach(function (h) {
+            tr.appendChild(el("th", null, h));
+          });
+          thead.appendChild(tr);
+          t.appendChild(thead);
+          var tb = document.createElement("tbody");
+          rows.forEach(function (cells) {
+            var r = document.createElement("tr");
+            cells.forEach(function (c) {
+              if (c) r.appendChild(c);
+            });
+            tb.appendChild(r);
+          });
+          t.appendChild(tb);
+          wrap.appendChild(t);
+          return t;
+        }
+        function tdText(v, cls) {
+          return el("td", cls || "", txt(v));
+        }
+        function tdChips(list, cls) {
+          var td = el("td");
+          (list || []).forEach(function (v, i) {
+            if (i) td.appendChild(document.createTextNode(" "));
+            td.appendChild(chip(v, cls));
+          });
+          return td;
+        }
+
+        function escCsv(v) {
+          v = txt(v).replace(/"/g, '""');
+          return /[",\n]/.test(v) ? '"' + v + '"' : v;
+        }
+        function toCsv(headers, rows) {
+          return (
+            headers.map(escCsv).join(",") +
+            "\n" +
+            rows
+              .map(function (r) {
+                return r.map(escCsv).join(",");
+              })
+              .join("\n")
+          );
+        }
+        function escTsv(v) {
+          return txt(v).replace(/\t/g, " ").replace(/\r?\n/g, " ");
+        }
+        function toTsv(headers, rows) {
+          return (
+            headers.map(escTsv).join("\t") +
+            "\n" +
+            rows
+              .map(function (r) {
+                return r.map(escTsv).join("\t");
+              })
+              .join("\n")
+          );
+        }
+        function copyText(text, btnEl) {
+          function done() {
+            if (btnEl) {
+              var old = btnEl.textContent;
+              btnEl.textContent = "Copied";
+              setTimeout(function () {
+                btnEl.textContent = old;
+              }, 1400);
+            }
+          }
+          function fallback() {
+            var ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+              document.execCommand("copy");
+              done();
+            } catch (e) {
+              window.prompt("Copy manually:", text);
+            }
+            document.body.removeChild(ta);
+          }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, fallback);
+          } else fallback();
+        }
+        function download(name, content) {
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(
+            new Blob([content], {type: "application/json"}),
+          );
+          a.download = name;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function () {
+            URL.revokeObjectURL(a.href);
+            a.remove();
+          }, 500);
+        }
+        function copyBtns(getData) {
+          var span = el("span");
+          span.appendChild(
+            btn("Copy CSV", function () {
+              var d = getData();
+              copyText(toCsv(d.headers, d.rows), this);
+            }),
+          );
+          span.appendChild(document.createTextNode(" "));
+          span.appendChild(
+            btn("Copy Excel (TSV)", function () {
+              var d = getData();
+              copyText(toTsv(d.headers, d.rows), this);
+            }),
+          );
+          return span;
+        }
+
+        // ---------- header / tabs ----------
+        document.title = "Test Kit — " + S.prd_name;
+        document.getElementById("hdr-name").textContent = S.prd_name;
+        var hasDesign = !!(S.design && S.design.traceability_matrix);
+        var metaLine = document.getElementById("hdr-meta");
+        if (hasDesign) {
+          metaLine.textContent =
+            "requirements: " +
+            S.requirements.requirements.length +
+            " · checklist: " +
+            S.design.traceability_matrix.length +
+            " · cases: " +
+            S.design.test_cases.length +
+            " · answer keys: " +
+            (S.design.answer_keys || []).length +
+            " · generated " +
+            ((S.design.meta && S.design.meta.generated_at) || "");
+        } else {
+          metaLine.textContent =
+            S.docs_dir +
+            " · requirements only (review stage) · " +
+            ((S.requirements.meta &&
+              S.requirements.meta.counts &&
+              S.requirements.meta.counts.requirements) ||
+              S.requirements.requirements.length) +
+            " requirements";
+        }
+        var TABS = [["sec-req", "Requirement"]];
+        if (hasDesign) {
+          TABS.push(
+            ["sec-tm", "Traceability Matrix"],
+            ["sec-tc", "Test Cases"],
+            ["sec-audit", "Audit"],
+          );
+        }
+        var nav = document.getElementById("tabs");
+        TABS.forEach(function (t, i) {
+          var b = btn(t[1], function () {
+            document.querySelectorAll("main > section").forEach(function (s) {
+              s.classList.remove("on");
+            });
+            document.querySelectorAll("nav button").forEach(function (x) {
+              x.classList.remove("on");
+            });
+            document.getElementById(t[0]).classList.add("on");
+            b.classList.add("on");
+          });
+          if (i === 0) b.classList.add("on");
+          nav.appendChild(b);
+        });
+        document.getElementById("sec-req").classList.add("on");
+
+        // ---------- REQUIREMENTS ----------
+        var reqWrap = document.getElementById("req-wrap"),
+          reqBar = document.getElementById("req-bar");
+        reqBar.appendChild(
+          el(
+            "span",
+            "hint",
+            "Edit inline, add or delete rows. No approval step: anything not deleted counts as approved. Save writes requirements.json.",
+          ),
+        );
+        reqBar.appendChild(
+          btn("+ Add requirement", function () {
+            var n = maxReq() + 1,
+              id = "REQ-" + pad(n);
+            S.requirements.requirements.push({
+              req_id: id,
+              requirement: "",
+              quote: "",
+              section: "",
+              type: "flow",
+              testable: true,
+            });
+            editing[id] = true;
+            renderReq();
+          }),
+        );
+        reqBar.appendChild(copyBtns(reqTableData));
+        function pad(n) {
+          return (n < 10 ? "00" : "0") + n;
+        }
+        function maxReq() {
+          var m = 0;
+          S.requirements.requirements.forEach(function (r) {
+            var n = parseInt((r.req_id || "").replace(/\D/g, ""), 10);
+            if (n > m) m = n;
+          });
+          return m;
+        }
+        function reqTableData() {
+          return {
+            headers: ["REQ-ID", "Requirement", "Section", "Type", "Testable"],
+            rows: S.requirements.requirements.map(function (r) {
+              return [
+                r.req_id,
+                r.requirement,
+                r.section,
+                r.type,
+                r.testable ? "Yes" : "No",
+              ];
+            }),
+          };
+        }
+        function renderReq() {
+          reqWrap.textContent = "";
+          var rows = S.requirements.requirements.map(function (r) {
+            var tr = [];
+            if (editing[r.req_id]) {
+              tr.push(tdText(r.req_id, "id"));
+              var rq = el("td"),
+                qa = document.createElement("textarea");
+              qa.value = txt(r.requirement);
+              rq.appendChild(qa);
+              tr.push(rq);
+              var sc = el("td"),
+                si = document.createElement("input");
+              si.value = txt(r.section);
+              sc.appendChild(si);
+              tr.push(sc);
+              var ty = el("td"),
+                sel = document.createElement("select");
+              TYPES.forEach(function (t) {
+                var o = document.createElement("option");
+                o.value = t;
+                o.textContent = t;
+                if (r.type === t) o.selected = true;
+                sel.appendChild(o);
+              });
+              ty.appendChild(sel);
+              tr.push(ty);
+              var tb = el("td"),
+                sel2 = document.createElement("select");
+              [
+                ["yes", "Yes"],
+                ["no", "No"],
+              ].forEach(function (p) {
+                var o = document.createElement("option");
+                o.value = p[0];
+                o.textContent = p[1];
+                if ((r.testable ? "yes" : "no") === p[0]) o.selected = true;
+                sel2.appendChild(o);
+              });
+              tb.appendChild(sel2);
+              tr.push(tb);
+              var act = el("td", "rowbtns");
+              act.appendChild(
+                btn("Save row", function () {
+                  r.requirement = qa.value.trim();
+                  r.section = si.value.trim();
+                  r.type = sel.value;
+                  r.testable = sel2.value === "yes";
+                  delete editing[r.req_id];
+                  renderReq();
+                }),
+              );
+              act.appendChild(document.createTextNode(" "));
+              act.appendChild(
+                btn("Cancel", function () {
+                  if (!txt(r.requirement).trim()) {
+                    S.requirements.requirements =
+                      S.requirements.requirements.filter(function (x) {
+                        return x !== r;
+                      });
+                  }
+                  delete editing[r.req_id];
+                  renderReq();
+                }),
+              );
+              tr.push(act);
+            } else {
+              tr.push(tdText(r.req_id, "id"));
+              tr.push(tdText(r.requirement, "wide"));
+              tr.push(tdText(r.section, "ctr"));
+              var tc = el("td");
+              tc.appendChild(chip(r.type, r.type));
+              tr.push(tc);
+              var tv = el("td");
+              tv.appendChild(
+                chip(r.testable ? "Yes" : "No", r.testable ? "yes" : "no"),
+              );
+              tr.push(tv);
+              var act = el("td", "rowbtns");
+              act.appendChild(
+                btn("Edit", function () {
+                  editing[r.req_id] = true;
+                  renderReq();
+                }),
+              );
+              act.appendChild(document.createTextNode(" "));
+              act.appendChild(
+                btn("Delete", function () {
+                  if (confirm("Delete " + r.req_id + "?")) {
+                    S.requirements.requirements =
+                      S.requirements.requirements.filter(function (x) {
+                        return x !== r;
+                      });
+                    renderReq();
+                  }
+                }),
+              );
+              tr.push(act);
+            }
+            return tr;
+          });
+          tableInto(
+            reqWrap,
+            ["REQ-ID", "Requirement", "Section", "Type", "Testable", ""],
+            rows,
+          );
+        }
+        renderReq();
+
+        // ---------- AMBIGUITY LOG (answer editable) ----------
+        var ambBar = document.getElementById("amb-bar"),
+          ambWrap = document.getElementById("amb-wrap");
+        var ambs = S.requirements.ambiguities || [];
+        ambBar.appendChild(
+          el("h2", "tab-title", "Ambiguity log (" + ambs.length + ")"),
+        );
+        if (ambs.length) {
+          ambBar.appendChild(
+            el(
+              "span",
+              "hint",
+              "Fill the Answer column when the PM replies — a filled answer counts as confirmed specification for test design. Copy prompt brings the whole file to any LLM to update.",
+            ),
+          );
+          ambBar.appendChild(copyBtns(ambTableData));
+          ambBar.appendChild(
+            btn("Copy LLM context (Ambiguities)", function () {
+              copyText(llmContextAmb(), this);
+            }),
+          );
+          var rows = ambs.map(function (a) {
+            var an = el("td"),
+              inp = document.createElement("input");
+            inp.value = txt(a.answer);
+            inp.placeholder = "—";
+            inp.addEventListener("change", function () {
+              a.answer = inp.value;
+            });
+            an.appendChild(inp);
+            return [
+              tdText(a.amb_id, "id"),
+              tdText(fmtList(a.req_refs), "ctr"),
+              tdText(a.kind, "ctr"),
+              tdText(a.issue, "wide"),
+              tdText(a.question, "wide"),
+              an,
+            ];
+          });
+          tableInto(
+            ambWrap,
+            [
+              "AMB-ID",
+              "REQ refs",
+              "Kind",
+              "Issue",
+              "Question for PM",
+              "Answer",
+            ],
+            rows,
+          );
+        } else {
+          ambWrap.appendChild(el("p", "hint", "No ambiguities recorded."));
+        }
+        function ambTableData() {
+          return {
+            headers: [
+              "AMB-ID",
+              "REQ refs",
+              "Kind",
+              "Issue",
+              "Question for PM",
+              "Answer",
+            ],
+            rows: ambs.map(function (a) {
+              return [
+                a.amb_id,
+                fmtList(a.req_refs),
+                a.kind,
+                a.issue,
+                a.question,
+                txt(a.answer),
+              ];
+            }),
+          };
+        }
+        function llmContextAmb() {
+          var head =
+            'You are assisting a QA engineer maintaining the requirement ambiguities for "' +
+            S.prd_name +
+            '".\n' +
+            "The artifact lives at " +
+            S.docs_dir +
+            "/requirements.json (schema: meta, requirements[], ambiguities[]; each ambiguity has kind, issue, question, answer).\n" +
+            "Below is the current file. Apply the changes described after this block (e.g. fill answer fields from the PM's replies, update or add ambiguities), then output the COMPLETE updated requirements.json — valid JSON only, unchanged entries keep their IDs, answers never invented beyond what is given.\n\n";
+          return (
+            head + "```\n" + JSON.stringify(S.requirements, null, 2) + "\n```"
+          );
+        }
+
+        // ---------- SAVE ----------
+        document
+          .getElementById("btn-save")
+          .addEventListener("click", function () {
+            var c = S.requirements.meta && S.requirements.meta.counts;
+            if (c) {
+              c.requirements = S.requirements.requirements.length;
+              c.testable = S.requirements.requirements.filter(function (r) {
+                return r.testable;
+              }).length;
+              c.not_testable = c.requirements - c.testable;
+              c.ambiguities = (S.requirements.ambiguities || []).length;
+            }
+            var content = JSON.stringify(S.requirements, null, 2),
+              st = document.getElementById("save-status");
+            fetch("/save", {
+              method: "POST",
+              headers: {"Content-Type": "application/json"},
+              body: JSON.stringify({
+                filename: "requirements.json",
+                content: content,
+              }),
+            })
+              .then(function (r) {
+                if (!r.ok) throw 0;
+                return r.json();
+              })
+              .then(
+                function () {
+                  st.textContent =
+                    "Saved to " + S.docs_dir + "/requirements.json";
+                  st.style.color = "var(--ok)";
+                },
+                function () {
+                  download("requirements.json", content);
+                  st.textContent =
+                    "Server not running — downloaded requirements.json; replace the file in " +
+                    S.docs_dir +
+                    "/";
+                  st.style.color = "var(--warn)";
+                },
+              );
+          });
+
+        // ---------- TRACEABILITY MATRIX (grouped, Excel-merge style) ----------
+        function tmRows() {
+          return S.design.traceability_matrix.map(function (t) {
+            return [
+              t.tm_id,
+              t.group_requirement || "",
+              t.group_primary || "",
+              t.group_secondary || "",
+              t.group_tertiary || "",
+              t.behaviour,
+            ];
+          });
+        }
+        function tmTableData() {
+          var raw = tmRows(),
+            out = [];
+          raw.forEach(function (r, i) {
+            out.push(
+              r.map(function (v, col) {
+                if (col === 0 || col === 5) return v; // ID + Checklist always shown
+                return i > 0 && raw[i - 1][col] === v ? "" : v; // group columns: blank on continuation
+              }),
+            );
+          });
+          return {
+            headers: [
+              "Checklist ID",
+              "Requirement",
+              "Primary",
+              "Secondary",
+              "Tertiary",
+              "Checklist",
+            ],
+            rows: out,
+          };
+        }
+        function renderTm() {
+          var wrap = document.getElementById("tm-wrap");
+          wrap.textContent = "";
+          var tms = S.design.traceability_matrix;
+          var table = document.createElement("table"),
+            thead = document.createElement("thead"),
+            hr = document.createElement("tr");
+          [
+            "Checklist ID",
+            "Requirement",
+            "Primary",
+            "Secondary",
+            "Tertiary",
+            "Checklist",
+          ].forEach(function (h) {
+            hr.appendChild(el("th", null, h));
+          });
+          thead.appendChild(hr);
+          table.appendChild(thead);
+          var tb = document.createElement("tbody");
+          var runs = [null, null, null, null]; // pending open td per group column (1..4)
+          tms.forEach(function (t) {
+            var tr = document.createElement("tr");
+            tr.appendChild(tdText(t.tm_id, "id"));
+            [
+              t.group_requirement,
+              t.group_primary,
+              t.group_secondary,
+              t.group_tertiary,
+            ].forEach(function (v, idx) {
+              if (runs[idx] && runs[idx].val === v) {
+                runs[idx].n++;
+              } else {
+                if (runs[idx] && runs[idx].td)
+                  runs[idx].td.rowSpan = runs[idx].n;
+                var td = el("td", idx === 0 ? "grp" : "ctr", txt(v));
+                runs[idx] = {val: v, n: 1, td: td};
+                tr.appendChild(td);
+              }
+            });
+            var cl = el("td", null, t.behaviour);
+            if (t.change_expected) {
+              cl.appendChild(document.createTextNode(" "));
+              cl.appendChild(chip("change expected", "change"));
+            }
+            if (t.notes) {
+              cl.title = t.notes;
+            }
+            tr.appendChild(cl);
+            tb.appendChild(tr);
+          });
+          runs.forEach(function (r) {
+            if (r && r.td) r.td.rowSpan = r.n;
+          });
+          table.appendChild(tb);
+          wrap.appendChild(table);
+        }
+        function llmContextDesign() {
+          var head =
+            'You are assisting a QA engineer editing the test design for "' +
+            S.prd_name +
+            '".\n' +
+            "The artifact lives at " +
+            S.docs_dir +
+            "/design.json (schema: meta, traceability_matrix, test_cases, answer_keys, coverage, heuristic_checklist). Ambiguity answers in the context are confirmed specification.\n" +
+            "Below are the current traceability_matrix, test_cases, answer_keys arrays and the ambiguities with answers. Apply the changes described after this block, then output the COMPLETE updated design.json — valid JSON only, unchanged IDs for untouched entries, counts in meta kept consistent.\n\n";
+          return (
+            head +
+            "```\n" +
+            JSON.stringify(
+              {
+                traceability_matrix: S.design.traceability_matrix,
+                test_cases: S.design.test_cases,
+                answer_keys: S.design.answer_keys || [],
+                ambiguities_with_answers: S.requirements.ambiguities || [],
+              },
+              null,
+              2,
+            ) +
+            "\n```"
+          );
+        }
+
+        // ---------- TEST CASES (filter by Type; copy excludes Type) ----------
+        var tcFilter = "all";
+        function tcVisible() {
+          return S.design.test_cases.filter(function (t) {
+            return tcFilter === "all" || t.layer === tcFilter;
+          });
+        }
+        function tcTableData() {
+          return {
+            headers: ["Test Case ID", "Test Case Name"],
+            rows: tcVisible().map(function (t) {
+              return [t.tc_id, t.title];
+            }),
+          };
+        }
+        function renderTc() {
+          var wrap = document.getElementById("tc-wrap");
+          wrap.textContent = "";
+          var bar = document.getElementById("tc-bar");
+          bar.textContent = "";
+          bar.appendChild(
+            el(
+              "span",
+              "hint",
+              (S.design.answer_keys || []).length +
+                " answer keys — click Detail to view. Copy includes ID + Name only (Type excluded).",
+            ),
+          );
+          var sel = document.createElement("select");
+          sel.className = "filter";
+          ["all", "e2e", "api-integration", "be-unit", "fe-unit"].forEach(
+            function (v) {
+              var o = document.createElement("option");
+              o.value = v;
+              o.textContent = v === "all" ? "Type: all" : v;
+              if (tcFilter === v) o.selected = true;
+              sel.appendChild(o);
+            },
+          );
+          sel.addEventListener("change", function () {
+            tcFilter = sel.value;
+            renderTc();
+          });
+          bar.appendChild(sel);
+          bar.appendChild(document.createTextNode(" "));
+          bar.appendChild(copyBtns(tcTableData));
+          bar.appendChild(
+            btn("Copy LLM context (TM+TC)", function () {
+              copyText(llmContextDesign(), this);
+            }),
+          );
+          var rows = tcVisible().map(function (tc) {
+            var act = el("td", "rowbtns");
+            act.appendChild(
+              btn("Detail", function () {
+                openTcModal(tc);
+              }),
+            );
+            return [
+              tdText(tc.tc_id, "id"),
+              tdText(tc.title, "wide"),
+              tdText(tc.layer, "ctr"),
+              act,
+            ];
+          });
+          tableInto(wrap, ["Test Case ID", "Test Case Name", "Type", ""], rows);
+        }
+
+        if (hasDesign) {
+          var tmBar = document.getElementById("tm-bar");
+          tmBar.appendChild(
+            el(
+              "span",
+              "hint",
+              "Requirement breakdown — group columns merge like Excel (copy keeps the merge). " +
+                S.design.traceability_matrix.filter(function (t) {
+                  return t.change_expected;
+                }).length +
+                " entries expect code changes (safety-net tests).",
+            ),
+          );
+          tmBar.appendChild(copyBtns(tmTableData));
+          tmBar.appendChild(
+            btn("Copy LLM context (TM+TC)", function () {
+              copyText(llmContextDesign(), this);
+            }),
+          );
+          renderTm();
+          renderTc();
+
+          // ---------- AUDIT ----------
+          var aw = document.getElementById("audit-wrap");
+          var hc = S.design.heuristic_checklist || [];
+          var hcc =
+            (S.design.meta &&
+              S.design.meta.counts &&
+              S.design.meta.counts.heuristic_checklist) ||
+            {};
+          aw.appendChild(
+            el(
+              "h2",
+              "tab-title",
+              "Heuristic self-audit — " +
+                (hcc.applied || 0) +
+                " applied / " +
+                (hcc.na || 0) +
+                " na / " +
+                (hcc.deferred || 0) +
+                " deferred",
+            ),
+          );
+          aw.appendChild(
+            el(
+              "p",
+              "hint",
+              "Proof the design walked the full Test Heuristics Cheat Sheet. applied = designed (evidence links), na = surface absent, deferred = needs something (env, PM answer, git history).",
+            ),
+          );
+          tableInto(
+            aw,
+            ["HC", "Heuristic", "Status", "Evidence"],
+            hc.map(function (h) {
+              var st = el("td");
+              st.appendChild(chip(h.status, h.status));
+              return [
+                tdText(h.hc_id, "id"),
+                tdText(h.heuristic),
+                st,
+                tdText(h.evidence, "wide"),
+              ];
+            }),
+          );
+          var cov = S.design.coverage || {},
+            notes = [];
+          (cov.tm_without_tc || []).forEach(function (x) {
+            notes.push("Checklist without TC: " + x);
+          });
+          (cov.skipped_requirements || []).forEach(function (x) {
+            notes.push("Skipped: " + x);
+          });
+          (cov.conflicts_detected || []).forEach(function (x) {
+            notes.push("Conflict: " + x);
+          });
+          if (notes.length) {
+            aw.appendChild(el("h2", "tab-title", "Coverage notes"));
+            var ul = document.createElement("ul");
+            notes.forEach(function (n) {
+              ul.appendChild(el("li", null, n));
+            });
+            aw.appendChild(ul);
+          }
+        }
+
+        // ---------- MODAL (TC detail + answer key) ----------
+        var modal = document.getElementById("modal"),
+          card = document.getElementById("modal-card");
+        function closeModal() {
+          modal.classList.remove("on");
+        }
+        modal.addEventListener("click", function (e) {
+          if (e.target === modal) closeModal();
+        });
+        function openTcModal(tc) {
+          card.textContent = "";
+          var x = btn("×", closeModal);
+          x.className = "close";
+          x.style.fontSize = "18px";
+          card.appendChild(x);
+          card.appendChild(el("h2", null, tc.tc_id));
+          card.appendChild(el("p", "sub", tc.title));
+          card.appendChild(
+            el(
+              "p",
+              "sub",
+              tc.jenis +
+                " · " +
+                tc.priority +
+                " · Type: " +
+                tc.layer +
+                " · Checklist: " +
+                fmtList(tc.tm_ids) +
+                " · REQ: " +
+                fmtList(tc.req_ids),
+            ),
+          );
+          var kv = el("dl", "kv");
+          dl(kv, "Preconditions", fmtList(tc.preconditions));
+          dl(kv, "Steps", fmtList(tc.steps));
+          dl(kv, "Test data", JSON.stringify(tc.test_data || {}));
+          dl(kv, "Expected result", tc.expected_result);
+          dl(
+            kv,
+            "Automation candidate",
+            tc.automation_candidate ? "yes" : "no",
+          );
+          if (tc.ambiguity_refs && tc.ambiguity_refs.length)
+            dl(kv, "Ambiguity refs", fmtList(tc.ambiguity_refs));
+          card.appendChild(kv);
+          var ak = (S.design.answer_keys || []).filter(function (a) {
+            return a.tc_id === tc.tc_id;
+          })[0];
+          if (ak) {
+            card.appendChild(
+              el(
+                "h3",
+                null,
+                "Answer key — " + ak.ak_id + " (why: " + ak.why + ")",
+              ),
+            );
+            var kv2 = el("dl", "kv");
+            dl(kv2, "Preparation", fmtList(ak.prep));
+            dl(kv2, "Execution", fmtList(ak.execution));
+            card.appendChild(kv2);
+            card.appendChild(el("h3", null, "Assertions"));
+            var ul = document.createElement("ul");
+            (ak.assertions || []).forEach(function (a) {
+              ul.appendChild(el("li", null, a));
+            });
+            card.appendChild(ul);
+            if (ak.example_table && ak.example_table.length) {
+              card.appendChild(el("h3", null, "Example table"));
+              var keys = [];
+              ak.example_table.forEach(function (o) {
+                Object.keys(o).forEach(function (k) {
+                  if (keys.indexOf(k) < 0) keys.push(k);
+                });
+              });
+              var tbl = tableInto(
+                card,
+                keys,
+                ak.example_table.map(function (o) {
+                  return keys.map(function (k) {
+                    return tdText(JSON.stringify(o[k]));
+                  });
+                }),
+              );
+              tbl.className = "subtable";
+            }
+          } else {
+            card.appendChild(
+              el(
+                "p",
+                "hint",
+                "No answer key for this case — its steps + expected result are the repro.",
+              ),
+            );
+          }
+          modal.classList.add("on");
+        }
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") closeModal();
+        });
+      })();
+    </script>
+  </body>
+</html>

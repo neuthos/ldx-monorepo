@@ -1,411 +1,1258 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PRD Test Kit</title>
-<style>
-:root{--ink:#1a2233;--mut:#68738a;--line:#dfe4ee;--bg:#f6f8fc;--acc:#2456d6;--ok:#0d7a4f;--warn:#b3540a;--bad:#b3261e;--chipbg:#eef2fb}
-*{box-sizing:border-box}
-body{margin:0;font:14px/1.45 -apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);padding:10px 18px;display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center}
-header h1{font-size:16px;margin:0}
-header .meta{color:var(--mut);font-size:12px}
-header .spacer{flex:1}
-button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:7px;padding:5px 12px;cursor:pointer}
-button:hover{border-color:var(--acc);color:var(--acc)}
-button.primary{background:var(--acc);border-color:var(--acc);color:#fff}
-button.primary:hover{opacity:.9;color:#fff}
-select.filter{font:inherit;border:1px solid var(--line);border-radius:7px;padding:4px 8px;background:#fff}
-#save-status{font-size:12px;color:var(--mut)}
-nav{display:flex;gap:4px;padding:8px 18px 0;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:57px;z-index:19}
-nav button{border:none;border-radius:8px 8px 0 0;padding:8px 16px;color:var(--mut);background:none}
-nav button.on{color:var(--acc);font-weight:600;box-shadow:inset 0 -2px 0 var(--acc)}
-main{padding:16px 18px 60px;max-width:1500px}
-section{display:none}
-section.on{display:block}
-.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 10px}
-.bar .hint{color:var(--mut);font-size:12px}
-table{border-collapse:collapse;width:100%;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-th,td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top;font-size:13px}
-th{background:var(--chipbg);font-size:12px;letter-spacing:.02em;color:var(--mut);position:sticky;top:0}
-td:last-child,th:last-child{border-right:none}
-tr:last-child td{border-bottom:none}
-td.id,td.ctr{white-space:nowrap;color:var(--mut);font-family:ui-monospace,Menlo,monospace;font-size:12px}
-.chip{display:inline-block;border-radius:20px;padding:1px 9px;font-size:11px;background:var(--chipbg);color:var(--ink);white-space:nowrap}
-.chip.flow{background:#e7f0ff}.chip.validation{background:#efe7ff}.chip.business-rule{background:#e7fff1}.chip.permission{background:#fff2e0}.chip.non-functional{background:#fdeaf6}.chip.constraint{background:#eef1f5}
-.chip.P0{background:#fde5e2;color:var(--bad)}.chip.P1{background:#fff0d9;color:var(--warn)}.chip.P2{background:#e7f0ff}.chip.P3{background:#eef1f5}
-.chip.yes{background:#e2f5ea;color:var(--ok)}.chip.no{background:#fde5e2;color:var(--bad)}
-.chip.applied{background:#e2f5ea;color:var(--ok)}.chip.na{background:#eef1f5;color:var(--mut)}.chip.deferred{background:#fff0d9;color:var(--warn)}
-.chip.H{background:#fde5e2;color:var(--bad)}.chip.M{background:#fff0d9;color:var(--warn)}.chip.L{background:#eef1f5;color:var(--mut)}
-.chip.change{background:#fde5e2;color:var(--bad)}
-.rowbtns{white-space:nowrap}
-.rowbtns button{padding:2px 8px;font-size:12px}
-input,select,textarea{font:inherit;width:100%;padding:4px 6px;border:1px solid var(--line);border-radius:6px}
-textarea{min-height:44px;resize:vertical}
-#modal{position:fixed;inset:0;background:rgba(20,26,40,.45);display:none;z-index:50;overflow:auto;padding:40px 16px}
-#modal.on{display:block}
-#modal .card{background:#fff;max-width:920px;margin:0 auto;border-radius:12px;padding:20px 24px 28px}
-#modal h2{margin:0 0 4px;font-size:16px}
-#modal .sub{color:var(--mut);margin:0 0 14px;font-size:12px}
-#modal .close{float:right}
-.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;margin:8px 0}
-.kv dt{color:var(--mut);font-size:12px}.kv dd{margin:0}
-#modal h3{font-size:13px;margin:18px 0 6px;color:var(--acc)}
-#modal ul{margin:6px 0;padding-left:20px}
-h2.tab-title{font-size:15px;margin:14px 0 8px}
-.subtable{margin:4px 0 14px}
-.grp{font-weight:600}
-</style>
-<style id="theme">/*__THEME__*/</style>
-</head>
-<body>
-<header>
-  <h1 id="hdr-name">PRD Test Kit</h1>
-  <span class="meta" id="hdr-meta"></span>
-  <span class="spacer"></span>
-  <span id="save-status"></span>
-  <button id="btn-save" class="primary">Save requirements</button>
-</header>
-<nav id="tabs"></nav>
-<main>
-  <section id="sec-req"><div class="bar" id="req-bar"></div><div id="req-wrap"></div><div id="amb-bar"></div><div id="amb-wrap"></div></section>
-  <section id="sec-tm"><div class="bar" id="tm-bar"></div><div id="tm-wrap"></div></section>
-  <section id="sec-tc"><div class="bar" id="tc-bar"></div><div id="tc-wrap"></div></section>
-  <section id="sec-audit"><div id="audit-wrap"></div></section>
-</main>
-<div id="modal"><div class="card" id="modal-card"></div></div>
-
-<script id="app-data">window.__PRDTESTKIT__ = /*__DATA__*/null;</script>
-<script>
-(function(){
-"use strict";
-var S = window.__PRDTESTKIT__;
-if(!S){document.body.innerHTML="<p style='padding:20px'>Data payload missing — regenerate this page with the prd-testkit skill.</p>";return;}
-var TYPES=["flow","validation","business-rule","permission","non-functional","constraint"];
-var editing={};
-
-function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined&&text!==null)e.textContent=String(text);return e;}
-function chip(txt,extra){return el("span","chip "+(extra||""),txt);}
-function txt(v){return (v===undefined||v===null)?"":String(v);}
-function fmtList(arr){return Array.isArray(arr)?arr.join(", "):txt(arr);}
-function dl(parent,label,value){var dt=el("dt",null,label),dd=el("dd");dd.textContent=txt(value);dd.style.whiteSpace="pre-wrap";parent.appendChild(dt);parent.appendChild(dd);}
-function btn(label,fn,cls){var b=el("button",cls||"",label);b.type="button";b.addEventListener("click",fn);return b;}
-
-function tableInto(wrap,headers,rows){
-  var t=document.createElement("table"),thead=document.createElement("thead"),tr=document.createElement("tr");
-  headers.forEach(function(h){tr.appendChild(el("th",null,h));});
-  thead.appendChild(tr);t.appendChild(thead);
-  var tb=document.createElement("tbody");
-  rows.forEach(function(cells){var r=document.createElement("tr");cells.forEach(function(c){if(c)r.appendChild(c);});tb.appendChild(r);});
-  t.appendChild(tb);wrap.appendChild(t);return t;
-}
-function tdText(v,cls){return el("td",cls||"",txt(v));}
-function tdChips(list,cls){var td=el("td");(list||[]).forEach(function(v,i){if(i)td.appendChild(document.createTextNode(" "));td.appendChild(chip(v,cls));});return td;}
-
-function escCsv(v){v=txt(v).replace(/"/g,'""');return /[",\n]/.test(v)?'"'+v+'"':v;}
-function toCsv(headers,rows){return headers.map(escCsv).join(",")+"\n"+rows.map(function(r){return r.map(escCsv).join(",");}).join("\n");}
-function escTsv(v){return txt(v).replace(/\t/g," ").replace(/\r?\n/g," ");}
-function toTsv(headers,rows){return headers.map(escTsv).join("\t")+"\n"+rows.map(function(r){return r.map(escTsv).join("\t");}).join("\n");}
-function copyText(text,btnEl){
-  function done(){if(btnEl){var old=btnEl.textContent;btnEl.textContent="Copied";setTimeout(function(){btnEl.textContent=old;},1400);}}
-  function fallback(){var ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done();}catch(e){window.prompt("Copy manually:",text);}document.body.removeChild(ta);}
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done,fallback);}else fallback();
-}
-function download(name,content){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([content],{type:"application/json"}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);}
-function copyBtns(getData){
-  var span=el("span");
-  span.appendChild(btn("Copy CSV",function(){var d=getData();copyText(toCsv(d.headers,d.rows),this);}));
-  span.appendChild(document.createTextNode(" "));
-  span.appendChild(btn("Copy Excel (TSV)",function(){var d=getData();copyText(toTsv(d.headers,d.rows),this);}));
-  return span;
-}
-
-// ---------- header / tabs ----------
-document.title="Test Kit — "+S.prd_name;
-document.getElementById("hdr-name").textContent=S.prd_name;
-var hasDesign=!!(S.design&&S.design.traceability_matrix);
-var metaLine=document.getElementById("hdr-meta");
-if(hasDesign){
-  metaLine.textContent="requirements: "+S.requirements.requirements.length+" · checklist: "+S.design.traceability_matrix.length+" · cases: "+S.design.test_cases.length+" · answer keys: "+(S.design.answer_keys||[]).length+" · generated "+(S.design.meta&&S.design.meta.generated_at||"");
-}else{
-  metaLine.textContent=S.docs_dir+" · requirements only (review stage) · "+(S.requirements.meta&&S.requirements.meta.counts&&S.requirements.meta.counts.requirements||S.requirements.requirements.length)+" requirements";
-}
-var TABS=[["sec-req","Requirement"]];
-if(hasDesign){TABS.push(["sec-tm","Traceability Matrix"],["sec-tc","Test Cases"],["sec-audit","Audit"]);}
-var nav=document.getElementById("tabs");
-TABS.forEach(function(t,i){
-  var b=btn(t[1],function(){
-    document.querySelectorAll("main > section").forEach(function(s){s.classList.remove("on");});
-    document.querySelectorAll("nav button").forEach(function(x){x.classList.remove("on");});
-    document.getElementById(t[0]).classList.add("on");b.classList.add("on");
-  });
-  if(i===0)b.classList.add("on");
-  nav.appendChild(b);
-});
-document.getElementById("sec-req").classList.add("on");
-
-// ---------- REQUIREMENTS ----------
-var reqWrap=document.getElementById("req-wrap"),reqBar=document.getElementById("req-bar");
-reqBar.appendChild(el("span","hint","Edit inline, add or delete rows. No approval step: anything not deleted counts as approved. Save writes requirements.json."));
-reqBar.appendChild(btn("+ Add requirement",function(){
-  var n=maxReq()+1,id="REQ-"+pad(n);
-  S.requirements.requirements.push({req_id:id,requirement:"",quote:"",section:"",type:"flow",testable:true});
-  editing[id]=true;renderReq();
-}));
-reqBar.appendChild(copyBtns(reqTableData));
-function pad(n){return (n<10?"00":"0")+n;}
-function maxReq(){var m=0;S.requirements.requirements.forEach(function(r){var n=parseInt((r.req_id||"").replace(/\D/g,""),10);if(n>m)m=n;});return m;}
-function reqTableData(){
-  return {
-    headers:["REQ-ID","Requirement","Section","Type","Testable"],
-    rows:S.requirements.requirements.map(function(r){return [r.req_id,r.requirement,r.section,r.type,r.testable?"Ya":"TIDak"];})
-  };
-}
-function renderReq(){
-  reqWrap.textContent="";
-  var rows=S.requirements.requirements.map(function(r){
-    var tr=[];
-    if(editing[r.req_id]){
-      tr.push(tdText(r.req_id,"id"));
-      var rq=el("td"),qa=document.createElement("textarea");qa.value=txt(r.requirement);rq.appendChild(qa);tr.push(rq);
-      var sc=el("td"),si=document.createElement("input");si.value=txt(r.section);sc.appendChild(si);tr.push(sc);
-      var ty=el("td"),sel=document.createElement("select");
-      TYPES.forEach(function(t){var o=document.createElement("option");o.value=t;o.textContent=t;if(r.type===t)o.selected=true;sel.appendChild(o);});
-      ty.appendChild(sel);tr.push(ty);
-      var tb=el("td"),sel2=document.createElement("select");
-      [["yes","Ya"],["no","TIDak"]].forEach(function(p){var o=document.createElement("option");o.value=p[0];o.textContent=p[1];if((r.testable?"yes":"no")===p[0])o.selected=true;sel2.appendChild(o);});
-      tb.appendChild(sel2);tr.push(tb);
-      var act=el("td","rowbtns");
-      act.appendChild(btn("Save row",function(){
-        r.requirement=qa.value.trim();r.section=si.value.trim();r.type=sel.value;r.testable=sel2.value==="yes";
-        delete editing[r.req_id];renderReq();
-      }));
-      act.appendChild(document.createTextNode(" "));
-      act.appendChild(btn("Cancel",function(){
-        if(!txt(r.requirement).trim()){S.requirements.requirements=S.requirements.requirements.filter(function(x){return x!==r;});}
-        delete editing[r.req_id];renderReq();
-      }));
-      tr.push(act);
-    }else{
-      tr.push(tdText(r.req_id,"id"));
-      tr.push(tdText(r.requirement,"wide"));
-      tr.push(tdText(r.section,"ctr"));
-      var tc=el("td");tc.appendChild(chip(r.type,r.type));tr.push(tc);
-      var tv=el("td");tv.appendChild(chip(r.testable?"Ya":"TIDak",r.testable?"yes":"no"));tr.push(tv);
-      var act=el("td","rowbtns");
-      act.appendChild(btn("Edit",function(){editing[r.req_id]=true;renderReq();}));
-      act.appendChild(document.createTextNode(" "));
-      act.appendChild(btn("Delete",function(){
-        if(confirm("Delete "+r.req_id+"?")){S.requirements.requirements=S.requirements.requirements.filter(function(x){return x!==r;});renderReq();}
-      }));
-      tr.push(act);
-    }
-    return tr;
-  });
-  tableInto(reqWrap,["REQ-ID","Requirement","Section","Type","Testable",""],rows);
-}
-renderReq();
-
-// ---------- AMBIGUITY LOG (answer editable) ----------
-var ambBar=document.getElementById("amb-bar"),ambWrap=document.getElementById("amb-wrap");
-var ambs=S.requirements.ambiguities||[];
-ambBar.appendChild(el("h2","tab-title","Ambiguity log ("+ambs.length+")"));
-if(ambs.length){
-  ambBar.appendChild(el("span","hint","Fill the Answer column when the PM replies — a filled answer counts as confirmed specification for test design. Copy prompt brings the whole file to any LLM to update."));
-  ambBar.appendChild(copyBtns(ambTableData));
-  ambBar.appendChild(btn("Copy LLM context (Ambiguities)",function(){copyText(llmContextAmb(),this);}));
-  var rows=ambs.map(function(a){
-    var an=el("td"),inp=document.createElement("input");
-    inp.value=txt(a.answer);inp.placeholder="—";
-    inp.addEventListener("change",function(){a.answer=inp.value;});
-    an.appendChild(inp);
-    return [tdText(a.amb_id,"id"),tdText(fmtList(a.req_refs),"ctr"),tdText(a.kind,"ctr"),tdText(a.issue,"wide"),tdText(a.question,"wide"),an];
-  });
-  tableInto(ambWrap,["AMB-ID","REQ refs","Kind","Issue","Question for PM","Answer"],rows);
-}else{
-  ambWrap.appendChild(el("p","hint","No ambiguities recorded."));
-}
-function ambTableData(){
-  return {
-    headers:["AMB-ID","REQ refs","Kind","Issue","Question for PM","Answer"],
-    rows:ambs.map(function(a){return [a.amb_id,fmtList(a.req_refs),a.kind,a.issue,a.question,txt(a.answer)];})
-  };
-}
-function llmContextAmb(){
-  var head="You are assisting a QA engineer maintaining the requirement ambiguities for \""+S.prd_name+"\".\n"+
-    "The artifact lives at "+S.docs_dir+"/requirements.json (schema: meta, requirements[], ambiguities[]; each ambiguity has kind, issue, question, answer).\n"+
-    "Below is the current file. Apply the changes described after this block (e.g. fill answer fields from the PM's replies, update or add ambiguities), then output the COMPLETE updated requirements.json — valid JSON only, unchanged entries keep their IDs, answers never invented beyond what is given.\n\n";
-  return head+"```\n"+JSON.stringify(S.requirements,null,2)+"\n```";
-}
-
-// ---------- SAVE ----------
-document.getElementById("btn-save").addEventListener("click",function(){
-  var c=S.requirements.meta&&S.requirements.meta.counts;
-  if(c){
-    c.requirements=S.requirements.requirements.length;
-    c.testable=S.requirements.requirements.filter(function(r){return r.testable;}).length;
-    c.not_testable=c.requirements-c.testable;
-    c.ambiguities=(S.requirements.ambiguities||[]).length;
-  }
-  var content=JSON.stringify(S.requirements,null,2),st=document.getElementById("save-status");
-  fetch("/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({filename:"requirements.json",content:content})})
-   .then(function(r){if(!r.ok)throw 0;return r.json();})
-   .then(function(){st.textContent="Saved to "+S.docs_dir+"/requirements.json";st.style.color="var(--ok)";},function(){
-     download("requirements.json",content);
-     st.textContent="Server not running — downloaded requirements.json; replace the file in "+S.docs_dir+"/";
-     st.style.color="var(--warn)";
-   });
-});
-
-// ---------- TRACEABILITY MATRIX (grouped, Excel-merge style) ----------
-function tmRows(){
-  return S.design.traceability_matrix.map(function(t){
-    return [t.tm_id,t.group_requirement||"",t.group_primary||"",t.group_secondary||"",t.group_tertiary||"",t.behaviour];
-  });
-}
-function tmTableData(){
-  var raw=tmRows(),out=[];
-  raw.forEach(function(r,i){
-    out.push(r.map(function(v,col){
-      if(col===0||col===5)return v;                       // ID + Checklist always shown
-      return (i>0&&raw[i-1][col]===v)?"":v;               // group columns: blank on continuation
-    }));
-  });
-  return {headers:["Checklist ID","Requirement","Primary","Secondary","Tertiary","Checklist"],rows:out};
-}
-function renderTm(){
-  var wrap=document.getElementById("tm-wrap");wrap.textContent="";
-  var tms=S.design.traceability_matrix;
-  var table=document.createElement("table"),thead=document.createElement("thead"),hr=document.createElement("tr");
-  ["Checklist ID","Requirement","Primary","Secondary","Tertiary","Checklist"].forEach(function(h){hr.appendChild(el("th",null,h));});
-  thead.appendChild(hr);table.appendChild(thead);
-  var tb=document.createElement("tbody");
-  var runs=[null,null,null,null]; // pending open td per group column (1..4)
-  tms.forEach(function(t){
-    var tr=document.createElement("tr");
-    tr.appendChild(tdText(t.tm_id,"id"));
-    [t.group_requirement,t.group_primary,t.group_secondary,t.group_tertiary].forEach(function(v,idx){
-      if(runs[idx]&&runs[idx].val===v){runs[idx].n++;}
-      else{
-        if(runs[idx]&&runs[idx].td)runs[idx].td.rowSpan=runs[idx].n;
-        var td=el("td",(idx===0?"grp":"ctr"),txt(v));
-        runs[idx]={val:v,n:1,td:td};tr.appendChild(td);
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PRD Test Kit</title>
+    <style>
+      :root {
+        --ink: #1a2233;
+        --mut: #68738a;
+        --line: #dfe4ee;
+        --bg: #f6f8fc;
+        --acc: #2456d6;
+        --ok: #0d7a4f;
+        --warn: #b3540a;
+        --bad: #b3261e;
+        --chipbg: #eef2fb;
       }
-    });
-    var cl=el("td",null,t.behaviour);
-    if(t.change_expected){cl.appendChild(document.createTextNode(" "));cl.appendChild(chip("change expected","change"));}
-    if(t.notes){cl.title=t.notes;}
-    tr.appendChild(cl);
-    tb.appendChild(tr);
-  });
-  runs.forEach(function(r){if(r&&r.td)r.td.rowSpan=r.n;});
-  table.appendChild(tb);wrap.appendChild(table);
-}
-function llmContextDesign(){
-  var head="You are assisting a QA engineer editing the test design for \""+S.prd_name+"\".\n"+
-    "The artifact lives at "+S.docs_dir+"/design.json (schema: meta, traceability_matrix, test_cases, answer_keys, coverage, heuristic_checklist). Ambiguity answers in the context are confirmed specification.\n"+
-    "Below are the current traceability_matrix, test_cases, answer_keys arrays and the ambiguities with answers. Apply the changes described after this block, then output the COMPLETE updated design.json — valid JSON only, unchanged IDs for untouched entries, counts in meta kept consistent.\n\n";
-  return head+"```\n"+JSON.stringify({traceability_matrix:S.design.traceability_matrix,test_cases:S.design.test_cases,answer_keys:S.design.answer_keys||[],ambiguities_with_answers:(S.requirements.ambiguities||[])},null,2)+"\n```";
-}
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font:
+          14px/1.45 -apple-system,
+          "Segoe UI",
+          Roboto,
+          Arial,
+          sans-serif;
+        color: var(--ink);
+        background: var(--bg);
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+        padding: 10px 18px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 22px;
+        align-items: center;
+      }
+      header h1 {
+        font-size: 16px;
+        margin: 0;
+      }
+      header .meta {
+        color: var(--mut);
+        font-size: 12px;
+      }
+      header .spacer {
+        flex: 1;
+      }
+      button {
+        font: inherit;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 7px;
+        padding: 5px 12px;
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: var(--acc);
+        color: var(--acc);
+      }
+      button.primary {
+        background: var(--acc);
+        border-color: var(--acc);
+        color: #fff;
+      }
+      button.primary:hover {
+        opacity: 0.9;
+        color: #fff;
+      }
+      select.filter {
+        font: inherit;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 4px 8px;
+        background: #fff;
+      }
+      #save-status {
+        font-size: 12px;
+        color: var(--mut);
+      }
+      nav {
+        display: flex;
+        gap: 4px;
+        padding: 8px 18px 0;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+        position: sticky;
+        top: 57px;
+        z-index: 19;
+      }
+      nav button {
+        border: none;
+        border-radius: 8px 8px 0 0;
+        padding: 8px 16px;
+        color: var(--mut);
+        background: none;
+      }
+      nav button.on {
+        color: var(--acc);
+        font-weight: 600;
+        box-shadow: inset 0 -2px 0 var(--acc);
+      }
+      main {
+        padding: 16px 18px 60px;
+        max-width: 1500px;
+      }
+      section {
+        display: none;
+      }
+      section.on {
+        display: block;
+      }
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin: 0 0 10px;
+      }
+      .bar .hint {
+        color: var(--mut);
+        font-size: 12px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        border-right: 1px solid var(--line);
+        padding: 7px 10px;
+        text-align: left;
+        vertical-align: top;
+        font-size: 13px;
+      }
+      th {
+        background: var(--chipbg);
+        font-size: 12px;
+        letter-spacing: 0.02em;
+        color: var(--mut);
+        position: sticky;
+        top: 0;
+      }
+      td:last-child,
+      th:last-child {
+        border-right: none;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      td.id,
+      td.ctr {
+        white-space: nowrap;
+        color: var(--mut);
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 12px;
+      }
+      .chip {
+        display: inline-block;
+        border-radius: 20px;
+        padding: 1px 9px;
+        font-size: 11px;
+        background: var(--chipbg);
+        color: var(--ink);
+        white-space: nowrap;
+      }
+      .chip.flow {
+        background: #e7f0ff;
+      }
+      .chip.validation {
+        background: #efe7ff;
+      }
+      .chip.business-rule {
+        background: #e7fff1;
+      }
+      .chip.permission {
+        background: #fff2e0;
+      }
+      .chip.non-functional {
+        background: #fdeaf6;
+      }
+      .chip.constraint {
+        background: #eef1f5;
+      }
+      .chip.P0 {
+        background: #fde5e2;
+        color: var(--bad);
+      }
+      .chip.P1 {
+        background: #fff0d9;
+        color: var(--warn);
+      }
+      .chip.P2 {
+        background: #e7f0ff;
+      }
+      .chip.P3 {
+        background: #eef1f5;
+      }
+      .chip.yes {
+        background: #e2f5ea;
+        color: var(--ok);
+      }
+      .chip.no {
+        background: #fde5e2;
+        color: var(--bad);
+      }
+      .chip.applied {
+        background: #e2f5ea;
+        color: var(--ok);
+      }
+      .chip.na {
+        background: #eef1f5;
+        color: var(--mut);
+      }
+      .chip.deferred {
+        background: #fff0d9;
+        color: var(--warn);
+      }
+      .chip.H {
+        background: #fde5e2;
+        color: var(--bad);
+      }
+      .chip.M {
+        background: #fff0d9;
+        color: var(--warn);
+      }
+      .chip.L {
+        background: #eef1f5;
+        color: var(--mut);
+      }
+      .chip.change {
+        background: #fde5e2;
+        color: var(--bad);
+      }
+      .rowbtns {
+        white-space: nowrap;
+      }
+      .rowbtns button {
+        padding: 2px 8px;
+        font-size: 12px;
+      }
+      input,
+      select,
+      textarea {
+        font: inherit;
+        width: 100%;
+        padding: 4px 6px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+      }
+      textarea {
+        min-height: 44px;
+        resize: vertical;
+      }
+      #modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(20, 26, 40, 0.45);
+        display: none;
+        z-index: 50;
+        overflow: auto;
+        padding: 40px 16px;
+      }
+      #modal.on {
+        display: block;
+      }
+      #modal .card {
+        background: #fff;
+        max-width: 920px;
+        margin: 0 auto;
+        border-radius: 12px;
+        padding: 20px 24px 28px;
+      }
+      #modal h2 {
+        margin: 0 0 4px;
+        font-size: 16px;
+      }
+      #modal .sub {
+        color: var(--mut);
+        margin: 0 0 14px;
+        font-size: 12px;
+      }
+      #modal .close {
+        float: right;
+      }
+      .kv {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 6px 14px;
+        margin: 8px 0;
+      }
+      .kv dt {
+        color: var(--mut);
+        font-size: 12px;
+      }
+      .kv dd {
+        margin: 0;
+      }
+      #modal h3 {
+        font-size: 13px;
+        margin: 18px 0 6px;
+        color: var(--acc);
+      }
+      #modal ul {
+        margin: 6px 0;
+        padding-left: 20px;
+      }
+      h2.tab-title {
+        font-size: 15px;
+        margin: 14px 0 8px;
+      }
+      .subtable {
+        margin: 4px 0 14px;
+      }
+      .grp {
+        font-weight: 600;
+      }
+    </style>
+    <style id="theme">
+      /*__THEME__*/
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1 id="hdr-name">PRD Test Kit</h1>
+      <span class="meta" id="hdr-meta"></span>
+      <span class="spacer"></span>
+      <span id="save-status"></span>
+      <button id="btn-save" class="primary">Save requirements</button>
+    </header>
+    <nav id="tabs"></nav>
+    <main>
+      <section id="sec-req">
+        <div class="bar" id="req-bar"></div>
+        <div id="req-wrap"></div>
+        <div id="amb-bar"></div>
+        <div id="amb-wrap"></div>
+      </section>
+      <section id="sec-tm">
+        <div class="bar" id="tm-bar"></div>
+        <div id="tm-wrap"></div>
+      </section>
+      <section id="sec-tc">
+        <div class="bar" id="tc-bar"></div>
+        <div id="tc-wrap"></div>
+      </section>
+      <section id="sec-audit"><div id="audit-wrap"></div></section>
+    </main>
+    <div id="modal"><div class="card" id="modal-card"></div></div>
 
-// ---------- TEST CASES (filter by Type; copy excludes Type) ----------
-var tcFilter="all";
-function tcVisible(){
-  return S.design.test_cases.filter(function(t){return tcFilter==="all"||t.layer===tcFilter;});
-}
-function tcTableData(){
-  return {
-    headers:["Test Case ID","Test Case Name"],
-    rows:tcVisible().map(function(t){return [t.tc_id,t.title];})
-  };
-}
-function renderTc(){
-  var wrap=document.getElementById("tc-wrap");wrap.textContent="";
-  var bar=document.getElementById("tc-bar");
-  bar.textContent="";
-  bar.appendChild(el("span","hint",(S.design.answer_keys||[]).length+" answer keys — click Detail to view. Copy includes ID + Name only (Type excluded)."));
-  var sel=document.createElement("select");sel.className="filter";
-  ["all","e2e","api-integration","be-unit","fe-unit"].forEach(function(v){
-    var o=document.createElement("option");o.value=v;o.textContent=v==="all"?"Type: all":v;if(tcFilter===v)o.selected=true;sel.appendChild(o);
-  });
-  sel.addEventListener("change",function(){tcFilter=sel.value;renderTc();});
-  bar.appendChild(sel);
-  bar.appendChild(document.createTextNode(" "));
-  bar.appendChild(copyBtns(tcTableData));
-  bar.appendChild(btn("Copy LLM context (TM+TC)",function(){copyText(llmContextDesign(),this);}));
-  var rows=tcVisible().map(function(tc){
-    var act=el("td","rowbtns");act.appendChild(btn("Detail",function(){openTcModal(tc);}));
-    return [tdText(tc.tc_id,"id"),tdText(tc.title,"wide"),tdText(tc.layer,"ctr"),act];
-  });
-  tableInto(wrap,["Test Case ID","Test Case Name","Type",""],rows);
-}
+    <script id="app-data">
+      window.__PRDTESTKIT__ = /*__DATA__*/ null;
+    </script>
+    <script>
+      (function () {
+        "use strict";
+        var S = window.__PRDTESTKIT__;
+        if (!S) {
+          document.body.innerHTML =
+            "<p style='padding:20px'>Data payload missing — regenerate this page with the prd-testkit skill.</p>";
+          return;
+        }
+        var TYPES = [
+          "flow",
+          "validation",
+          "business-rule",
+          "permission",
+          "non-functional",
+          "constraint",
+        ];
+        var editing = {};
 
-if(hasDesign){
-  var tmBar=document.getElementById("tm-bar");
-  tmBar.appendChild(el("span","hint","Requirement breakdown — group columns merge like Excel (copy keeps the merge). "+S.design.traceability_matrix.filter(function(t){return t.change_expected;}).length+" entries expect code changes (safety-net tests)."));
-  tmBar.appendChild(copyBtns(tmTableData));
-  tmBar.appendChild(btn("Copy LLM context (TM+TC)",function(){copyText(llmContextDesign(),this);}));
-  renderTm();
-  renderTc();
+        function el(tag, cls, text) {
+          var e = document.createElement(tag);
+          if (cls) e.className = cls;
+          if (text !== undefined && text !== null) e.textContent = String(text);
+          return e;
+        }
+        function chip(txt, extra) {
+          return el("span", "chip " + (extra || ""), txt);
+        }
+        function txt(v) {
+          return v === undefined || v === null ? "" : String(v);
+        }
+        function fmtList(arr) {
+          return Array.isArray(arr) ? arr.join(", ") : txt(arr);
+        }
+        function dl(parent, label, value) {
+          var dt = el("dt", null, label),
+            dd = el("dd");
+          dd.textContent = txt(value);
+          dd.style.whiteSpace = "pre-wrap";
+          parent.appendChild(dt);
+          parent.appendChild(dd);
+        }
+        function btn(label, fn, cls) {
+          var b = el("button", cls || "", label);
+          b.type = "button";
+          b.addEventListener("click", fn);
+          return b;
+        }
 
-  // ---------- AUDIT ----------
-  var aw=document.getElementById("audit-wrap");
-  var hc=S.design.heuristic_checklist||[];
-  var hcc=S.design.meta&&S.design.meta.counts&&S.design.meta.counts.heuristic_checklist||{};
-  aw.appendChild(el("h2","tab-title","Heuristic self-audit — "+(hcc.applied||0)+" applied / "+(hcc.na||0)+" na / "+(hcc.deferred||0)+" deferred"));
-  aw.appendChild(el("p","hint","Proof the design walked the full Test Heuristics Cheat Sheet. applied = designed (evidence links), na = surface absent, deferred = needs something (env, PM answer, git history)."));
-  tableInto(aw,["HC","Heuristic","Status","Evidence"],hc.map(function(h){
-    var st=el("td");st.appendChild(chip(h.status,h.status));
-    return [tdText(h.hc_id,"id"),tdText(h.heuristic),st,tdText(h.evidence,"wide")];
-  }));
-  var cov=S.design.coverage||{},notes=[];
-  (cov.tm_without_tc||[]).forEach(function(x){notes.push("Checklist without TC: "+x);});
-  (cov.skipped_requirements||[]).forEach(function(x){notes.push("Skipped: "+x);});
-  (cov.conflicts_detected||[]).forEach(function(x){notes.push("Conflict: "+x);});
-  if(notes.length){
-    aw.appendChild(el("h2","tab-title","Coverage notes"));
-    var ul=document.createElement("ul");notes.forEach(function(n){ul.appendChild(el("li",null,n));});aw.appendChild(ul);
-  }
-}
+        function tableInto(wrap, headers, rows) {
+          var t = document.createElement("table"),
+            thead = document.createElement("thead"),
+            tr = document.createElement("tr");
+          headers.forEach(function (h) {
+            tr.appendChild(el("th", null, h));
+          });
+          thead.appendChild(tr);
+          t.appendChild(thead);
+          var tb = document.createElement("tbody");
+          rows.forEach(function (cells) {
+            var r = document.createElement("tr");
+            cells.forEach(function (c) {
+              if (c) r.appendChild(c);
+            });
+            tb.appendChild(r);
+          });
+          t.appendChild(tb);
+          wrap.appendChild(t);
+          return t;
+        }
+        function tdText(v, cls) {
+          return el("td", cls || "", txt(v));
+        }
+        function tdChips(list, cls) {
+          var td = el("td");
+          (list || []).forEach(function (v, i) {
+            if (i) td.appendChild(document.createTextNode(" "));
+            td.appendChild(chip(v, cls));
+          });
+          return td;
+        }
 
-// ---------- MODAL (TC detail + answer key) ----------
-var modal=document.getElementById("modal"),card=document.getElementById("modal-card");
-function closeModal(){modal.classList.remove("on");}
-modal.addEventListener("click",function(e){if(e.target===modal)closeModal();});
-function openTcModal(tc){
-  card.textContent="";
-  var x=btn("×",closeModal);x.className="close";x.style.fontSize="18px";card.appendChild(x);
-  card.appendChild(el("h2",null,tc.tc_id));
-  card.appendChild(el("p","sub",tc.title));
-  card.appendChild(el("p","sub",tc.jenis+" · "+tc.priority+" · Type: "+tc.layer+" · Checklist: "+fmtList(tc.tm_ids)+" · REQ: "+fmtList(tc.req_ids)));
-  var kv=el("dl","kv");
-  dl(kv,"Preconditions",fmtList(tc.preconditions));
-  dl(kv,"Steps",fmtList(tc.steps));
-  dl(kv,"Test data",JSON.stringify(tc.test_data||{}));
-  dl(kv,"Expected result",tc.expected_result);
-  dl(kv,"Automation candidate",tc.automation_candidate?"yes":"no");
-  if(tc.ambiguity_refs&&tc.ambiguity_refs.length)dl(kv,"Ambiguity refs",fmtList(tc.ambiguity_refs));
-  card.appendChild(kv);
-  var ak=(S.design.answer_keys||[]).filter(function(a){return a.tc_id===tc.tc_id;})[0];
-  if(ak){
-    card.appendChild(el("h3",null,"Answer key — "+ak.ak_id+" (why: "+ak.why+")"));
-    var kv2=el("dl","kv");dl(kv2,"Preparation",fmtList(ak.prep));dl(kv2,"Execution",fmtList(ak.execution));card.appendChild(kv2);
-    card.appendChild(el("h3",null,"Assertions"));
-    var ul=document.createElement("ul");(ak.assertions||[]).forEach(function(a){ul.appendChild(el("li",null,a));});card.appendChild(ul);
-    if(ak.example_table&&ak.example_table.length){
-      card.appendChild(el("h3",null,"Example table"));
-      var keys=[];ak.example_table.forEach(function(o){Object.keys(o).forEach(function(k){if(keys.indexOf(k)<0)keys.push(k);});});
-      var tbl=tableInto(card,keys,ak.example_table.map(function(o){return keys.map(function(k){return tdText(JSON.stringify(o[k]));});}));
-      tbl.className="subtable";
-    }
-  }else{
-    card.appendChild(el("p","hint","No answer key for this case — its steps + expected result are the repro."));
-  }
-  modal.classList.add("on");
-}
-document.addEventListener("keydown",function(e){if(e.key==="Escape")closeModal();});
-})();
-</script>
-</body>
+        function escCsv(v) {
+          v = txt(v).replace(/"/g, '""');
+          return /[",\n]/.test(v) ? '"' + v + '"' : v;
+        }
+        function toCsv(headers, rows) {
+          return (
+            headers.map(escCsv).join(",") +
+            "\n" +
+            rows
+              .map(function (r) {
+                return r.map(escCsv).join(",");
+              })
+              .join("\n")
+          );
+        }
+        function escTsv(v) {
+          return txt(v).replace(/\t/g, " ").replace(/\r?\n/g, " ");
+        }
+        function toTsv(headers, rows) {
+          return (
+            headers.map(escTsv).join("\t") +
+            "\n" +
+            rows
+              .map(function (r) {
+                return r.map(escTsv).join("\t");
+              })
+              .join("\n")
+          );
+        }
+        function copyText(text, btnEl) {
+          function done() {
+            if (btnEl) {
+              var old = btnEl.textContent;
+              btnEl.textContent = "Copied";
+              setTimeout(function () {
+                btnEl.textContent = old;
+              }, 1400);
+            }
+          }
+          function fallback() {
+            var ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+              document.execCommand("copy");
+              done();
+            } catch (e) {
+              window.prompt("Copy manually:", text);
+            }
+            document.body.removeChild(ta);
+          }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, fallback);
+          } else fallback();
+        }
+        function download(name, content) {
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(
+            new Blob([content], {type: "application/json"}),
+          );
+          a.download = name;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function () {
+            URL.revokeObjectURL(a.href);
+            a.remove();
+          }, 500);
+        }
+        function copyBtns(getData) {
+          var span = el("span");
+          span.appendChild(
+            btn("Copy CSV", function () {
+              var d = getData();
+              copyText(toCsv(d.headers, d.rows), this);
+            }),
+          );
+          span.appendChild(document.createTextNode(" "));
+          span.appendChild(
+            btn("Copy Excel (TSV)", function () {
+              var d = getData();
+              copyText(toTsv(d.headers, d.rows), this);
+            }),
+          );
+          return span;
+        }
+
+        // ---------- header / tabs ----------
+        document.title = "Test Kit — " + S.prd_name;
+        document.getElementById("hdr-name").textContent = S.prd_name;
+        var hasDesign = !!(S.design && S.design.traceability_matrix);
+        var metaLine = document.getElementById("hdr-meta");
+        if (hasDesign) {
+          metaLine.textContent =
+            "requirements: " +
+            S.requirements.requirements.length +
+            " · checklist: " +
+            S.design.traceability_matrix.length +
+            " · cases: " +
+            S.design.test_cases.length +
+            " · answer keys: " +
+            (S.design.answer_keys || []).length +
+            " · generated " +
+            ((S.design.meta && S.design.meta.generated_at) || "");
+        } else {
+          metaLine.textContent =
+            S.docs_dir +
+            " · requirements only (review stage) · " +
+            ((S.requirements.meta &&
+              S.requirements.meta.counts &&
+              S.requirements.meta.counts.requirements) ||
+              S.requirements.requirements.length) +
+            " requirements";
+        }
+        var TABS = [["sec-req", "Requirement"]];
+        if (hasDesign) {
+          TABS.push(
+            ["sec-tm", "Traceability Matrix"],
+            ["sec-tc", "Test Cases"],
+            ["sec-audit", "Audit"],
+          );
+        }
+        var nav = document.getElementById("tabs");
+        TABS.forEach(function (t, i) {
+          var b = btn(t[1], function () {
+            document.querySelectorAll("main > section").forEach(function (s) {
+              s.classList.remove("on");
+            });
+            document.querySelectorAll("nav button").forEach(function (x) {
+              x.classList.remove("on");
+            });
+            document.getElementById(t[0]).classList.add("on");
+            b.classList.add("on");
+          });
+          if (i === 0) b.classList.add("on");
+          nav.appendChild(b);
+        });
+        document.getElementById("sec-req").classList.add("on");
+
+        // ---------- REQUIREMENTS ----------
+        var reqWrap = document.getElementById("req-wrap"),
+          reqBar = document.getElementById("req-bar");
+        reqBar.appendChild(
+          el(
+            "span",
+            "hint",
+            "Edit inline, add or delete rows. No approval step: anything not deleted counts as approved. Save writes requirements.json.",
+          ),
+        );
+        reqBar.appendChild(
+          btn("+ Add requirement", function () {
+            var n = maxReq() + 1,
+              id = "REQ-" + pad(n);
+            S.requirements.requirements.push({
+              req_id: id,
+              requirement: "",
+              quote: "",
+              section: "",
+              type: "flow",
+              testable: true,
+            });
+            editing[id] = true;
+            renderReq();
+          }),
+        );
+        reqBar.appendChild(copyBtns(reqTableData));
+        function pad(n) {
+          return (n < 10 ? "00" : "0") + n;
+        }
+        function maxReq() {
+          var m = 0;
+          S.requirements.requirements.forEach(function (r) {
+            var n = parseInt((r.req_id || "").replace(/\D/g, ""), 10);
+            if (n > m) m = n;
+          });
+          return m;
+        }
+        function reqTableData() {
+          return {
+            headers: ["REQ-ID", "Requirement", "Section", "Type", "Testable"],
+            rows: S.requirements.requirements.map(function (r) {
+              return [
+                r.req_id,
+                r.requirement,
+                r.section,
+                r.type,
+                r.testable ? "Yes" : "No",
+              ];
+            }),
+          };
+        }
+        function renderReq() {
+          reqWrap.textContent = "";
+          var rows = S.requirements.requirements.map(function (r) {
+            var tr = [];
+            if (editing[r.req_id]) {
+              tr.push(tdText(r.req_id, "id"));
+              var rq = el("td"),
+                qa = document.createElement("textarea");
+              qa.value = txt(r.requirement);
+              rq.appendChild(qa);
+              tr.push(rq);
+              var sc = el("td"),
+                si = document.createElement("input");
+              si.value = txt(r.section);
+              sc.appendChild(si);
+              tr.push(sc);
+              var ty = el("td"),
+                sel = document.createElement("select");
+              TYPES.forEach(function (t) {
+                var o = document.createElement("option");
+                o.value = t;
+                o.textContent = t;
+                if (r.type === t) o.selected = true;
+                sel.appendChild(o);
+              });
+              ty.appendChild(sel);
+              tr.push(ty);
+              var tb = el("td"),
+                sel2 = document.createElement("select");
+              [
+                ["yes", "Yes"],
+                ["no", "No"],
+              ].forEach(function (p) {
+                var o = document.createElement("option");
+                o.value = p[0];
+                o.textContent = p[1];
+                if ((r.testable ? "yes" : "no") === p[0]) o.selected = true;
+                sel2.appendChild(o);
+              });
+              tb.appendChild(sel2);
+              tr.push(tb);
+              var act = el("td", "rowbtns");
+              act.appendChild(
+                btn("Save row", function () {
+                  r.requirement = qa.value.trim();
+                  r.section = si.value.trim();
+                  r.type = sel.value;
+                  r.testable = sel2.value === "yes";
+                  delete editing[r.req_id];
+                  renderReq();
+                }),
+              );
+              act.appendChild(document.createTextNode(" "));
+              act.appendChild(
+                btn("Cancel", function () {
+                  if (!txt(r.requirement).trim()) {
+                    S.requirements.requirements =
+                      S.requirements.requirements.filter(function (x) {
+                        return x !== r;
+                      });
+                  }
+                  delete editing[r.req_id];
+                  renderReq();
+                }),
+              );
+              tr.push(act);
+            } else {
+              tr.push(tdText(r.req_id, "id"));
+              tr.push(tdText(r.requirement, "wide"));
+              tr.push(tdText(r.section, "ctr"));
+              var tc = el("td");
+              tc.appendChild(chip(r.type, r.type));
+              tr.push(tc);
+              var tv = el("td");
+              tv.appendChild(
+                chip(r.testable ? "Yes" : "No", r.testable ? "yes" : "no"),
+              );
+              tr.push(tv);
+              var act = el("td", "rowbtns");
+              act.appendChild(
+                btn("Edit", function () {
+                  editing[r.req_id] = true;
+                  renderReq();
+                }),
+              );
+              act.appendChild(document.createTextNode(" "));
+              act.appendChild(
+                btn("Delete", function () {
+                  if (confirm("Delete " + r.req_id + "?")) {
+                    S.requirements.requirements =
+                      S.requirements.requirements.filter(function (x) {
+                        return x !== r;
+                      });
+                    renderReq();
+                  }
+                }),
+              );
+              tr.push(act);
+            }
+            return tr;
+          });
+          tableInto(
+            reqWrap,
+            ["REQ-ID", "Requirement", "Section", "Type", "Testable", ""],
+            rows,
+          );
+        }
+        renderReq();
+
+        // ---------- AMBIGUITY LOG (answer editable) ----------
+        var ambBar = document.getElementById("amb-bar"),
+          ambWrap = document.getElementById("amb-wrap");
+        var ambs = S.requirements.ambiguities || [];
+        ambBar.appendChild(
+          el("h2", "tab-title", "Ambiguity log (" + ambs.length + ")"),
+        );
+        if (ambs.length) {
+          ambBar.appendChild(
+            el(
+              "span",
+              "hint",
+              "Fill the Answer column when the PM replies — a filled answer counts as confirmed specification for test design. Copy prompt brings the whole file to any LLM to update.",
+            ),
+          );
+          ambBar.appendChild(copyBtns(ambTableData));
+          ambBar.appendChild(
+            btn("Copy LLM context (Ambiguities)", function () {
+              copyText(llmContextAmb(), this);
+            }),
+          );
+          var rows = ambs.map(function (a) {
+            var an = el("td"),
+              inp = document.createElement("input");
+            inp.value = txt(a.answer);
+            inp.placeholder = "—";
+            inp.addEventListener("change", function () {
+              a.answer = inp.value;
+            });
+            an.appendChild(inp);
+            return [
+              tdText(a.amb_id, "id"),
+              tdText(fmtList(a.req_refs), "ctr"),
+              tdText(a.kind, "ctr"),
+              tdText(a.issue, "wide"),
+              tdText(a.question, "wide"),
+              an,
+            ];
+          });
+          tableInto(
+            ambWrap,
+            [
+              "AMB-ID",
+              "REQ refs",
+              "Kind",
+              "Issue",
+              "Question for PM",
+              "Answer",
+            ],
+            rows,
+          );
+        } else {
+          ambWrap.appendChild(el("p", "hint", "No ambiguities recorded."));
+        }
+        function ambTableData() {
+          return {
+            headers: [
+              "AMB-ID",
+              "REQ refs",
+              "Kind",
+              "Issue",
+              "Question for PM",
+              "Answer",
+            ],
+            rows: ambs.map(function (a) {
+              return [
+                a.amb_id,
+                fmtList(a.req_refs),
+                a.kind,
+                a.issue,
+                a.question,
+                txt(a.answer),
+              ];
+            }),
+          };
+        }
+        function llmContextAmb() {
+          var head =
+            'You are assisting a QA engineer maintaining the requirement ambiguities for "' +
+            S.prd_name +
+            '".\n' +
+            "The artifact lives at " +
+            S.docs_dir +
+            "/requirements.json (schema: meta, requirements[], ambiguities[]; each ambiguity has kind, issue, question, answer).\n" +
+            "Below is the current file. Apply the changes described after this block (e.g. fill answer fields from the PM's replies, update or add ambiguities), then output the COMPLETE updated requirements.json — valid JSON only, unchanged entries keep their IDs, answers never invented beyond what is given.\n\n";
+          return (
+            head + "```\n" + JSON.stringify(S.requirements, null, 2) + "\n```"
+          );
+        }
+
+        // ---------- SAVE ----------
+        document
+          .getElementById("btn-save")
+          .addEventListener("click", function () {
+            var c = S.requirements.meta && S.requirements.meta.counts;
+            if (c) {
+              c.requirements = S.requirements.requirements.length;
+              c.testable = S.requirements.requirements.filter(function (r) {
+                return r.testable;
+              }).length;
+              c.not_testable = c.requirements - c.testable;
+              c.ambiguities = (S.requirements.ambiguities || []).length;
+            }
+            var content = JSON.stringify(S.requirements, null, 2),
+              st = document.getElementById("save-status");
+            fetch("/save", {
+              method: "POST",
+              headers: {"Content-Type": "application/json"},
+              body: JSON.stringify({
+                filename: "requirements.json",
+                content: content,
+              }),
+            })
+              .then(function (r) {
+                if (!r.ok) throw 0;
+                return r.json();
+              })
+              .then(
+                function () {
+                  st.textContent =
+                    "Saved to " + S.docs_dir + "/requirements.json";
+                  st.style.color = "var(--ok)";
+                },
+                function () {
+                  download("requirements.json", content);
+                  st.textContent =
+                    "Server not running — downloaded requirements.json; replace the file in " +
+                    S.docs_dir +
+                    "/";
+                  st.style.color = "var(--warn)";
+                },
+              );
+          });
+
+        // ---------- TRACEABILITY MATRIX (grouped, Excel-merge style) ----------
+        function tmRows() {
+          return S.design.traceability_matrix.map(function (t) {
+            return [
+              t.tm_id,
+              t.group_requirement || "",
+              t.group_primary || "",
+              t.group_secondary || "",
+              t.group_tertiary || "",
+              t.behaviour,
+            ];
+          });
+        }
+        function tmTableData() {
+          var raw = tmRows(),
+            out = [];
+          raw.forEach(function (r, i) {
+            out.push(
+              r.map(function (v, col) {
+                if (col === 0 || col === 5) return v; // ID + Checklist always shown
+                return i > 0 && raw[i - 1][col] === v ? "" : v; // group columns: blank on continuation
+              }),
+            );
+          });
+          return {
+            headers: [
+              "Checklist ID",
+              "Requirement",
+              "Primary",
+              "Secondary",
+              "Tertiary",
+              "Checklist",
+            ],
+            rows: out,
+          };
+        }
+        function renderTm() {
+          var wrap = document.getElementById("tm-wrap");
+          wrap.textContent = "";
+          var tms = S.design.traceability_matrix;
+          var table = document.createElement("table"),
+            thead = document.createElement("thead"),
+            hr = document.createElement("tr");
+          [
+            "Checklist ID",
+            "Requirement",
+            "Primary",
+            "Secondary",
+            "Tertiary",
+            "Checklist",
+          ].forEach(function (h) {
+            hr.appendChild(el("th", null, h));
+          });
+          thead.appendChild(hr);
+          table.appendChild(thead);
+          var tb = document.createElement("tbody");
+          var runs = [null, null, null, null]; // pending open td per group column (1..4)
+          tms.forEach(function (t) {
+            var tr = document.createElement("tr");
+            tr.appendChild(tdText(t.tm_id, "id"));
+            [
+              t.group_requirement,
+              t.group_primary,
+              t.group_secondary,
+              t.group_tertiary,
+            ].forEach(function (v, idx) {
+              if (runs[idx] && runs[idx].val === v) {
+                runs[idx].n++;
+              } else {
+                if (runs[idx] && runs[idx].td)
+                  runs[idx].td.rowSpan = runs[idx].n;
+                var td = el("td", idx === 0 ? "grp" : "ctr", txt(v));
+                runs[idx] = {val: v, n: 1, td: td};
+                tr.appendChild(td);
+              }
+            });
+            var cl = el("td", null, t.behaviour);
+            if (t.change_expected) {
+              cl.appendChild(document.createTextNode(" "));
+              cl.appendChild(chip("change expected", "change"));
+            }
+            if (t.notes) {
+              cl.title = t.notes;
+            }
+            tr.appendChild(cl);
+            tb.appendChild(tr);
+          });
+          runs.forEach(function (r) {
+            if (r && r.td) r.td.rowSpan = r.n;
+          });
+          table.appendChild(tb);
+          wrap.appendChild(table);
+        }
+        function llmContextDesign() {
+          var head =
+            'You are assisting a QA engineer editing the test design for "' +
+            S.prd_name +
+            '".\n' +
+            "The artifact lives at " +
+            S.docs_dir +
+            "/design.json (schema: meta, traceability_matrix, test_cases, answer_keys, coverage, heuristic_checklist). Ambiguity answers in the context are confirmed specification.\n" +
+            "Below are the current traceability_matrix, test_cases, answer_keys arrays and the ambiguities with answers. Apply the changes described after this block, then output the COMPLETE updated design.json — valid JSON only, unchanged IDs for untouched entries, counts in meta kept consistent.\n\n";
+          return (
+            head +
+            "```\n" +
+            JSON.stringify(
+              {
+                traceability_matrix: S.design.traceability_matrix,
+                test_cases: S.design.test_cases,
+                answer_keys: S.design.answer_keys || [],
+                ambiguities_with_answers: S.requirements.ambiguities || [],
+              },
+              null,
+              2,
+            ) +
+            "\n```"
+          );
+        }
+
+        // ---------- TEST CASES (filter by Type; copy excludes Type) ----------
+        var tcFilter = "all";
+        function tcVisible() {
+          return S.design.test_cases.filter(function (t) {
+            return tcFilter === "all" || t.layer === tcFilter;
+          });
+        }
+        function tcTableData() {
+          return {
+            headers: ["Test Case ID", "Test Case Name"],
+            rows: tcVisible().map(function (t) {
+              return [t.tc_id, t.title];
+            }),
+          };
+        }
+        function renderTc() {
+          var wrap = document.getElementById("tc-wrap");
+          wrap.textContent = "";
+          var bar = document.getElementById("tc-bar");
+          bar.textContent = "";
+          bar.appendChild(
+            el(
+              "span",
+              "hint",
+              (S.design.answer_keys || []).length +
+                " answer keys — click Detail to view. Copy includes ID + Name only (Type excluded).",
+            ),
+          );
+          var sel = document.createElement("select");
+          sel.className = "filter";
+          ["all", "e2e", "api-integration", "be-unit", "fe-unit"].forEach(
+            function (v) {
+              var o = document.createElement("option");
+              o.value = v;
+              o.textContent = v === "all" ? "Type: all" : v;
+              if (tcFilter === v) o.selected = true;
+              sel.appendChild(o);
+            },
+          );
+          sel.addEventListener("change", function () {
+            tcFilter = sel.value;
+            renderTc();
+          });
+          bar.appendChild(sel);
+          bar.appendChild(document.createTextNode(" "));
+          bar.appendChild(copyBtns(tcTableData));
+          bar.appendChild(
+            btn("Copy LLM context (TM+TC)", function () {
+              copyText(llmContextDesign(), this);
+            }),
+          );
+          var rows = tcVisible().map(function (tc) {
+            var act = el("td", "rowbtns");
+            act.appendChild(
+              btn("Detail", function () {
+                openTcModal(tc);
+              }),
+            );
+            return [
+              tdText(tc.tc_id, "id"),
+              tdText(tc.title, "wide"),
+              tdText(tc.layer, "ctr"),
+              act,
+            ];
+          });
+          tableInto(wrap, ["Test Case ID", "Test Case Name", "Type", ""], rows);
+        }
+
+        if (hasDesign) {
+          var tmBar = document.getElementById("tm-bar");
+          tmBar.appendChild(
+            el(
+              "span",
+              "hint",
+              "Requirement breakdown — group columns merge like Excel (copy keeps the merge). " +
+                S.design.traceability_matrix.filter(function (t) {
+                  return t.change_expected;
+                }).length +
+                " entries expect code changes (safety-net tests).",
+            ),
+          );
+          tmBar.appendChild(copyBtns(tmTableData));
+          tmBar.appendChild(
+            btn("Copy LLM context (TM+TC)", function () {
+              copyText(llmContextDesign(), this);
+            }),
+          );
+          renderTm();
+          renderTc();
+
+          // ---------- AUDIT ----------
+          var aw = document.getElementById("audit-wrap");
+          var hc = S.design.heuristic_checklist || [];
+          var hcc =
+            (S.design.meta &&
+              S.design.meta.counts &&
+              S.design.meta.counts.heuristic_checklist) ||
+            {};
+          aw.appendChild(
+            el(
+              "h2",
+              "tab-title",
+              "Heuristic self-audit — " +
+                (hcc.applied || 0) +
+                " applied / " +
+                (hcc.na || 0) +
+                " na / " +
+                (hcc.deferred || 0) +
+                " deferred",
+            ),
+          );
+          aw.appendChild(
+            el(
+              "p",
+              "hint",
+              "Proof the design walked the full Test Heuristics Cheat Sheet. applied = designed (evidence links), na = surface absent, deferred = needs something (env, PM answer, git history).",
+            ),
+          );
+          tableInto(
+            aw,
+            ["HC", "Heuristic", "Status", "Evidence"],
+            hc.map(function (h) {
+              var st = el("td");
+              st.appendChild(chip(h.status, h.status));
+              return [
+                tdText(h.hc_id, "id"),
+                tdText(h.heuristic),
+                st,
+                tdText(h.evidence, "wide"),
+              ];
+            }),
+          );
+          var cov = S.design.coverage || {},
+            notes = [];
+          (cov.tm_without_tc || []).forEach(function (x) {
+            notes.push("Checklist without TC: " + x);
+          });
+          (cov.skipped_requirements || []).forEach(function (x) {
+            notes.push("Skipped: " + x);
+          });
+          (cov.conflicts_detected || []).forEach(function (x) {
+            notes.push("Conflict: " + x);
+          });
+          if (notes.length) {
+            aw.appendChild(el("h2", "tab-title", "Coverage notes"));
+            var ul = document.createElement("ul");
+            notes.forEach(function (n) {
+              ul.appendChild(el("li", null, n));
+            });
+            aw.appendChild(ul);
+          }
+        }
+
+        // ---------- MODAL (TC detail + answer key) ----------
+        var modal = document.getElementById("modal"),
+          card = document.getElementById("modal-card");
+        function closeModal() {
+          modal.classList.remove("on");
+        }
+        modal.addEventListener("click", function (e) {
+          if (e.target === modal) closeModal();
+        });
+        function openTcModal(tc) {
+          card.textContent = "";
+          var x = btn("×", closeModal);
+          x.className = "close";
+          x.style.fontSize = "18px";
+          card.appendChild(x);
+          card.appendChild(el("h2", null, tc.tc_id));
+          card.appendChild(el("p", "sub", tc.title));
+          card.appendChild(
+            el(
+              "p",
+              "sub",
+              tc.jenis +
+                " · " +
+                tc.priority +
+                " · Type: " +
+                tc.layer +
+                " · Checklist: " +
+                fmtList(tc.tm_ids) +
+                " · REQ: " +
+                fmtList(tc.req_ids),
+            ),
+          );
+          var kv = el("dl", "kv");
+          dl(kv, "Preconditions", fmtList(tc.preconditions));
+          dl(kv, "Steps", fmtList(tc.steps));
+          dl(kv, "Test data", JSON.stringify(tc.test_data || {}));
+          dl(kv, "Expected result", tc.expected_result);
+          dl(
+            kv,
+            "Automation candidate",
+            tc.automation_candidate ? "yes" : "no",
+          );
+          if (tc.ambiguity_refs && tc.ambiguity_refs.length)
+            dl(kv, "Ambiguity refs", fmtList(tc.ambiguity_refs));
+          card.appendChild(kv);
+          var ak = (S.design.answer_keys || []).filter(function (a) {
+            return a.tc_id === tc.tc_id;
+          })[0];
+          if (ak) {
+            card.appendChild(
+              el(
+                "h3",
+                null,
+                "Answer key — " + ak.ak_id + " (why: " + ak.why + ")",
+              ),
+            );
+            var kv2 = el("dl", "kv");
+            dl(kv2, "Preparation", fmtList(ak.prep));
+            dl(kv2, "Execution", fmtList(ak.execution));
+            card.appendChild(kv2);
+            card.appendChild(el("h3", null, "Assertions"));
+            var ul = document.createElement("ul");
+            (ak.assertions || []).forEach(function (a) {
+              ul.appendChild(el("li", null, a));
+            });
+            card.appendChild(ul);
+            if (ak.example_table && ak.example_table.length) {
+              card.appendChild(el("h3", null, "Example table"));
+              var keys = [];
+              ak.example_table.forEach(function (o) {
+                Object.keys(o).forEach(function (k) {
+                  if (keys.indexOf(k) < 0) keys.push(k);
+                });
+              });
+              var tbl = tableInto(
+                card,
+                keys,
+                ak.example_table.map(function (o) {
+                  return keys.map(function (k) {
+                    return tdText(JSON.stringify(o[k]));
+                  });
+                }),
+              );
+              tbl.className = "subtable";
+            }
+          } else {
+            card.appendChild(
+              el(
+                "p",
+                "hint",
+                "No answer key for this case — its steps + expected result are the repro.",
+              ),
+            );
+          }
+          modal.classList.add("on");
+        }
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") closeModal();
+        });
+      })();
+    </script>
+  </body>
 </html>
