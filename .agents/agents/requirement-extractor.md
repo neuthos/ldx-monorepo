@@ -73,10 +73,11 @@ Read the entire PRD, then produce exactly one file `<output-dir>/requirements.js
       "kind": "unmeasurable",
       "issue": "Claims \"with cepat\" (fast) but no number given",
       "question": "What is the maximum SLA for point-redemption processing — e.g. 2 seconds?",
-      "answer": ""
+      "answer": "",
+      "ai_analyzed": false
     }
   ]
 }
 ```
 
-Rules for the JSON: strict valid JSON (no comments, no trailing commas), UTF-8, `req_refs` empty array `[]` when an ambiguity has no related REQ (absence entries may reference the nearest feature REQ). `type` and `kind` use only the enum values above (`kind`: contradiction | unmeasurable | fudge | absence). `answer` is always emitted as an empty string — it is filled later by the PM/reviewer in the review page, and once filled it counts as confirmed specification for downstream test design.
+Rules for the JSON: strict valid JSON (no comments, no trailing commas), UTF-8, `req_refs` empty array `[]` when an ambiguity has no related REQ (absence entries may reference the nearest feature REQ). `type` and `kind` use only the enum values above (`kind`: contradiction | unmeasurable | fudge | absence). Emit `answer: ""` and `ai_analyzed: false` for every new ambiguity. Reviewer answers remain pending until the Copy to Agent pass validates them against the PRD and BE/FE code and reconciles the requirements.

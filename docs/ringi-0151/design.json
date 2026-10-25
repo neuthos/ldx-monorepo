@@ -1,0 +1,2080 @@
+{
+  "meta": {
+    "prd_name": "RINGI 0151 - Filter Addition and Item Addition (Invoice Type)",
+    "source": "/Users/galangkeda/Documents/Keda/ldx-monorepo/docs/ringi-0151/requirements.json",
+    "code_roots": {
+      "be": "/tmp/ringi151-code/be — read-only git-show extract of /Users/galangkeda/Documents/Keda/L-DX_Backend @ feat/ringi-151 (key commit 284a04c7df, extract HEAD 3d68beb144); live working tree is on another branch without the RINGI 0151 code",
+      "fe": "/tmp/ringi151-code/fe — read-only git-show extract of /Users/galangkeda/Documents/Keda/ldx-frontend @ feat/ringi-151 (key commit 2fda751c22, extract HEAD d2c282055e); live working tree is on another branch without the RINGI 0151 code"
+    },
+    "generated_at": "2026-10-23",
+    "counts": {
+      "requirements_in": 15,
+      "requirements_used": 13,
+      "skipped_untestable": ["REQ-005", "REQ-013"],
+      "matrix_entries": 42,
+      "test_cases": 42,
+      "answer_keys": 13,
+      "expected_changes": 6,
+      "by_jenis": {
+        "positive": 12,
+        "boundary": 7,
+        "negative": 7,
+        "interrupt": 3,
+        "multi-user": 3,
+        "flood": 1,
+        "count": 3,
+        "combination": 6,
+        "non-functional": 0
+      },
+      "by_priority": {"P0": 0, "P1": 13, "P2": 29, "P3": 0},
+      "by_layer": {"be-unit": 8, "fe-unit": 7, "api-integration": 17, "e2e": 10},
+      "flagged_with_ambiguity": 26,
+      "oracle_pending": 0,
+      "heuristic_checklist": {"applied": 37, "na": 4, "deferred": 2}
+    },
+    "expected_changes": [
+      {
+        "id": "EX-001",
+        "where": "ldx-frontend@feat/ringi-151:cypress/e2e/inventory-control/p5.InvoiceList.cy.ts",
+        "prd_says": "Invoice Type filter item, matching search, detail column and download column must exist on INV-060-013 (REQ-002/REQ-003/REQ-004, T-001/T-003/T-004/T-006)",
+        "code_shows": "the e2e spec 'should filter data' still selects only the old invoiceType (Credit Sales/Prepayment) field and never touches invoicePrintType, the new column, or the download",
+        "linked_tms": ["ID-CHECK-008", "ID-CHECK-010", "ID-CHECK-018", "ID-CHECK-028", "ID-CHECK-038"]
+      },
+      {
+        "id": "EX-002",
+        "where": "L-DX_Backend@feat/ringi-151:docs/tests/download_excel_unit_testing_payloads/invoice_list.json",
+        "prd_says": "download data takes every list column in screen order (REQ-004, DOC-001 §3.4)",
+        "code_shows": "fixture date_fields lacks sales_billing_date and currency_fields lists previous_invoice_amount/invoice_exc_prev, while the FE really posts date_fields [sales_billing_closing_date, delivery_date, sales_billing_date] and currency_fields [previous_invoice_residual, deposit_amount, invoice_exc_prev, invoice_paid] (ldx-frontend@feat/ringi-151:src/views/InventoryControl/ShipmentProcess/Invoices/hooks/useDownloadExcelInvoiceList.ts) — the fixture must be realigned to the FE request shape",
+        "linked_tms": ["ID-CHECK-008"]
+      },
+      {
+        "id": "EX-003",
+        "where": "L-DX_Backend@feat/ringi-151:docs/tests/download_excel_unit_testing_payloads/invoice_list.json (header rename noted in _comment)",
+        "prd_says": "one new column named Invoice Type immediately right of Billing To (REQ-008); the pre-existing 掛売／前払 column is a different field (REQ-002 notes, DOC-001 column 15 note: older documents called it 請求書種別)",
+        "code_shows": "the sales_billing_category header in the fixture was renamed from the stale 'Invoice Type' to 'Credit Sales/Prepayment' — before this change lands on master, two export columns would share the name 'Invoice Type'; any consumer keyed on the old header text breaks",
+        "linked_tms": ["ID-CHECK-011", "ID-CHECK-042"]
+      },
+      {
+        "id": "EX-004",
+        "where": "L-DX_Backend@feat/ringi-151:ldx_addons/ldx_core/utils/validator.py validate_download_limit_by_len (and validate_download_limit_sql/_orm)",
+        "prd_says": "download limit is per-company res.company.download_limit, 0 = unlimited, default 200,000; team environment 2,000 (REQ-013 notes / QA-005, confirmed specification)",
+        "code_shows": "validator.py falls back with `download_limit = env.ref('base.main_company').download_limit or DEFAULT_DOWNLOAD_LIMIT` where its own DEFAULT_DOWNLOAD_LIMIT = 10000 (res_company.py defines a different 200000), so a company set to 0 (unlimited) is silently capped at 10,000 — the 0-means-unlimited rule is not enforced by the validator",
+        "linked_tms": ["ID-CHECK-007"]
+      },
+      {
+        "id": "EX-005",
+        "where": "both extracts: no guest-access test or access-rule surface present",
+        "prd_says": "guest display, search and download unchanged; DOC-001 marks guest access TBD and demands a real guest login before sign-off (REQ-009 / T-008)",
+        "code_shows": "neither extract contains a guest test or guest-specific access configuration; nothing automates or records the guest path — a verification gap that must be closed before sign-off",
+        "linked_tms": ["ID-CHECK-035", "ID-CHECK-036", "ID-CHECK-037"]
+      },
+      {
+        "id": "EX-006",
+        "where": "ldx-frontend@feat/ringi-151:mocks/data/invoiceList.ts",
+        "prd_says": "detail items show each row's Invoice Type (REQ-003/REQ-007)",
+        "code_shows": "the mock dataset carries no sales_billing_to_invoice_type key, so mock-driven FE development and storybook/e2e runs on mocks will not render the new column until the mock is extended",
+        "linked_tms": ["ID-CHECK-028"]
+      }
+    ]
+  },
+  "traceability_matrix": [
+    {
+      "tm_id": "ID-CHECK-001",
+      "group_requirement": "Should be able to archive Billing To masters with archive behaviour unchanged",
+      "group_primary": "Update",
+      "group_secondary": "Manual",
+      "group_tertiary": "Archive Composition",
+      "behaviour": "Able to archive an eligible Billing To master; its existing invoices keep listing on the Invoice List with their Invoice Type, stay filterable by Invoice Type, and stay in the Excel export",
+      "req_ids": ["REQ-010"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Archive rules live in L-DX_Backend@feat/ringi-151:ldx_addons/ldx_core/account/billing_master.py write() (active=False path with check_active_transactions); FE keeps archived masters findable via ldx-frontend@feat/ringi-151:src/views/InventoryControl/ShipmentProcess/Invoices/components/InvoiceFilter/InvoiceFilter.tsx BillingToSelector searchDomain [['active','in',[true,false]]]. DOC-001: invoices are never archived, the master is; code shows _archived suffix."
+    },
+    {
+      "tm_id": "ID-CHECK-002",
+      "group_requirement": "Should be able to archive Billing To masters with archive behaviour unchanged",
+      "group_primary": "Update",
+      "group_secondary": "Manual",
+      "group_tertiary": "Archive Guardrails",
+      "behaviour": "Not able to archive a Billing To master that existing archive rules still block; the refusal message is unchanged by the Invoice Type modification",
+      "req_ids": ["REQ-010"],
+      "layer_targets": ["be"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Negative confirmation of the constraint: attempt the excluded behaviour (archive blocked master), expect the pre-existing ValidationError ('Cannot archive billing to master ...') from L-DX_Backend@feat/ringi-151:ldx_addons/ldx_core/account/billing_master.py."
+    },
+    {
+      "tm_id": "ID-CHECK-003",
+      "group_requirement": "Should be able to choose Invoice Type filter options sourced from the Billing To master",
+      "group_primary": "Display",
+      "group_secondary": "Filter",
+      "group_tertiary": "Invoice Type Filter Options",
+      "behaviour": "Able to open the Invoice Type pull-down and see exactly the seven Invoice Type values set in the Billing To master (detailed, simple, super_simple, direct_debit, credit_card, envelope, envelope_simple)",
+      "req_ids": ["REQ-006"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "H",
+      "status": "Pending",
+      "notes": "Seven is the rule's own number — the boundary is the exact set, no more, no fewer. Options render from ldx-frontend@feat/ringi-151:public/locales/{en,ja}/billing_to_master.json invoice_print_type_options via InvoicePrintTypeSelector.tsx; enum source of truth L-DX_Backend@feat/ringi-151:ldx_addons/ldx_core/utils/account/billing/__init__.py SELECTION_BILL_INVOICE_PRINT_TYPE (lines 87-95). QA-002/AMB-003 confirmed."
+    },
+    {
+      "tm_id": "ID-CHECK-004",
+      "group_requirement": "Should be able to choose Invoice Type filter options sourced from the Billing To master",
+      "group_primary": "Display",
+      "group_secondary": "Filter",
+      "group_tertiary": "Invoice Type Filter Options",
+      "behaviour": "Not able to find an unset/blank option, an all/combined option, or a Credit Sales/Prepayment value (invoice/advance_payment) inside the Invoice Type pull-down",
+      "req_ids": ["REQ-006"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Contrary approach to ID-CHECK-003. AMB-004 answer: the filter offers only the 7 master values — no 'unset' option was requested; the BE enum's extra 'all' key (EnumBillInvoiceType.all, used for billing generation) must not leak into this pull-down."
+    },
+    {
+      "tm_id": "ID-CHECK-005",
+      "group_requirement": "Should be able to choose Invoice Type filter options sourced from the Billing To master",
+      "group_primary": "Display",
+      "group_secondary": "Filter",
+      "group_tertiary": "Invoice Type Filter Options",
+      "behaviour": "Verify the option labels localize with the UI language and match the Billing To master screen's own Invoice Type selector labels (EN and JA)",
+      "req_ids": ["REQ-006"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Combination with the localization surface. FE labels: billing_to_master.json invoice_print_type_options (JA 詳細版/簡易版優先/超簡易版/口座引落/クレジット引落明細書/一括詳細版（窓付き封筒対応）/一括簡易版（窓付き封筒対応）). Observed drift, not on this screen's path: BE LABEL_INVOICE_TYPE ja uses 簡易版 and 口座振替 for two keys — export values come from FE-sent convert_fields, so the FE locale is the label oracle here."
+    },
+    {
+      "tm_id": "ID-CHECK-006",
+      "group_requirement": "Should be able to download the Invoice List with the Invoice Type column",
+      "group_primary": "Download",
+      "group_secondary": "Batch",
+      "group_tertiary": "Download Interruptions",
+      "behaviour": "Able to trigger Download All repeatedly in rapid succession without duplicate or corrupt Excel output; each completed export carries the Invoice Type column",
+      "req_ids": ["REQ-004"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Flood probe on the download endpoint /api/dataset/sales.billing.invoice/download_excel; FE hook ldx-frontend@feat/ringi-151:src/views/InventoryControl/ShipmentProcess/Invoices/hooks/useDownloadExcelInvoiceList.ts."
+    },
+    {
+      "tm_id": "ID-CHECK-007",
+      "group_requirement": "Should be able to download the Invoice List with the Invoice Type column",
+      "group_primary": "Download",
+      "group_secondary": "Batch",
+      "group_tertiary": "Download Volume and Limit",
+      "behaviour": "Verify the export boundary at the company download limit: exactly-limit matching rows export successfully with Invoice Type in every row; one row above the limit is refused with the row-limit message naming the limit and the matching count",
+      "req_ids": ["REQ-004"],
+      "layer_targets": ["be"],
+      "conflict_with": [],
+      "change_expected": true,
+      "risk": "H",
+      "status": "Pending",
+      "notes": "EX-004: L-DX_Backend@feat/ringi-151:ldx_addons/ldx_core/utils/validator.py validate_download_limit_by_len coerces download_limit 0 to its own DEFAULT_DOWNLOAD_LIMIT 10000 (res_company.py says 0 = unlimited, default 200000) — tests here are the safety net for that upcoming fix. QA-005 confirmed team environment limit = 2,000; refusal message per DOC-001 §4. Expected result follows the confirmed specification (0 = unlimited, limit enforced per company), not the current fallback."
+    },
+    {
+      "tm_id": "ID-CHECK-008",
+      "group_requirement": "Should be able to download the Invoice List with the Invoice Type column",
+      "group_primary": "Download",
+      "group_secondary": "Batch",
+      "group_tertiary": "Invoice Type Download Column",
+      "behaviour": "Able to download the Invoice List to Excel with a newly added Invoice Type column, for both Download All and ticked-row Download",
+      "req_ids": ["REQ-004"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": true,
+      "risk": "H",
+      "status": "Pending",
+      "notes": "EX-002: BE test fixture docs/tests/download_excel_unit_testing_payloads/invoice_list.json (L-DX_Backend@feat/ringi-151) lags the real FE request shape — realign when the change ships. FE sends headers + convert_fields from ldx-frontend@feat/ringi-151:src/views/InventoryControl/ShipmentProcess/Invoices/hooks/useDownloadExcelInvoiceList.ts. QA-003 open point: the PRD §4.3 Download Sample has not been shared — exact header text/format beyond the locale labels stays flagged (AMB-003), not invented."
+    },
+    {
+      "tm_id": "ID-CHECK-009",
+      "group_requirement": "Should be able to download the Invoice List with the Invoice Type column",
+      "group_primary": "Download",
+      "group_secondary": "Batch",
+      "group_tertiary": "Zero-Row Export",
+      "behaviour": "Able to download with a zero-match Invoice Type filter and receive a header-only Excel file that still contains the Invoice Type header",
+      "req_ids": ["REQ-004", "REQ-014"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Count = 0 on the download path; zero-match domain (e.g. credit_card with no such invoice) must not crash the streaming writer."
+    },
+    {
+      "tm_id": "ID-CHECK-010",
+      "group_requirement": "Should be able to download the Invoice Type column immediately right of Billing To",
+      "group_primary": "Download",
+      "group_secondary": "Batch",
+      "group_tertiary": "Download Column Position",
+      "behaviour": "Verify the downloaded file inserts the Invoice Type column immediately to the right of the Billing To column, with header text in the UI language (EN Invoice Type / JA 請求書種類)",
+      "req_ids": ["REQ-008"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": true,
+      "risk": "H",
+      "status": "Pending",
+      "notes": "PRD §4.3 position rule (T-006). EX-001: cypress has no download assertion yet. Header text comes from the shared invoice_list locale headers[] (accessor sales_billing_to_invoice_type right after sales_billing_to_master_id) — the unshared Download Sample (QA-003 pending, AMB-003 flagged) prevents confirming anything beyond these labels."
+    },
+    {
+      "tm_id": "ID-CHECK-011",
+      "group_requirement": "Should be able to download the Invoice Type column immediately right of Billing To",
+      "group_primary": "Download",
+      "group_secondary": "Batch",
+      "group_tertiary": "Screen-File Column Parity",
+      "behaviour": "Verify the screen table and the Excel file keep the identical column sequence (Billing To → Invoice Type → Credit Sales/Prepayment) and no two columns share the Invoice Type header",
+      "req_ids": ["REQ-008", "REQ-003"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": true,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "AMB-005 answer: on-screen position equals the download position. EX-003: the BE fixture renamed the stale sales_billing_category header from 'Invoice Type' to 'Credit Sales/Prepayment' — before this lands, two columns would share one name; this entry is the safety net for that rename (L-DX_Backend@feat/ringi-151:docs/tests/download_excel_unit_testing_payloads/invoice_list.json)."
+    },
+    {
+      "tm_id": "ID-CHECK-012",
+      "group_requirement": "Should be able to output the same Invoice Type value as the screen in the download file",
+      "group_primary": "Download",
+      "group_secondary": "Detail",
+      "group_tertiary": "Concurrent Downloads",
+      "behaviour": "Able to export simultaneously from two accounts running different UI languages; each file's Invoice Type cells match that user's on-screen labels",
+      "req_ids": ["REQ-015"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Multi-user probe on the per-language convert_fields mapping (lang kwarg + FE-sent labels)."
+    },
+    {
+      "tm_id": "ID-CHECK-013",
+      "group_requirement": "Should be able to output the same Invoice Type value as the screen in the download file",
+      "group_primary": "Download",
+      "group_secondary": "Detail",
+      "group_tertiary": "Download Interruptions",
+      "behaviour": "Able to cancel the over-1,000-row confirmation or refresh during the export spinner and still receive a complete file with correct Invoice Type values on retry",
+      "req_ids": ["REQ-015", "REQ-008"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Interrupt for the REQ-008/REQ-015 download flow; confirmation dialog behaviour per DOC-001 §3.4 (>1,000 rows asks first; no x, no outside-click close)."
+    },
+    {
+      "tm_id": "ID-CHECK-014",
+      "group_requirement": "Should be able to output the same Invoice Type value as the screen in the download file",
+      "group_primary": "Download",
+      "group_secondary": "Detail",
+      "group_tertiary": "Invoice Type Blank Value",
+      "behaviour": "Able to see a blank Invoice Type cell in the downloaded file for an invoice whose Billing To master type is cleared (blank on screen, blank in file)",
+      "req_ids": ["REQ-015"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "AMB-004 answer = blank (confirmed specification, no pending marker). FE render mapInvoicePrintType[value] ?? value with falsy → blank (ldx-frontend@feat/ringi-151:src/views/.../InvoiceTable/InvoiceTable.tsx)."
+    },
+    {
+      "tm_id": "ID-CHECK-015",
+      "group_requirement": "Should be able to output the same Invoice Type value as the screen in the download file",
+      "group_primary": "Download",
+      "group_secondary": "Detail",
+      "group_tertiary": "Invoice Type Download Value",
+      "behaviour": "Able to see every downloaded Invoice Type cell output the same value the screen displays, as the converted label of the master-linked key (EN and JA)",
+      "req_ids": ["REQ-015"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "H",
+      "status": "Pending",
+      "notes": "T-007 core. Conversion via formatConvertFieldsValue('sales_billing_to_invoice_type', …) in ldx-frontend@feat/ringi-151:src/views/.../hooks/useDownloadExcelInvoiceList.ts; BE applies convert_fields in the export pipeline."
+    },
+    {
+      "tm_id": "ID-CHECK-016",
+      "group_requirement": "Should be able to output the same Invoice Type value as the screen in the download file",
+      "group_primary": "Download",
+      "group_secondary": "Filter",
+      "group_tertiary": "Filtered Export",
+      "behaviour": "Able to export with the Invoice Type filter applied: the file holds only rows of that type, each with that type's label, across multi-chunk streaming",
+      "req_ids": ["REQ-015", "REQ-014"],
+      "layer_targets": ["be"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Combination of filter domain + export; chunked streaming (stream_excel_from_search_read, small chunk_size) proves no row is dropped or mislabelled across chunk boundaries — L-DX_Backend@feat/ringi-151:ldx_addons/ldx_core/tests/download_excel/test_invoice_list.py test_9 pattern."
+    },
+    {
+      "tm_id": "ID-CHECK-017",
+      "group_requirement": "Should be able to filter the detail list by Invoice Type",
+      "group_primary": "Search",
+      "group_secondary": "Filter",
+      "group_tertiary": "Filter Combination",
+      "behaviour": "Able to combine the Invoice Type filter with the Billing To filter and the Credit Sales/Prepayment filter; only rows satisfying all selected conditions list",
+      "req_ids": ["REQ-014"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Cross-REQ interaction: the new sales_billing_to_invoice_type_equal domain composes with sales_billing_to_master_id and sales_billing_category domains; FE domain assembly in ldx-frontend@feat/ringi-151:src/views/.../contexts/InvoiceContext.tsx setFilter."
+    },
+    {
+      "tm_id": "ID-CHECK-018",
+      "group_requirement": "Should be able to filter the detail list by Invoice Type",
+      "group_primary": "Search",
+      "group_secondary": "Filter",
+      "group_tertiary": "Invoice Type Filter Matching",
+      "behaviour": "Able to select an Invoice Type option, press Search, and see only invoice data matching the selected Invoice Type in the detail list",
+      "req_ids": ["REQ-014"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": true,
+      "risk": "H",
+      "status": "Pending",
+      "notes": "T-003 core. QA-002 confirmed: matching uses the same value the detail column shows (master-linked). EX-001: cypress 'should filter data' does not exercise the new field — this entry is the safety net. BE: stored column filtered by selection equality over /api/dataset/sales.billing.invoice/search_read."
+    },
+    {
+      "tm_id": "ID-CHECK-019",
+      "group_requirement": "Should be able to filter the detail list by Invoice Type",
+      "group_primary": "Search",
+      "group_secondary": "Filter",
+      "group_tertiary": "Invoice Type Filter Matching",
+      "behaviour": "Not able to get substring matches from the Invoice Type filter: selecting simple never returns super_simple invoices (selection equality)",
+      "req_ids": ["REQ-014"],
+      "layer_targets": ["be"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Contrary approach to ID-CHECK-018; guards against an ilike-style operator leaking in (the FE form key suffix _equal must yield '=' not 'ilike' — ldx-frontend@feat/ringi-151:src/views/.../__tests__/InvoiceContext.test.tsx)."
+    },
+    {
+      "tm_id": "ID-CHECK-020",
+      "group_requirement": "Should be able to filter the detail list by Invoice Type",
+      "group_primary": "Search",
+      "group_secondary": "Filter",
+      "group_tertiary": "Invoice Type Filter Matching",
+      "behaviour": "Verify zero, one and many match counts behave correctly, and with no Invoice Type selected the list still shows every invoice including blank-type rows",
+      "req_ids": ["REQ-014", "REQ-007"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Count 0/1/many on the governed entity (invoices). AMB-004: blank rows appear only when no type is selected — there is no unset option."
+    },
+    {
+      "tm_id": "ID-CHECK-021",
+      "group_requirement": "Should be able to read each invoice's master-linked Invoice Type value",
+      "group_primary": "Read",
+      "group_secondary": "Detail",
+      "group_tertiary": "Concurrent Master Edits",
+      "behaviour": "Able to see the Invoice List reflect another user's Billing To master type edit on the next search, and the final value after rapid repeated edits (last write wins)",
+      "req_ids": ["REQ-007"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Multi-user + flood variants on the shared master record (stored related field recomputes on write — L-DX_Backend@feat/ringi-151:ldx_addons/ldx_core/transactions/sales_billing_invoice.py, store=True)."
+    },
+    {
+      "tm_id": "ID-CHECK-022",
+      "group_requirement": "Should be able to read each invoice's master-linked Invoice Type value",
+      "group_primary": "Read",
+      "group_secondary": "Detail",
+      "group_tertiary": "Invoice Type Blank Value",
+      "behaviour": "Able to see invoices whose Billing To type is cleared display blank on screen; not able to match them under any of the seven filter options",
+      "req_ids": ["REQ-007"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "AMB-004 answered: blank. Blank arises only from a cleared master type (new masters default detailed) or a masterless invoice; both store False (L-DX_Backend@feat/ringi-151:ldx_addons/ldx_core/tests/test_sales_billing_invoice_type.py test_masterless_and_cleared_types_store_false)."
+    },
+    {
+      "tm_id": "ID-CHECK-023",
+      "group_requirement": "Should be able to read each invoice's master-linked Invoice Type value",
+      "group_primary": "Read",
+      "group_secondary": "Detail",
+      "group_tertiary": "Invoice Type Row Value",
+      "behaviour": "Able to see each invoice row display the Invoice Type currently linked to its Invoice Number — the Billing To master's live value — for all seven enum values with localized labels",
+      "req_ids": ["REQ-007"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "H",
+      "status": "Pending",
+      "notes": "T-005 core; boundary = each of the 7 keys renders its correct label. AMB-006/QA-001(b)/QA-004 confirmed live lookup ('Berubah karena terhubung dengan id'): sales_billing_to_invoice_type = fields.Selection(related='sales_billing_to_master_id.invoice_print_type', store=True) at L-DX_Backend@feat/ringi-151:ldx_addons/ldx_core/transactions/sales_billing_invoice.py (key commit 284a04c7df)."
+    },
+    {
+      "tm_id": "ID-CHECK-024",
+      "group_requirement": "Should be able to read each invoice's master-linked Invoice Type value",
+      "group_primary": "Read",
+      "group_secondary": "Detail",
+      "group_tertiary": "Invoice Type Row Value",
+      "behaviour": "Verify one and many invoices per master, and many masters sharing one type, all display the same master-linked Invoice Type value",
+      "req_ids": ["REQ-007"],
+      "layer_targets": ["be"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Count 1/many on the governed entity (invoice rows vs masters)."
+    },
+    {
+      "tm_id": "ID-CHECK-025",
+      "group_requirement": "Should be able to read each invoice's master-linked Invoice Type value",
+      "group_primary": "Read",
+      "group_secondary": "Detail",
+      "group_tertiary": "Live Master Lookup",
+      "behaviour": "Able to see existing invoices change their displayed Invoice Type when the Billing To master's type is edited, and follow the billing's master reassignment (live lookup, not an issuance snapshot)",
+      "req_ids": ["REQ-007"],
+      "layer_targets": ["be"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "H",
+      "status": "Pending",
+      "notes": "Combination with the adjacent master-edit rule. AMB-006 answer is confirmed specification ('It changes, because it is linked by id'). Proven pattern: test_master_type_edit_propagates_to_invoices and test_master_reassignment_recomputes_stored_type in L-DX_Backend@feat/ringi-151:ldx_addons/ldx_core/tests/test_sales_billing_invoice_type.py."
+    },
+    {
+      "tm_id": "ID-CHECK-026",
+      "group_requirement": "Should be able to run the closing process with closing behaviour unchanged",
+      "group_primary": "Confirm",
+      "group_secondary": "Manual",
+      "group_tertiary": "Closed Period Operations",
+      "behaviour": "Not able to observe any new blocking: invoices dated inside a closed accounting period still list, display their Invoice Type, filter by Invoice Type, and export",
+      "req_ids": ["REQ-011"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Negative confirmation of the constraint: attempt each operation under a closed period, expect all to succeed. DOC-001: the closing banner blocks nothing on this screen; the three date filters deliberately allow closed days."
+    },
+    {
+      "tm_id": "ID-CHECK-027",
+      "group_requirement": "Should be able to run the closing process with closing behaviour unchanged",
+      "group_primary": "Confirm",
+      "group_secondary": "Manual",
+      "group_tertiary": "Closing Composition",
+      "behaviour": "Able to complete the closing process for a period whose invoices carry the new Invoice Type field; closing finishes successfully",
+      "req_ids": ["REQ-011"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "T-009 closing half, run as a regression: the stored column must not disturb closing (no new constraint, no write dependency)."
+    },
+    {
+      "tm_id": "ID-CHECK-028",
+      "group_requirement": "Should be able to see the Invoice Type column in the detail list",
+      "group_primary": "Display",
+      "group_secondary": "List",
+      "group_tertiary": "Invoice Type Column Header",
+      "behaviour": "Able to see an Invoice Type column added to the detail table header of the Invoice List",
+      "req_ids": ["REQ-003"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": true,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "T-004. Column list = invoice_list locale headers[] consumed by useColumnsV2('invoice_list') (ldx-frontend@feat/ringi-151:src/views/.../components/InvoiceTable/InvoiceTable.tsx); list fetch requests sales_billing_to_invoice_type in ldx-frontend@feat/ringi-151:src/views/.../Invoices.tsx fields[]. EX-001 (cypress gap) and EX-006 (mock lacks the key) — these tests are the safety net."
+    },
+    {
+      "tm_id": "ID-CHECK-029",
+      "group_requirement": "Should be able to see the Invoice Type column in the detail list",
+      "group_primary": "Display",
+      "group_secondary": "List",
+      "group_tertiary": "Invoice Type Column Position",
+      "behaviour": "Verify the on-screen Invoice Type column sits immediately to the right of Billing To — the same position as in the download file",
+      "req_ids": ["REQ-003"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "AMB-005 answer = 'Make it the same as the download file' (confirmed specification). Both surfaces read one column list: ldx-frontend@feat/ringi-151:public/locales/{en,ja}/invoice_list.json headers[] with sales_billing_to_invoice_type directly after sales_billing_to_master_id."
+    },
+    {
+      "tm_id": "ID-CHECK-030",
+      "group_requirement": "Should be able to see the Japanese translations of the new Invoice Type items rendered correctly",
+      "group_primary": "Display",
+      "group_secondary": "List",
+      "group_tertiary": "Japanese Screen Labels",
+      "behaviour": "Able to switch the UI language to Japanese and see every new Invoice Type surface render its Japanese label: the filter label 請求書種類, the seven Billing To master options (詳細版, 簡易版優先, 超簡易版, 口座引落, クレジット引落明細書, 一括詳細版（窓付き封筒対応）, 一括簡易版（窓付き封筒対応）), the detail column header 請求書種類, and each row's Japanese cell label",
+      "req_ids": ["REQ-002", "REQ-003", "REQ-006", "REQ-007"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Rendered-session complement to ID-CHECK-005 (which asserts locale-file parity EN/JA): a real ja_JP session fails here when a ja locale key is missing and the screen falls back to EN or a raw enum key. Label sources: ldx-frontend@feat/ringi-151:public/locales/ja/invoice_list.json (filter label and column header, key invoice_print_type) and ja/billing_to_master.json invoice_print_type_options; cell render path mapInvoicePrintType[value] ?? value in src/views/.../components/InvoiceTable/InvoiceTable.tsx."
+    },
+    {
+      "tm_id": "ID-CHECK-031",
+      "group_requirement": "Should be able to see the Japanese translations of the new Invoice Type items rendered correctly",
+      "group_primary": "Download",
+      "group_secondary": "Batch",
+      "group_tertiary": "Japanese Download Labels",
+      "behaviour": "Able to download the file in a Japanese UI session and see the Invoice Type column output all seven values as their correct Japanese labels, including the full-width parentheses of the two envelope labels （窓付き封筒対応）",
+      "req_ids": ["REQ-004", "REQ-008", "REQ-015"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "TC-Auto-INV-015 asserts only 4 of 7 types in JA; the JA labels for simple (簡易版優先), envelope and envelope_simple (full-width （窓付き封筒対応）) are never asserted in the download today. Column position stays guarded by ID-CHECK-010 — this entry is label completeness and multibyte integrity, not position. Conversion via formatConvertFieldsValue('sales_billing_to_invoice_type', …) in ldx-frontend@feat/ringi-151:src/views/.../hooks/useDownloadExcelInvoiceList.ts; BE applies the FE-sent convert_fields (REQ-015 notes)."
+    },
+    {
+      "tm_id": "ID-CHECK-032",
+      "group_requirement": "Should be able to see the Japanese translations of the new Invoice Type items rendered correctly",
+      "group_primary": "Download",
+      "group_secondary": "Detail",
+      "group_tertiary": "Japanese Label Traps",
+      "behaviour": "Not able to find a raw enum key, an English label, or the drifted Backend Japanese label (簡易版 for simple, 口座振替 for direct_debit) as the exact value of any Japanese Invoice Type cell or option — the Frontend ja locale is the label oracle",
+      "req_ids": ["REQ-006", "REQ-015"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Contrary approach guarding the drift recorded in ID-CHECK-005 notes: BE LABEL_INVOICE_TYPE ja uses 簡易版 and 口座振替 for two keys while the FE ja locale uses 簡易版優先 and 口座引落 — export values come from FE-sent convert_fields, so the FE locale is the label oracle. Assertions are exact-equality so 簡易版 never false-positives against 簡易版優先 or 超簡易版."
+    },
+    {
+      "tm_id": "ID-CHECK-033",
+      "group_requirement": "Should be able to see the time zone display unchanged",
+      "group_primary": "Display",
+      "group_secondary": "List",
+      "group_tertiary": "Time Zone Display (Dates)",
+      "behaviour": "Verify the list and Excel date columns keep the same Japan-time calendar day as before the modification; no change or offset in the time zone display",
+      "req_ids": ["REQ-012"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "T-010 time-zone half. DOC-001: dates are Japan-time calendar days; the merged-PDF UTC deviation belongs to the PDF batch, not this Excel download."
+    },
+    {
+      "tm_id": "ID-CHECK-034",
+      "group_requirement": "Should be able to see the time zone display unchanged",
+      "group_primary": "Download",
+      "group_secondary": "Batch",
+      "group_tertiary": "Time Zone Display (New Column)",
+      "behaviour": "Verify the Invoice Type value is identical when the same export runs under a different time-zone setting; no date offset leaks into the new column",
+      "req_ids": ["REQ-012"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "The new column is not a date, so it must be invariant across tz values (tz kwarg in the download payload); date columns are guarded by ID-CHECK-033."
+    },
+    {
+      "tm_id": "ID-CHECK-035",
+      "group_requirement": "Should be able to use the Invoice List as a guest user with permissions unchanged",
+      "group_primary": "Permission",
+      "group_secondary": "Manual",
+      "group_tertiary": "Access Without Menu Entry",
+      "behaviour": "Not able to open the Invoice List without the menu entry; the access-refused message is unchanged",
+      "req_ids": ["REQ-009"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": true,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Excluded-actor negative. Message per DOC-001 §4 ('You are not allowed to access this page...'). EX-005: no guest/access-rule surface exists in either extract — verify with a real account before sign-off."
+    },
+    {
+      "tm_id": "ID-CHECK-036",
+      "group_requirement": "Should be able to use the Invoice List as a guest user with permissions unchanged",
+      "group_primary": "Permission",
+      "group_secondary": "Manual",
+      "group_tertiary": "Guest Access",
+      "behaviour": "Able to log in with a guest account and perform display, search (including the Invoice Type filter) and download on the Invoice List as before the modification",
+      "req_ids": ["REQ-009"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": true,
+      "risk": "H",
+      "status": "Pending",
+      "notes": "T-008. DOC-001 marks guest access TBD — the PRD oracle is 'No change': whatever a guest could do before (display, search, download) still works, now with the Invoice Type additions visible. EX-005: unverified by any automated test; a real guest login is required before sign-off."
+    },
+    {
+      "tm_id": "ID-CHECK-037",
+      "group_requirement": "Should be able to use the Invoice List as a guest user with permissions unchanged",
+      "group_primary": "Permission",
+      "group_secondary": "Manual",
+      "group_tertiary": "Guest Access",
+      "behaviour": "Able to have a guest and an internal user work the screen simultaneously with identical Invoice Type behaviour, and guest rapid-fire downloads remain stable",
+      "req_ids": ["REQ-009"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Multi-user + flood variants for the permission rule (two accounts, same resource, simultaneous; same account rapid downloads)."
+    },
+    {
+      "tm_id": "ID-CHECK-038",
+      "group_requirement": "Should be able to use the new Invoice Type filter on the Invoice List screen",
+      "group_primary": "Display",
+      "group_secondary": "Filter",
+      "group_tertiary": "Invoice Type Filter Presence",
+      "behaviour": "Able to find an Invoice Type filter item added to the Invoice List search condition area",
+      "req_ids": ["REQ-002"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": true,
+      "risk": "H",
+      "status": "Pending",
+      "notes": "T-001. FE: Form.Item sales_billing_to_invoice_type_equal → InvoicePrintTypeSelector with data-test=invoice_print_type (ldx-frontend@feat/ringi-151:src/views/.../components/InvoiceFilter/InvoiceFilter.tsx, key commit 2fda751c22). EX-001: cypress does not assert it yet — safety net for the e2e update."
+    },
+    {
+      "tm_id": "ID-CHECK-039",
+      "group_requirement": "Should be able to use the new Invoice Type filter on the Invoice List screen",
+      "group_primary": "Search",
+      "group_secondary": "Filter",
+      "group_tertiary": "Search Flow Interruptions",
+      "behaviour": "Able to recover from a browser refresh or a double-submit of Search during an Invoice Type filtered search: the list stays usable and the matching-only result is preserved on re-search",
+      "req_ids": ["REQ-002", "REQ-003", "REQ-014"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Flow interrupt shared across REQ-002/003/014 (refresh mid-flow, double POST of the search); also verifies the Invoice Type column still renders after reload."
+    },
+    {
+      "tm_id": "ID-CHECK-040",
+      "group_requirement": "Should be able to use the new Invoice Type filter on the Invoice List screen",
+      "group_primary": "Search",
+      "group_secondary": "Filter",
+      "group_tertiary": "Session Loss Recovery",
+      "behaviour": "Able to regain a working Invoice List — filter, search and download — after the session is lost mid-flow and the user re-authenticates",
+      "req_ids": ["REQ-002", "REQ-003", "REQ-004", "REQ-014"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Session-loss interrupt shared across the four flow REQs; no data may render for an expired session, and all three operations work again after re-login."
+    },
+    {
+      "tm_id": "ID-CHECK-041",
+      "group_requirement": "Should be able to verify the modification scope of the Invoice List screen (INV-060-013)",
+      "group_primary": "Display",
+      "group_secondary": "Manual",
+      "group_tertiary": "Screen Scope (INV-060-013)",
+      "behaviour": "Verify the Invoice Type filter, detail column and download column additions are delivered on the Invoice List screen (INV-060-013) and are not added to a sibling screen",
+      "req_ids": ["REQ-001"],
+      "layer_targets": ["fe"],
+      "conflict_with": [],
+      "change_expected": false,
+      "risk": "L",
+      "status": "Pending",
+      "notes": "Constraint negative confirmation: attempt to find the additions on a sibling screen (e.g. Billing Info List) — expect absence; scope stays INV-060-013 per PRD §3.1."
+    },
+    {
+      "tm_id": "ID-CHECK-042",
+      "group_requirement": "Should not be able to confuse the new Invoice Type item with the pre-existing Credit Sales/Prepayment item",
+      "group_primary": "Display",
+      "group_secondary": "Filter",
+      "group_tertiary": "Invoice Type - Label Distinction",
+      "behaviour": "Not able to confuse the new Invoice Type filter with the pre-existing Credit Sales/Prepayment (掛売／前払) filter: distinct labels and option sets in both UI languages",
+      "req_ids": ["REQ-002"],
+      "layer_targets": ["be", "fe"],
+      "conflict_with": [],
+      "change_expected": true,
+      "risk": "M",
+      "status": "Pending",
+      "notes": "Label trap guard. New filter: locale key invoice_print_type (EN 'Invoice Type', JA 請求書種類), form field sales_billing_to_invoice_type_equal, 7 options. Old filter: locale key invoice_type (EN 'Credit Sales/Prepayment', JA 掛売／前払), field sales_billing_category, 2 options (invoice/advance_payment); older documents called the old column 請求書種別. EX-003 records the matching export-side rename."
+    }
+  ],
+  "test_cases": [
+    {
+      "tc_id": "TC-Auto-INV-001",
+      "title": "Should be able to archive an eligible Billing To master while its invoices keep listing, filtering and exporting with their Invoice Type (archive unchanged, T-009 archive half)",
+      "tm_ids": ["ID-CHECK-001"],
+      "req_ids": ["REQ-010"],
+      "jenis": "positive",
+      "priority": "P2",
+      "layer": "api-integration",
+      "preconditions": [
+        "Billing To master BTM-INV001-A exists with invoice_print_type = direct_debit",
+        "Confirmed billing + invoice R151-INV001-001 linked to BTM-INV001-A exists"
+      ],
+      "steps": [
+        "Archive BTM-INV001-A (active = False) following the existing archive rules",
+        "POST /api/dataset/sales.billing.invoice/search_read with domain [[\"sales_billing_invoice_no\",\"=\",\"R151-INV001-001\"]]",
+        "POST /api/dataset/sales.billing.invoice/download_excel with the same domain and the standard headers incl. sales_billing_to_invoice_type"
+      ],
+      "test_data": {"master_code": "BTM-INV001-A", "invoice_print_type": "direct_debit", "invoice_no": "R151-INV001-001"},
+      "expected_result": "Archive succeeds; the invoice still lists with sales_billing_to_invoice_type = direct_debit, is returned when filtering by direct_debit, and its Excel row carries the converted label (Direct Debit) — archive behaviour unchanged per PRD §4.4",
+      "automation_candidate": true,
+      "ambiguity_refs": []
+    },
+    {
+      "tc_id": "TC-Auto-INV-002",
+      "title": "Should not be able to archive a Billing To master still blocked by existing archive rules (refusal unchanged by the Invoice Type change)",
+      "tm_ids": ["ID-CHECK-002"],
+      "req_ids": ["REQ-010"],
+      "jenis": "negative",
+      "priority": "P2",
+      "layer": "be-unit",
+      "preconditions": [
+        "Billing To master BTM-INV002-B with an active transaction that the archive rule blocks",
+        "No Invoice Type specific bypass exists"
+      ],
+      "steps": [
+        "Attempt env['billing.to.master'].write({'active': False}) on BTM-INV002-B without skip contexts",
+        "Repeat the attempt after the Invoice Type field exists on sales.billing.invoice"
+      ],
+      "test_data": {"master_code": "BTM-INV002-B", "blocked_reason": "active transactions / active customers still linked"},
+      "expected_result": "Both attempts raise the pre-existing ValidationError ('Cannot archive billing to master ...'); the message and condition are identical before and after the modification",
+      "automation_candidate": true,
+      "ambiguity_refs": []
+    },
+    {
+      "tc_id": "TC-Auto-INV-003",
+      "title": "Should be able to open the Invoice Type filter pull-down and see exactly the seven Billing To master values (T-002)",
+      "tm_ids": ["ID-CHECK-003"],
+      "req_ids": ["REQ-006"],
+      "jenis": "positive",
+      "priority": "P1",
+      "layer": "fe-unit",
+      "preconditions": ["Invoice List filter panel rendered with billing_to_master locale loaded"],
+      "steps": [
+        "Render the Invoice Type selector (InvoicePrintTypeSelector) and read its options",
+        "Assert the option value set equals exactly the seven master enum keys"
+      ],
+      "test_data": {"expected_values": ["detailed", "simple", "super_simple", "direct_debit", "credit_card", "envelope", "envelope_simple"]},
+      "expected_result": "The pull-down offers exactly the 7 Invoice Type values set in the Billing To master — the values PRD §4.1 requires ('Display the \"Invoice Type\" of the Billing To master'); no eighth option, none missing",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-003", "AMB-004"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-004",
+      "title": "Should not be able to find an unset, all/combined, or Credit Sales/Prepayment value inside the Invoice Type pull-down (option set boundary)",
+      "tm_ids": ["ID-CHECK-004"],
+      "req_ids": ["REQ-006"],
+      "jenis": "negative",
+      "priority": "P2",
+      "layer": "fe-unit",
+      "preconditions": ["Invoice Type selector rendered from billing_to_master:invoice_print_type_options"],
+      "steps": [
+        "Render the selector and collect all option values and labels",
+        "Assert absence of forbidden values"
+      ],
+      "test_data": {"forbidden_values": ["", "all", "unset", "invoice", "advance_payment"], "forbidden_labels": ["Combined", "集約分", "Credit Sales", "Prepayment", "掛売", "前払"]},
+      "expected_result": "No unset/blank option, no all/combined option (the BE enum's 'all' key must not leak), and no Credit Sales/Prepayment value appears — the pull-down shows only master Invoice Type values (AMB-004: blank rows are reachable only by not selecting a type)",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-003", "AMB-004"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-005",
+      "title": "Should be able to see localized Invoice Type option labels matching the Billing To master screen in both UI languages (EN / JA parity)",
+      "tm_ids": ["ID-CHECK-005"],
+      "req_ids": ["REQ-006"],
+      "jenis": "combination",
+      "priority": "P2",
+      "layer": "fe-unit",
+      "preconditions": ["en and ja locales loaded for billing_to_master"],
+      "steps": [
+        "Read invoice_print_type_options from en and ja billing_to_master.json",
+        "Assert both locales carry the same 7 values with non-empty labels, and each label equals the label the Billing To master screen shows for the same key"
+      ],
+      "test_data": {"ja_labels": {"detailed": "詳細版", "simple": "簡易版優先", "super_simple": "超簡易版", "direct_debit": "口座引落", "credit_card": "クレジット引落明細書", "envelope": "一括詳細版（窓付き封筒対応）", "envelope_simple": "一括簡易版（窓付き封筒対応）"}},
+      "expected_result": "Option labels localize per UI language and match the master screen's selector one-to-one for all 7 keys; the filter 'displays the Invoice Type of the Billing To master' in the running language (PRD §4.1)",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-003", "AMB-004"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-006",
+      "title": "Should be able to survive rapid repeated Download All clicks without duplicate or corrupt Excel output (flood on download)",
+      "tm_ids": ["ID-CHECK-006"],
+      "req_ids": ["REQ-004"],
+      "jenis": "flood",
+      "priority": "P2",
+      "layer": "api-integration",
+      "preconditions": ["At least 3 invoices of distinct Invoice Types exist", "Company download limit above the match count"],
+      "steps": [
+        "Fire 5 concurrent POST /api/dataset/sales.billing.invoice/download_excel requests with identical payloads",
+        "Parse every returned workbook"
+      ],
+      "test_data": {"concurrent_requests": 5, "rows_expected": 3},
+      "expected_result": "Every request returns 200 and a complete workbook: identical row count, identical column order with Invoice Type immediately after Billing To, identical converted cells — no truncated, duplicated or interleaved rows",
+      "automation_candidate": true,
+      "ambiguity_refs": []
+    },
+    {
+      "tc_id": "TC-Auto-INV-007",
+      "title": "Should be able to export exactly at the company download limit and be refused one row above it (limit boundary, team environment 2,000)",
+      "tm_ids": ["ID-CHECK-007"],
+      "req_ids": ["REQ-004"],
+      "jenis": "boundary",
+      "priority": "P2",
+      "layer": "api-integration",
+      "preconditions": [
+        "res.company.download_limit set to the team environment value 2000 (QA-005 confirmed; a small value such as 5 is acceptable for a fast run with the same boundary logic)",
+        "Ability to seed exactly limit and limit+1 matching invoices"
+      ],
+      "steps": [
+        "Seed exactly `limit` invoices; POST download_excel; parse the file",
+        "Seed one more invoice (limit+1 matches); POST download_excel again"
+      ],
+      "test_data": {"variants": [{"download_limit": 2000, "matches": 2000, "expect": "200 + full file"}, {"download_limit": 2000, "matches": 2001, "expect": "refused"}, {"download_limit": 5, "matches": 5, "expect": "200 + full file"}, {"download_limit": 5, "matches": 6, "expect": "refused"}]},
+      "expected_result": "At exactly the limit the export succeeds with every row carrying its Invoice Type label; at limit+1 the export is refused with the row-limit message naming the limit and the matching count (恐れ入ります。ダウンロード可能な件数は[limit]件までです。現在[count]件が対象となっています...). Per confirmed specification, download_limit 0 means unlimited and must not fall back to a smaller constant (see EX-004)",
+      "automation_candidate": true,
+      "ambiguity_refs": []
+    },
+    {
+      "tc_id": "TC-Auto-INV-008",
+      "title": "Should be able to download the Invoice List to Excel with the Invoice Type column present (Download All and ticked-row Download, T-006 presence)",
+      "tm_ids": ["ID-CHECK-008"],
+      "req_ids": ["REQ-004"],
+      "jenis": "positive",
+      "priority": "P1",
+      "layer": "api-integration",
+      "preconditions": ["At least 2 invoices with different Invoice Types exist"],
+      "steps": [
+        "POST /api/dataset/sales.billing.invoice/download_excel with headers containing sales_billing_to_invoice_type (Download All, empty selection)",
+        "Repeat with a selected subset: domain extended with [\"id\",\"in\",[<id1>]] (ticked-row Download)"
+      ],
+      "test_data": {"variants": [{"mode": "download_all", "selected": []}, {"mode": "selected_rows", "selected": [1]}]},
+      "expected_result": "Both downloads return 200 and the workbook contains a column for sales_billing_to_invoice_type ('Invoice Type' / 請求書種類 per UI language); Download All carries every matching row, ticked-row Download carries only the ticked rows",
+      "automation_candidate": true,
+      "ambiguity_refs": []
+    },
+    {
+      "tc_id": "TC-Auto-INV-009",
+      "title": "Should be able to download a header-only Excel when the Invoice Type filter matches zero rows (zero-count export)",
+      "tm_ids": ["ID-CHECK-009"],
+      "req_ids": ["REQ-004", "REQ-014"],
+      "jenis": "count",
+      "priority": "P2",
+      "layer": "api-integration",
+      "preconditions": ["No invoice whose master type is credit_card exists"],
+      "steps": [
+        "POST download_excel with domain [[\"sales_billing_to_invoice_type\",\"=\",\"credit_card\"]]",
+        "Parse the workbook"
+      ],
+      "test_data": {"domain": [["sales_billing_to_invoice_type", "=", "credit_card"]]},
+      "expected_result": "HTTP 200; the file has the full header row including the Invoice Type column and zero data rows; no crash in the streaming writer on the empty branch",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-010",
+      "title": "Should be able to find the Invoice Type column immediately right of Billing To in the downloaded file with the UI-language header (EN Invoice Type / JA 請求書種類)",
+      "tm_ids": ["ID-CHECK-010"],
+      "req_ids": ["REQ-008"],
+      "jenis": "boundary",
+      "priority": "P1",
+      "layer": "api-integration",
+      "preconditions": ["At least 1 invoice exists", "FE payload mirrors the invoice_list locale headers"],
+      "steps": [
+        "POST download_excel with lang en_US; read the header row index of 'Billing To' and 'Invoice Type'",
+        "Repeat with lang ja_JP and the ja headers/convert labels; read the header index of 請求先 and 請求書種類"
+      ],
+      "test_data": {"en_headers": {"billing_to": "Billing To", "invoice_type": "Invoice Type"}, "ja_headers": {"billing_to": "請求先", "invoice_type": "請求書種類"}},
+      "expected_result": "In both languages the Invoice Type column index equals the Billing To column index + 1 ('Insert immediately to the right of Billing To', PRD §4.3 / T-006); header text equals the UI-language locale label (exact sample-file wording remains flagged under QA-003/AMB-003 — not asserted beyond the locale labels)",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-003"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-011",
+      "title": "Should be able to see identical column order on screen and in the file with no duplicate Invoice Type header (Billing To → Invoice Type → Credit Sales/Prepayment)",
+      "tm_ids": ["ID-CHECK-011"],
+      "req_ids": ["REQ-008", "REQ-003"],
+      "jenis": "combination",
+      "priority": "P2",
+      "layer": "fe-unit",
+      "preconditions": ["invoice_list locale (en and ja) loaded"],
+      "steps": [
+        "Read the headers[] accessor sequence from the locale used by both the table and the export",
+        "Assert sales_billing_to_invoice_type follows sales_billing_to_master_id, sales_billing_category follows it, and all header names are unique within each locale"
+      ],
+      "test_data": {"expected_sequence": ["sales_billing_to_master_id", "sales_billing_to_invoice_type", "sales_billing_category"]},
+      "expected_result": "Screen and file share one column list with the sequence Billing To → Invoice Type → Credit Sales/Prepayment (AMB-005 answer: same as the download); the pre-existing 掛売／前払 column keeps its own label so no two columns are named 'Invoice Type' (safety net for the EX-003 header rename)",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-003", "AMB-005"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-012",
+      "title": "Should be able to export simultaneously from two accounts in different UI languages with each file matching its own screen (multi-user EN/JA)",
+      "tm_ids": ["ID-CHECK-012"],
+      "req_ids": ["REQ-015"],
+      "jenis": "multi-user",
+      "priority": "P2",
+      "layer": "api-integration",
+      "preconditions": [
+        "User A (en UI) and User B (ja UI) both see the same invoice of a super_simple master",
+        "Both hold download permission"
+      ],
+      "steps": [
+        "Both users POST download_excel at the same time: A with lang en_US and EN convert labels, B with lang ja_JP and JA convert labels",
+        "Compare each file's Invoice Type cells against that user's on-screen label"
+      ],
+      "test_data": {"invoice_type": "super_simple", "en_label": "Super Simple Version", "ja_label": "超簡易版"},
+      "expected_result": "Both requests return 200; A's file shows Super Simple Version, B's file shows 超簡易版, each identical to its own screen; row sets are identical — per-language conversion does not cross users",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-013",
+      "title": "Should be able to cancel or refresh during an export spinner and still get a complete file with correct Invoice Type values on retry (interrupt)",
+      "tm_ids": ["ID-CHECK-013"],
+      "req_ids": ["REQ-015", "REQ-008"],
+      "jenis": "interrupt",
+      "priority": "P2",
+      "layer": "e2e",
+      "preconditions": ["More than 1,000 matching rows so the Download All confirmation appears (DOC-001 §3.4)"],
+      "steps": [
+        "Click Download All, press Cancel in the confirmation dialog — no export starts",
+        "Click Download All again, press Confirm, then refresh the browser while the spinner shows",
+        "Re-open the screen and repeat the export to completion; open the file"
+      ],
+      "test_data": {"matching_rows": 1001, "cancel_first": true},
+      "expected_result": "Cancel aborts cleanly; the interrupted attempt leaves no partial file listed or corrupt state; the retried export completes and every Invoice Type cell equals the screen value with the column immediately right of Billing To",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-014",
+      "title": "Should be able to see a blank Invoice Type cell in the file for an invoice whose Billing To type is cleared (blank stays blank, AMB-004)",
+      "tm_ids": ["ID-CHECK-014"],
+      "req_ids": ["REQ-015"],
+      "jenis": "boundary",
+      "priority": "P2",
+      "layer": "api-integration",
+      "preconditions": ["Master BTM-INV014-C whose invoice_print_type was cleared to False after invoice R151-INV014-003 was issued"],
+      "steps": [
+        "Confirm the screen shows an empty Invoice Type cell for R151-INV014-003",
+        "POST download_excel filtered to that invoice; read its Invoice Type cell"
+      ],
+      "test_data": {"invoice_no": "R151-INV014-003", "master_type": false},
+      "expected_result": "The exported cell is blank (empty string), matching the screen — 'Blank.' per the AMB-004 answer; the row itself is present with its other columns intact",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-015",
+      "title": "Should be able to see each downloaded Invoice Type cell equal the on-screen value as a localized label (EN and JA, T-007)",
+      "tm_ids": ["ID-CHECK-015"],
+      "req_ids": ["REQ-015"],
+      "jenis": "positive",
+      "priority": "P1",
+      "layer": "api-integration",
+      "preconditions": ["Invoices of at least 4 distinct master types exist (super_simple, detailed, direct_debit, credit_card)"],
+      "steps": [
+        "POST download_excel (lang en_US, EN convert labels); read each row's Invoice Type cell",
+        "Repeat with lang ja_JP and JA convert labels",
+        "Compare each cell against the value the screen shows for the same invoice in that language"
+      ],
+      "test_data": {"rows": [{"invoice_no": "R151-INV015-00", "type": "super_simple", "en": "Super Simple Version", "ja": "超簡易版"}, {"invoice_no": "R151-INV015-01", "type": "detailed", "en": "Detailed Version", "ja": "詳細版"}, {"invoice_no": "R151-INV015-02", "type": "direct_debit", "en": "Direct Debit", "ja": "口座引落"}, {"invoice_no": "R151-INV015-03", "type": "credit_card", "en": "Credit Card Statement", "ja": "クレジット引落明細書"}]},
+      "expected_result": "Every row's cell equals the screen's value in that UI language ('The same correct value as the \"Invoice Type\" on the screen must be output in each row', PRD §5 T-007)",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-016",
+      "title": "Should be able to export many filtered rows across streaming chunks with every Invoice Type cell correct (filter composed with export)",
+      "tm_ids": ["ID-CHECK-016"],
+      "req_ids": ["REQ-015", "REQ-014"],
+      "jenis": "combination",
+      "priority": "P2",
+      "layer": "be-unit",
+      "preconditions": ["More than 2 invoices across super_simple / detailed / direct_debit masters"],
+      "steps": [
+        "Call stream_excel_from_search_read with domain [[\"sales_billing_to_invoice_type\",\"in\",[\"super_simple\",\"detailed\",\"direct_debit\"]]] and chunk_size = 2",
+        "Parse the workbook; compare row count with search_count and each Invoice Type cell with its master's label"
+      ],
+      "test_data": {"chunk_size": 2, "expected_min_rows": 3},
+      "expected_result": "Row count equals the domain's search_count (rows span multiple chunks with none dropped or duplicated) and every Invoice Type cell holds the converted label of that row's master type",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-017",
+      "title": "Should be able to combine the Invoice Type filter with Billing To and Credit Sales/Prepayment filters and get the intersected rows only",
+      "tm_ids": ["ID-CHECK-017"],
+      "req_ids": ["REQ-014"],
+      "jenis": "combination",
+      "priority": "P2",
+      "layer": "api-integration",
+      "preconditions": [
+        "Master A (super_simple) with invoices INV-A1 (billing_category invoice) and INV-A2 (advance_payment)",
+        "Master B (detailed) with invoice INV-B1 (invoice)"
+      ],
+      "steps": [
+        "POST search_read with domain [[\"sales_billing_to_invoice_type\",\"=\",\"super_simple\"],[\"sales_billing_to_master_id\",\"=\",<A>],[\"sales_billing_category\",\"=\",\"invoice\"]]",
+        "Repeat with type detailed + master B"
+      ],
+      "test_data": {"variants": [{"type": "super_simple", "master": "A", "category": "invoice", "expect": ["INV-A1"]}, {"type": "detailed", "master": "B", "category": "invoice", "expect": ["INV-B1"]}]},
+      "expected_result": "Only rows satisfying all selected conditions return (INV-A1 for the first combination, INV-B1 for the second); the Invoice Type filter narrows correctly alongside its neighbours",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-018",
+      "title": "Should be able to select an Invoice Type option, click Search, and see only invoices of that type in the detail list (T-003)",
+      "tm_ids": ["ID-CHECK-018"],
+      "req_ids": ["REQ-014"],
+      "jenis": "positive",
+      "priority": "P1",
+      "layer": "api-integration",
+      "preconditions": ["Invoices of super_simple and detailed masters exist, plus one blank-type invoice"],
+      "steps": [
+        "POST /api/dataset/sales.billing.invoice/search_read with domain [[\"sales_billing_to_invoice_type\",\"=\",\"super_simple\"]] and fields incl. sales_billing_to_invoice_type",
+        "Read the returned records and length"
+      ],
+      "test_data": {"filter_value": "super_simple"},
+      "expected_result": "Only invoice data matching the selected Invoice Type is displayed: every returned record carries sales_billing_to_invoice_type = super_simple, detailed and blank rows are absent, and length equals the super_simple count (PRD §5 T-003 / QA-002)",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-019",
+      "title": "Should not be able to get substring matches when filtering by Invoice Type (simple never returns super_simple)",
+      "tm_ids": ["ID-CHECK-019"],
+      "req_ids": ["REQ-014"],
+      "jenis": "negative",
+      "priority": "P2",
+      "layer": "be-unit",
+      "preconditions": ["An invoice whose master type is super_simple exists; no plain simple invoice exists"],
+      "steps": [
+        "env['sales.billing.invoice'].search([(\"sales_billing_to_invoice_type\", \"=\", \"simple\")])",
+        "Assert the super_simple invoice is absent and the result is empty"
+      ],
+      "test_data": {"filter_value": "simple", "seeded_type": "super_simple"},
+      "expected_result": "Selection equality only: 'simple' returns no rows and never matches the seeded super_simple invoice — matching is exact on the enum key, not by substring",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-020",
+      "title": "Should be able to see correct list results for zero, one and many matches, with blank-type rows still listed when no type is selected (count 0/1/many)",
+      "tm_ids": ["ID-CHECK-020"],
+      "req_ids": ["REQ-014", "REQ-007"],
+      "jenis": "count",
+      "priority": "P2",
+      "layer": "api-integration",
+      "preconditions": [
+        "One envelope_simple invoice, three detailed invoices, one cleared-type (blank) invoice, no credit_card invoice"
+      ],
+      "steps": [
+        "POST search_read with domain = each of envelope_simple, detailed, credit_card, and no type domain at all",
+        "For the unfiltered run assert the blank invoice is present with an empty sales_billing_to_invoice_type"
+      ],
+      "test_data": {"variants": [{"type": "envelope_simple", "expect_count": 1}, {"type": "detailed", "expect_count": 3}, {"type": "credit_card", "expect_count": 0}, {"type": null, "expect_count": "all incl. blank"}]},
+      "expected_result": "Zero-match returns an empty list and length 0; one-match returns exactly that row; many-match returns exactly those rows; with no Invoice Type selected every invoice lists including the blank-type row (AMB-004: blank rows appear only when no type is selected)",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004", "AMB-006"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-021",
+      "title": "Should be able to see the list reflect another user's master edit and the final value after rapid repeated edits (multi-user and flood on live lookup)",
+      "tm_ids": ["ID-CHECK-021"],
+      "req_ids": ["REQ-007"],
+      "jenis": "multi-user",
+      "priority": "P2",
+      "layer": "be-unit",
+      "preconditions": ["User B's invoice R151-INV021-004 under master BTM-INV021-D (super_simple)"],
+      "steps": [
+        "As user A, write BTM-INV021-D.invoice_print_type = direct_debit; flush; as user B read the invoice's sales_billing_to_invoice_type",
+        "Rapidly write the master type 5 times ending on credit_card; flush; read again"
+      ],
+      "test_data": {"edits": ["direct_debit", "envelope", "simple", "envelope_simple", "credit_card"], "final": "credit_card"},
+      "expected_result": "B's read returns direct_debit after the first edit and credit_card after the burst — the list follows the master's current value (live lookup), and last write wins with no stale or intermediate value left stored",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004", "AMB-006"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-022",
+      "title": "Should not be able to match a blank-type invoice under any of the seven Invoice Type filter options (cleared type stores False)",
+      "tm_ids": ["ID-CHECK-022"],
+      "req_ids": ["REQ-007"],
+      "jenis": "boundary",
+      "priority": "P2",
+      "layer": "be-unit",
+      "preconditions": [
+        "Invoice R151-INV022-005 whose master type was cleared to False",
+        "Masterless invoice R151-INV022-006",
+        "Normal detailed invoice R151-INV022-007"
+      ],
+      "steps": [
+        "Read sales_billing_to_invoice_type on all three invoices",
+        "Search each of the seven keys and assert the blank invoices are absent from all results",
+        "Search [(\"sales_billing_to_invoice_type\", \"=\", False)]"
+      ],
+      "test_data": {"blank_invoices": ["R151-INV022-005", "R151-INV022-006"], "normal": "R151-INV022-007"},
+      "expected_result": "The cleared and masterless invoices read False and appear under no key filter; the = False domain returns exactly them and excludes the detailed invoice — blank stays blank and unreachable by the 7 options (AMB-004 answer)",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004", "AMB-006"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-023",
+      "title": "Should be able to see each invoice row display its Billing To master's current Invoice Type for all seven values (T-005, live lookup)",
+      "tm_ids": ["ID-CHECK-023"],
+      "req_ids": ["REQ-007"],
+      "jenis": "positive",
+      "priority": "P1",
+      "layer": "be-unit",
+      "preconditions": ["Seven masters, one per enum key, each with one invoice R151-INV023-0NN"],
+      "steps": [
+        "Create the seven master/invoice pairs and read sales_billing_to_invoice_type on every invoice",
+        "Map each stored key to its EN label and compare with the label the FE table renders for the same key"
+      ],
+      "test_data": {"pairs": [{"master": "BTM-INV023-01", "type": "detailed", "label_en": "Detailed Version"}, {"master": "BTM-INV023-02", "type": "simple", "label_en": "Prioritize Simple Version"}, {"master": "BTM-INV023-03", "type": "super_simple", "label_en": "Super Simple Version"}, {"master": "BTM-INV023-04", "type": "direct_debit", "label_en": "Direct Debit"}, {"master": "BTM-INV023-05", "type": "credit_card", "label_en": "Credit Card Statement"}, {"master": "BTM-INV023-06", "type": "envelope", "label_en": "All-in-one Detailed Version"}, {"master": "BTM-INV023-07", "type": "envelope_simple", "label_en": "All-in-one Simple Version"}]},
+      "expected_result": "Every row returns its own master's current type key — 'Display the Invoice Type of the Invoice Number' (PRD §4.2) — for all 7 boundary values; a master created without an explicit type yields detailed (ORM default)",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004", "AMB-006"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-024",
+      "title": "Should be able to see consistent Invoice Type values for one and many invoices per master and many masters sharing one type (count 1/many)",
+      "tm_ids": ["ID-CHECK-024"],
+      "req_ids": ["REQ-007"],
+      "jenis": "count",
+      "priority": "P2",
+      "layer": "be-unit",
+      "preconditions": [
+        "Master M1 (simple) with 1 invoice; master M2 (simple) with 3 invoices; master M3 (detailed) with 1 invoice"
+      ],
+      "steps": [
+        "Read sales_billing_to_invoice_type across all 5 invoices",
+        "Group by master and compare each group's values with the master's invoice_print_type"
+      ],
+      "test_data": {"m1_invoices": 1, "m2_invoices": 3, "shared_type": "simple"},
+      "expected_result": "All 4 simple-master invoices read simple (1 and many per master, many masters sharing one type) and the detailed one reads detailed — the master-linked value is stable regardless of row count",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004", "AMB-006"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-025",
+      "title": "Should be able to see existing invoices update their Invoice Type after the Billing To master's type is edited or reassigned (live lookup, not issuance snapshot)",
+      "tm_ids": ["ID-CHECK-025"],
+      "req_ids": ["REQ-007"],
+      "jenis": "combination",
+      "priority": "P1",
+      "layer": "be-unit",
+      "preconditions": [
+        "Master M1 (super_simple) with invoice INV-25; master M2 (detailed) exists",
+        "INV-25's billing links to M1"
+      ],
+      "steps": [
+        "Write M1.invoice_print_type = direct_debit; flush; read INV-25.sales_billing_to_invoice_type",
+        "Rewrite the billing's billing_to_master_id to M2; flush; read again",
+        "Write M1.invoice_print_type = credit_card; flush; read INV-25 once more"
+      ],
+      "test_data": {"edit_sequence": [{"action": "edit M1", "expect": "direct_debit"}, {"action": "reassign to M2", "expect": "detailed"}, {"action": "edit old M1 again", "expect": "still detailed"}]},
+      "expected_result": "The invoice follows every change: direct_debit after the master edit, detailed after reassignment, and still detailed after the old master's later edit — live lookup linked by id (AMB-006/QA-001(b)/QA-004), never the value fixed at issuance",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004", "AMB-006"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-026",
+      "title": "Should not be able to observe any new lock on list, filter or export for invoices dated in a closed accounting period (closing unchanged)",
+      "tm_ids": ["ID-CHECK-026"],
+      "req_ids": ["REQ-011"],
+      "jenis": "negative",
+      "priority": "P2",
+      "layer": "api-integration",
+      "preconditions": [
+        "An accounting period covering the invoice date is closed (yellow closing banner active)",
+        "Invoice R151-INV026-008 dated inside the closed period, master type simple"
+      ],
+      "steps": [
+        "POST search_read with no domain — assert R151-INV026-008 lists with sales_billing_to_invoice_type = simple",
+        "POST search_read with domain [[\"sales_billing_to_invoice_type\",\"=\",\"simple\"]] — assert it returns",
+        "POST download_excel with the same domain — assert the row exports with its label"
+      ],
+      "test_data": {"invoice_no": "R151-INV026-008", "type": "simple"},
+      "expected_result": "All three operations succeed under the closed period — the closing lock blocks nothing on this screen, exactly as before the modification (PRD §4.4 Closing process: No change)",
+      "automation_candidate": true,
+      "ambiguity_refs": []
+    },
+    {
+      "tc_id": "TC-Auto-INV-027",
+      "title": "Should be able to complete the closing process for a period containing invoices carrying the new Invoice Type field (T-009)",
+      "tm_ids": ["ID-CHECK-027"],
+      "req_ids": ["REQ-011"],
+      "jenis": "positive",
+      "priority": "P2",
+      "layer": "e2e",
+      "preconditions": [
+        "Open accounting period with billings/invoices whose rows carry sales_billing_to_invoice_type",
+        "Closing execution permission for the operator"
+      ],
+      "steps": [
+        "Execute the closing process for the target period end-to-end",
+        "After completion, open the Invoice List and run one search and one download"
+      ],
+      "test_data": {"period": "current open period containing seeded invoices"},
+      "expected_result": "The closing process completes successfully with the new stored field present on every invoice (no constraint or write failure introduced), and the screen remains fully usable afterwards",
+      "automation_candidate": false,
+      "ambiguity_refs": []
+    },
+    {
+      "tc_id": "TC-Auto-INV-028",
+      "title": "Should be able to see an Invoice Type column header in the detail table of the Invoice List (T-004)",
+      "tm_ids": ["ID-CHECK-028"],
+      "req_ids": ["REQ-003"],
+      "jenis": "positive",
+      "priority": "P1",
+      "layer": "fe-unit",
+      "preconditions": ["invoice_list locale loaded; useColumnsV2('invoice_list') wired to the table"],
+      "steps": [
+        "Assert the invoice_list locale headers[] contain accessor sales_billing_to_invoice_type with name 'Invoice Type' (en) / 請求書種類 (ja)",
+        "Assert the list fetch fields in Invoices.tsx include sales_billing_to_invoice_type"
+      ],
+      "test_data": {"accessor": "sales_billing_to_invoice_type", "name_en": "Invoice Type", "name_ja": "請求書種類"},
+      "expected_result": "The detail table exposes an Invoice Type column header in both languages and the list data request carries the field — 'An \"Invoice Type\" column must be added to the detail table' (T-004); safety net for EX-001/EX-006",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-005"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-029",
+      "title": "Should be able to see the on-screen Invoice Type column immediately right of Billing To, same position as the download file (AMB-005)",
+      "tm_ids": ["ID-CHECK-029"],
+      "req_ids": ["REQ-003"],
+      "jenis": "boundary",
+      "priority": "P1",
+      "layer": "fe-unit",
+      "preconditions": ["invoice_list locale loaded (en and ja)"],
+      "steps": [
+        "Read the headers[] accessor order from both locales",
+        "Assert index(sales_billing_to_invoice_type) == index(sales_billing_to_master_id) + 1 in each"
+      ],
+      "test_data": {"locales": ["en", "ja"]},
+      "expected_result": "In both languages the on-screen column order is Billing To then Invoice Type — the same position as the download file ('Make it the same as the download file', AMB-005 answer)",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-005"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-030",
+      "title": "Should be able to see list and Excel date columns keep the same Japan-time calendar day with the new column added (time zone unchanged, T-010)",
+      "tm_ids": ["ID-CHECK-033"],
+      "req_ids": ["REQ-012"],
+      "jenis": "positive",
+      "priority": "P2",
+      "layer": "api-integration",
+      "preconditions": ["Invoice with billing date and closing date on a known Japan-time calendar day exists"],
+      "steps": [
+        "Read the on-screen values of Billing Date and Closing Date for the invoice",
+        "POST download_excel with tz Asia/Tokyo; read the same row's date cells",
+        "Compare the exported date strings with the screen's calendar days"
+      ],
+      "test_data": {"tz": "Asia/Tokyo", "columns": ["sales_billing_date", "sales_billing_closing_date"]},
+      "expected_result": "Each exported date equals the calendar day the screen shows (YYYY-MM-DD text on the same day) — no change or offset in the time zone display after adding the Invoice Type column (PRD §4.4 / T-010)",
+      "automation_candidate": true,
+      "ambiguity_refs": []
+    },
+    {
+      "tc_id": "TC-Auto-INV-031",
+      "title": "Should be able to see identical Invoice Type values when downloading under an overseas time-zone setting (no offset leaks into the new column)",
+      "tm_ids": ["ID-CHECK-034"],
+      "req_ids": ["REQ-012"],
+      "jenis": "boundary",
+      "priority": "P2",
+      "layer": "api-integration",
+      "preconditions": ["Same seeded invoice exported once with tz Asia/Tokyo and once with an overseas tz (e.g. Europe/London)"],
+      "steps": [
+        "POST download_excel twice for the same domain, tz Asia/Tokyo then Europe/London",
+        "Diff the two workbooks' Invoice Type cells (and row sets)"
+      ],
+      "test_data": {"tz_variants": ["Asia/Tokyo", "Europe/London"]},
+      "expected_result": "Invoice Type cells and row sets are byte-identical across the two time zones — the new column is not a date and must be invariant; any difference would be a time-zone leak into the new column",
+      "automation_candidate": true,
+      "ambiguity_refs": []
+    },
+    {
+      "tc_id": "TC-Auto-INV-032",
+      "title": "Should not be able to open the Invoice List without the menu entry (access-refused message unchanged)",
+      "tm_ids": ["ID-CHECK-035"],
+      "req_ids": ["REQ-009"],
+      "jenis": "negative",
+      "priority": "P2",
+      "layer": "e2e",
+      "preconditions": ["User account without the Invoice List menu entry exists"],
+      "steps": [
+        "Log in as the account and navigate directly to /inventory-control/shipment-process/invoices/",
+        "Read the page body"
+      ],
+      "test_data": {"url": "/inventory-control/shipment-process/invoices/"},
+      "expected_result": "The screen refuses access with the unchanged message 'You are not allowed to access this page. Contact your administrator to request access if necessary.' — the modification adds no new access path (EX-005: verify with a real account; no access-rule surface is in the extracts)",
+      "automation_candidate": true,
+      "ambiguity_refs": []
+    },
+    {
+      "tc_id": "TC-Auto-INV-033",
+      "title": "Should be able to display, search and download the Invoice List as a guest user exactly as before the modification (T-008)",
+      "tm_ids": ["ID-CHECK-036"],
+      "req_ids": ["REQ-009"],
+      "jenis": "positive",
+      "priority": "P1",
+      "layer": "e2e",
+      "preconditions": [
+        "Guest account exists; menu entry state for guests recorded before the test (DOC-001 marks guest access TBD)",
+        "Invoices of at least two Invoice Types exist"
+      ],
+      "steps": [
+        "Log in with the guest account and open the Invoice List",
+        "Open the Invoice Type pull-down, select super_simple, click Search",
+        "Click Download All and open the file"
+      ],
+      "test_data": {"actor": "guest", "filter_value": "super_simple"},
+      "expected_result": "Guest display, search and download all work as before: the screen opens with the Invoice Type filter and column, the filtered search returns only super_simple rows, and the download contains the Invoice Type column with matching labels — guest permissions unchanged (PRD §4.4 / T-008); record the actual guest outcome for sign-off per EX-005",
+      "automation_candidate": true,
+      "ambiguity_refs": []
+    },
+    {
+      "tc_id": "TC-Auto-INV-034",
+      "title": "Should be able to see guest and internal users get identical results simultaneously and guest rapid downloads stay stable (multi-user and flood)",
+      "tm_ids": ["ID-CHECK-037"],
+      "req_ids": ["REQ-009"],
+      "jenis": "multi-user",
+      "priority": "P2",
+      "layer": "e2e",
+      "preconditions": ["One guest and one internal session open on the same seeded data"],
+      "steps": [
+        "Both users apply the same Invoice Type filter and Search at the same time; compare result sets and column values",
+        "Guest clicks Download 5 times in rapid succession; inspect each file"
+      ],
+      "test_data": {"sessions": 2, "rapid_downloads": 5},
+      "expected_result": "Both users see identical rows and Invoice Type values simultaneously; the guest's 5 rapid downloads all complete with identical, complete files — no permission drift and no flood failure",
+      "automation_candidate": true,
+      "ambiguity_refs": []
+    },
+    {
+      "tc_id": "TC-Auto-INV-035",
+      "title": "Should be able to find the Invoice Type filter item in the Invoice List search condition area (T-001)",
+      "tm_ids": ["ID-CHECK-038"],
+      "req_ids": ["REQ-002"],
+      "jenis": "positive",
+      "priority": "P1",
+      "layer": "e2e",
+      "preconditions": ["Internal user with the menu entry logged in"],
+      "steps": [
+        "Open the Invoice List screen and inspect the search condition area (expand hidden filters)",
+        "Locate the Invoice Type filter field (data-test=invoice_print_type)"
+      ],
+      "test_data": {"data_test": "invoice_print_type", "label_en": "Invoice Type", "label_ja": "請求書種類"},
+      "expected_result": "The 'Invoice Type' filter item is added to the search condition area with its localized label ('The \"Invoice Type\" filter item must be added to the search condition area', T-001); safety net for the EX-001 cypress update",
+      "automation_candidate": true,
+      "ambiguity_refs": []
+    },
+    {
+      "tc_id": "TC-Auto-INV-036",
+      "title": "Should be able to recover from refresh and double-submit Search during an Invoice Type filtered search with the matching-only result preserved (interrupt)",
+      "tm_ids": ["ID-CHECK-039"],
+      "req_ids": ["REQ-002", "REQ-003", "REQ-014"],
+      "jenis": "interrupt",
+      "priority": "P2",
+      "layer": "e2e",
+      "preconditions": ["Invoices of two types exist; filter panel open"],
+      "steps": [
+        "Select Invoice Type = direct_debit and click Search; while the list reloads, press the browser refresh",
+        "After reload, re-apply the filter and double-click Search rapidly; read the result set and the column header"
+      ],
+      "test_data": {"variants": [{"interrupt": "refresh_mid_search"}, {"interrupt": "double_submit_search"}]},
+      "expected_result": "After both interrupts the screen renders a usable list with the Invoice Type column present, and the re-applied filter returns only direct_debit rows — no duplicated request state, no broken render, matching-only integrity preserved",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004", "AMB-005"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-037",
+      "title": "Should be able to regain a working search and download after session loss mid-flow on the Invoice List (interrupt)",
+      "tm_ids": ["ID-CHECK-040"],
+      "req_ids": ["REQ-002", "REQ-003", "REQ-004", "REQ-014"],
+      "jenis": "interrupt",
+      "priority": "P2",
+      "layer": "e2e",
+      "preconditions": ["User mid-session on the Invoice List with an Invoice Type filter applied"],
+      "steps": [
+        "Expire the session (logout in another tab / clear session cookie) and trigger a search",
+        "Re-authenticate, re-apply the Invoice Type filter, Search, then Download All"
+      ],
+      "test_data": {"filter_value": "envelope"},
+      "expected_result": "The expired session renders no invoice data; after re-login the filter, search and download all work again and return only envelope rows with the column in place — session loss mid-flow leaves no locked or leaking state",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-004", "AMB-005"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-038",
+      "title": "Should be able to confirm the Invoice Type filter, column and download additions exist only on the Invoice List screen INV-060-013 (scope, REQ-001)",
+      "tm_ids": ["ID-CHECK-041"],
+      "req_ids": ["REQ-001"],
+      "jenis": "positive",
+      "priority": "P2",
+      "layer": "e2e",
+      "preconditions": ["Screens INV-060-013 (Invoice List) and a sibling billing screen (Billing Info List) reachable"],
+      "steps": [
+        "Open INV-060-013 and confirm the Invoice Type filter, detail column and download column are present",
+        "Open the sibling screen and inspect its filter panel, table headers and export"
+      ],
+      "test_data": {"target_screen": "INV-060-013 Invoice List", "sibling_screen": "Billing Info List"},
+      "expected_result": "All three additions exist on INV-060-013 only; the sibling screen shows no Invoice Type (invoice_print_type) filter, column or export header — the modification is scoped to the Invoice List per PRD §3.1",
+      "automation_candidate": true,
+      "ambiguity_refs": []
+    },
+    {
+      "tc_id": "TC-Auto-INV-039",
+      "title": "Should not be able to confuse the new Invoice Type filter with the pre-existing Credit Sales/Prepayment (掛売／前払) filter (distinct labels and options)",
+      "tm_ids": ["ID-CHECK-042"],
+      "req_ids": ["REQ-002"],
+      "jenis": "negative",
+      "priority": "P2",
+      "layer": "fe-unit",
+      "preconditions": ["invoice_list locale loaded; filter panel rendered"],
+      "steps": [
+        "Assert locale keys invoice_print_type = 'Invoice Type'/請求書種類 and invoice_type = 'Credit Sales/Prepayment'/掛売／前払 remain distinct strings in both languages",
+        "Assert the form binds the new field under sales_billing_to_invoice_type_equal and the old one under sales_billing_category, each with its own option list (7 vs 2)"
+      ],
+      "test_data": {"new": {"key": "invoice_print_type", "field": "sales_billing_to_invoice_type_equal", "options": 7}, "old": {"key": "invoice_type", "field": "sales_billing_category", "options": 2}},
+      "expected_result": "Two separate filters render with distinct labels and disjoint option sets in EN and JA — the historical name 請求書種別 for the old column (DOC-001) cannot be mistaken for the new 請求書種類 filter; export-side twin of this guard is the EX-003 header rename",
+      "automation_candidate": true,
+      "ambiguity_refs": []
+    },
+    {
+      "tc_id": "TC-Auto-INV-040",
+      "title": "Should be able to see every new Invoice Type surface render its Japanese label in a Japanese UI session (filter, options, column header, cells)",
+      "tm_ids": ["ID-CHECK-030"],
+      "req_ids": ["REQ-002", "REQ-003", "REQ-006", "REQ-007"],
+      "jenis": "combination",
+      "priority": "P1",
+      "layer": "e2e",
+      "preconditions": [
+        "Internal user with the menu entry logged in and the UI language switched to Japanese (ja_JP)",
+        "At least one invoice of a super_simple Billing To master exists"
+      ],
+      "steps": [
+        "Open the Invoice List (INV-060-013) in the ja_JP session and expand the filter panel",
+        "Assert the Invoice Type filter carries the label 請求書種類 (data-test=invoice_print_type)",
+        "Open the pull-down and assert the option labels equal the seven expected JA labels exactly",
+        "Select 超簡易版, click 検索 (Search); read the detail table's Invoice Type header and every returned row's cell"
+      ],
+      "test_data": {"ui_lang": "ja_JP", "filter_label": "請求書種類", "column_header": "請求書種類", "selected_option": "超簡易版", "expected_options": {"detailed": "詳細版", "simple": "簡易版優先", "super_simple": "超簡易版", "direct_debit": "口座引落", "credit_card": "クレジット引落明細書", "envelope": "一括詳細版（窓付き封筒対応）", "envelope_simple": "一括簡易版（窓付き封筒対応）"}},
+      "expected_result": "Every new surface renders Japanese in the ja_JP session: filter label 請求書種類, the seven options with their exact JA labels, the column header 請求書種類, and each matching row's cell 超簡易版 — no EN fallback and no raw enum key anywhere (labels trace to REQ-002/REQ-003/REQ-006 notes; the cell is the master-linked value of REQ-007)",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-003"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-041",
+      "title": "Should be able to download in Japanese and see all seven Invoice Type values as correct Japanese labels including the full-width envelope parentheses",
+      "tm_ids": ["ID-CHECK-031"],
+      "req_ids": ["REQ-004", "REQ-008", "REQ-015"],
+      "jenis": "boundary",
+      "priority": "P1",
+      "layer": "api-integration",
+      "preconditions": ["Seven confirmed invoices exist, one per Invoice Type key (one master per key)"],
+      "steps": [
+        "POST /api/dataset/sales.billing.invoice/download_excel with lang ja_JP, the ja invoice_list headers and the ja convert_fields labels",
+        "Parse the workbook: read the Invoice Type header cell and the Invoice Type cell of each of the seven rows",
+        "Assert each cell equals its expected JA label and both envelope labels keep full-width parentheses （窓付き封筒対応）"
+      ],
+      "test_data": {"lang": "ja_JP", "header_ja": "請求書種類", "rows": [{"invoice_no": "R151-INV041-001", "type": "detailed", "ja_label": "詳細版"}, {"invoice_no": "R151-INV041-002", "type": "simple", "ja_label": "簡易版優先"}, {"invoice_no": "R151-INV041-003", "type": "super_simple", "ja_label": "超簡易版"}, {"invoice_no": "R151-INV041-004", "type": "direct_debit", "ja_label": "口座引落"}, {"invoice_no": "R151-INV041-005", "type": "credit_card", "ja_label": "クレジット引落明細書"}, {"invoice_no": "R151-INV041-006", "type": "envelope", "ja_label": "一括詳細版（窓付き封筒対応）"}, {"invoice_no": "R151-INV041-007", "type": "envelope_simple", "ja_label": "一括簡易版（窓付き封筒対応）"}]},
+      "expected_result": "The header reads 請求書種類 and all seven values export as their exact JA labels — 詳細版, 簡易版優先, 超簡易版, 口座引落, クレジット引落明細書, 一括詳細版（窓付き封筒対応）, 一括簡易版（窓付き封筒対応） — with the envelope parentheses kept full-width, no mojibake, no half-width substitution and no raw key ('The same correct value as the \"Invoice Type\" on the screen must be output in each row', PRD §5 T-007)",
+      "automation_candidate": true,
+      "ambiguity_refs": ["AMB-003"]
+    },
+    {
+      "tc_id": "TC-Auto-INV-042",
+      "title": "Should not be able to find a raw enum key, an English label, or the drifted Backend Japanese label as any Japanese Invoice Type value",
+      "tm_ids": ["ID-CHECK-032"],
+      "req_ids": ["REQ-006", "REQ-015"],
+      "jenis": "negative",
+      "priority": "P2",
+      "layer": "api-integration",
+      "preconditions": [
+        "Seven confirmed invoices exist, one per Invoice Type key",
+        "The ja convert_fields label map the FE sends is available for inspection"
+      ],
+      "steps": [
+        "POST download_excel with lang ja_JP and the ja convert_fields labels; collect every Invoice Type cell",
+        "Read the ja option labels of the Invoice Type pull-down (billing_to_master:invoice_print_type_options)",
+        "Assert no cell and no option label is exactly equal to any trap string"
+      ],
+      "test_data": {"trap_exact_values": ["detailed", "simple", "super_simple", "direct_debit", "credit_card", "envelope", "envelope_simple", "Detailed Version", "Prioritize Simple Version", "Super Simple Version", "Direct Debit", "Credit Card Statement", "All-in-one Detailed Version", "All-in-one Simple Version", "簡易版", "口座振替"]},
+      "expected_result": "Zero exact matches across cells and options: every Japanese value carries its FE ja locale label (簡易版優先 for simple, 口座引落 for direct_debit) — the drifted BE labels 簡易版 and 口座振替, raw enum keys and English labels never surface (exact-equality assertion, so 簡易版 does not false-positive against 簡易版優先 / 超簡易版)",
+      "automation_candidate": true,
+      "ambiguity_refs": []
+    }
+  ],
+  "answer_keys": [
+    {
+      "ak_id": "AK-001",
+      "tc_id": "TC-Auto-INV-001",
+      "testcase_name": "Should be able to archive an eligible Billing To master while its invoices keep listing, filtering and exporting with their Invoice Type (archive unchanged, T-009 archive half)",
+      "expected": "Match with answerkey",
+      "result": "",
+      "sections": [
+        {
+          "title": "Create Billing To master and confirmed invoice",
+          "kv": [
+            ["Billing To Code", "BTM-AK001-ARCH"],
+            ["Billing To Name", "AK001 Archive Master"],
+            ["Invoice Print Type", "direct_debit"],
+            ["Invoice No", "R151-AK001-001"],
+            ["Billing status", "confirm (billing confirmed so the invoice row exists)"]
+          ],
+          "table": null,
+          "expectation": "Master and confirmed invoice exist; the Invoice List shows the row with Invoice Type Direct Debit."
+        },
+        {
+          "title": "Archive the master under the existing rules",
+          "kv": [
+            ["Operation", "write billing.to.master active=False (satisfy/observe existing guardrails)"],
+            ["Expected immediate result", "Archive succeeds (no ValidationError)"]
+          ],
+          "table": null,
+          "expectation": "The master is archived; no new rule introduced by the Invoice Type change blocks it."
+        },
+        {
+          "title": "Verify list, filter and export keep the archived master's invoice",
+          "kv": [["Request 1", "search_read domain [[\"sales_billing_invoice_no\",\"=\",\"R151-AK001-001\"]]"]],
+          "table": {
+            "headers": ["check", "expected"],
+            "rows": [
+              ["list row present", "1 record, sales_billing_to_invoice_type = direct_debit"],
+              ["filter = direct_debit", "row returned"],
+              ["download_excel row", "present, Invoice Type cell = Direct Debit"],
+              ["Billing To code display", "carries _archived suffix (current behaviour, unchanged)"]
+            ]
+          },
+          "expectation": "Archive flow completes and the archived master's invoice keeps listing, filtering and exporting with its Invoice Type."
+        }
+      ]
+    },
+    {
+      "ak_id": "AK-002",
+      "tc_id": "TC-Auto-INV-007",
+      "testcase_name": "Should be able to export exactly at the company download limit and be refused one row above it (limit boundary, team environment 2,000)",
+      "expected": "Match with answerkey",
+      "result": "",
+      "sections": [
+        {
+          "title": "Set the company download limit",
+          "kv": [
+            ["Company", "base.main_company"],
+            ["Variant A (team value, QA-005)", "download_limit = 2000, seed 2000 then 2001 invoices"],
+            ["Variant B (fast run)", "download_limit = 5, seed 5 then 6 invoices"],
+            ["Variant C (unlimited rule)", "download_limit = 0 with matches > 10000 must NOT be refused (0 = unlimited per confirmed spec; see EX-004)"]
+          ],
+          "table": null,
+          "expectation": "Limit set on the company record; original value saved for restore."
+        },
+        {
+          "title": "Export at exactly the limit",
+          "kv": [["Request", "POST /api/dataset/sales.billing.invoice/download_excel, empty domain"]],
+          "table": {
+            "headers": ["check", "expected"],
+            "rows": [
+              ["HTTP status", "200"],
+              ["data rows", "exactly download_limit"],
+              ["Invoice Type cells", "every row carries its converted label"],
+              ["column order", "Invoice Type immediately after Billing To"]
+            ]
+          },
+          "expectation": "Boundary export succeeds in full."
+        },
+        {
+          "title": "Export one row above the limit",
+          "kv": [["Request", "same POST after adding one more matching invoice"]],
+          "table": {
+            "headers": ["check", "expected"],
+            "rows": [
+              ["HTTP status", "400"],
+              ["message contains", "ダウンロード可能な件数は{limit}件までです。"],
+              ["message contains", "現在{count}件が対象となっています。"],
+              ["file produced", "none"]
+            ]
+          },
+          "expectation": "Refusal with the documented row-limit message naming limit and count; narrow filters and retry is the documented remedy."
+        }
+      ]
+    },
+    {
+      "ak_id": "AK-003",
+      "tc_id": "TC-Auto-INV-012",
+      "testcase_name": "Should be able to export simultaneously from two accounts in different UI languages with each file matching its own screen (multi-user EN/JA)",
+      "expected": "Match with answerkey",
+      "result": "",
+      "sections": [
+        {
+          "title": "Seed one shared super_simple invoice",
+          "kv": [
+            ["Master", "BTM-AK003-SS (invoice_print_type = super_simple)"],
+            ["Invoice No", "R151-AK003-001"]
+          ],
+          "table": null,
+          "expectation": "Both users can see the row on their screens."
+        },
+        {
+          "title": "Export concurrently from two sessions",
+          "kv": [
+            ["User A", "lang en_US, convert label super_simple -> Super Simple Version"],
+            ["User B", "lang ja_JP, convert label super_simple -> 超簡易版"],
+            ["Timing", "both POSTs issued at the same time"]
+          ],
+          "table": {
+            "headers": ["check", "expected"],
+            "rows": [
+              ["A HTTP status / rows", "200 / exactly the shared row(s)"],
+              ["A Invoice Type cell", "Super Simple Version (equals A's screen)"],
+              ["B HTTP status / rows", "200 / same row set"],
+              ["B Invoice Type cell", "超簡易版 (equals B's screen)"]
+            ]
+          },
+          "expectation": "Concurrent per-language exports do not interfere; each file matches its own screen."
+        }
+      ]
+    },
+    {
+      "ak_id": "AK-004",
+      "tc_id": "TC-Auto-INV-014",
+      "testcase_name": "Should be able to see a blank Invoice Type cell in the file for an invoice whose Billing To type is cleared (blank stays blank, AMB-004)",
+      "expected": "Match with answerkey",
+      "result": "",
+      "sections": [
+        {
+          "title": "Create master, invoice, then clear the type",
+          "kv": [
+            ["Master", "BTM-AK004-CLR"],
+            ["Invoice No", "R151-AK004-002"],
+            ["Sequence", "create master (defaults detailed) -> create+confirm billing -> set master invoice_print_type = False -> flush"]
+          ],
+          "table": null,
+          "expectation": "Invoice exists; screen shows an empty Invoice Type cell for it."
+        },
+        {
+          "title": "Export the single row and inspect the cell",
+          "kv": [["Request", "download_excel domain [[\"sales_billing_invoice_no\",\"=\",\"R151-AK004-002\"]]"]],
+          "table": {
+            "headers": ["check", "expected"],
+            "rows": [
+              ["row present", "yes, 1 data row"],
+              ["Invoice Type cell", "blank (empty)"],
+              ["other cells", "intact (Invoice No, amounts)"]
+            ]
+          },
+          "expectation": "Blank on screen exports blank in the file — AMB-004 answer 'Blank.'"
+        }
+      ]
+    },
+    {
+      "ak_id": "AK-005",
+      "tc_id": "TC-Auto-INV-015",
+      "testcase_name": "Should be able to see each downloaded Invoice Type cell equal the on-screen value as a localized label (EN and JA, T-007)",
+      "expected": "Match with answerkey",
+      "result": "",
+      "sections": [
+        {
+          "title": "Seed four invoices of distinct types",
+          "kv": [["Pattern", "master BTM-AK005-0N with type T, confirmed invoice R151-AK005-00N"]],
+          "table": {
+            "headers": ["invoice_no", "type", "en_label", "ja_label"],
+            "rows": [
+              ["R151-AK005-000", "super_simple", "Super Simple Version", "超簡易版"],
+              ["R151-AK005-001", "detailed", "Detailed Version", "詳細版"],
+              ["R151-AK005-002", "direct_debit", "Direct Debit", "口座引落"],
+              ["R151-AK005-003", "credit_card", "Credit Card Statement", "クレジット引落明細書"]
+            ]
+          },
+          "expectation": "Four rows visible on screen with the EN labels in an EN session."
+        },
+        {
+          "title": "Export in EN and compare with the screen",
+          "kv": [["Request", "download_excel, lang en_US, EN convert_fields"]],
+          "table": {
+            "headers": ["check", "expected"],
+            "rows": [
+              ["cell per row", "equals the en_label column above"],
+              ["mismatches", "0"]
+            ]
+          },
+          "expectation": "Every EN cell equals the screen value."
+        },
+        {
+          "title": "Export in JA and compare with a JA screen",
+          "kv": [["Request", "download_excel, lang ja_JP, JA convert_fields (FE ja locale labels)"]],
+          "table": {
+            "headers": ["check", "expected"],
+            "rows": [
+              ["cell per row", "equals the ja_label column above"],
+              ["mismatches", "0"]
+            ]
+          },
+          "expectation": "Every JA cell equals the JA screen value — same correct value as the screen, per row."
+        }
+      ]
+    },
+    {
+      "ak_id": "AK-006",
+      "tc_id": "TC-Auto-INV-017",
+      "testcase_name": "Should be able to combine the Invoice Type filter with Billing To and Credit Sales/Prepayment filters and get the intersected rows only",
+      "expected": "Match with answerkey",
+      "result": "",
+      "sections": [
+        {
+          "title": "Seed masters and invoices",
+          "kv": [["Master A", "BTM-AK006-A (super_simple)"], ["Master B", "BTM-AK006-B (detailed)"]],
+          "table": {
+            "headers": ["invoice_no", "master", "type", "billing_category"],
+            "rows": [
+              ["R151-AK006-A1", "A", "super_simple", "invoice"],
+              ["R151-AK006-A2", "A", "super_simple", "advance_payment"],
+              ["R151-AK006-B1", "B", "detailed", "invoice"]
+            ]
+          },
+          "expectation": "Three rows seeded and visible unfiltered."
+        },
+        {
+          "title": "Apply combined filters and verify intersections",
+          "kv": [["Request", "search_read with the combined domains below"]],
+          "table": {
+            "headers": ["domain combination", "expected rows"],
+            "rows": [
+              ["type=super_simple AND master=A AND category=invoice", "R151-AK006-A1 only"],
+              ["type=super_simple AND master=A AND category=advance_payment", "R151-AK006-A2 only"],
+              ["type=detailed AND master=B", "R151-AK006-B1 only"],
+              ["type=detailed AND master=A", "none"]
+            ]
+          },
+          "expectation": "Only rows satisfying every selected condition list — the Invoice Type filter composes with its neighbours."
+        }
+      ]
+    },
+    {
+      "ak_id": "AK-007",
+      "tc_id": "TC-Auto-INV-018",
+      "testcase_name": "Should be able to select an Invoice Type option, click Search, and see only invoices of that type in the detail list (T-003)",
+      "expected": "Match with answerkey",
+      "result": "",
+      "sections": [
+        {
+          "title": "Seed invoices of three types plus one blank",
+          "kv": [["Pattern", "one confirmed invoice per master; one master cleared after issuance"]],
+          "table": {
+            "headers": ["invoice_no", "type"],
+            "rows": [
+              ["R151-AK007-SS", "super_simple"],
+              ["R151-AK007-DT", "detailed"],
+              ["R151-AK007-DD", "direct_debit"],
+              ["R151-AK007-BL", "(cleared -> False)"]
+            ]
+          },
+          "expectation": "Four rows list when no filter is applied."
+        },
+        {
+          "title": "Search by Invoice Type over the wire",
+          "kv": [["Request", "POST /api/dataset/sales.billing.invoice/search_read, domain [[\"sales_billing_to_invoice_type\",\"=\",\"super_simple\"]], fields incl. sales_billing_to_invoice_type"]],
+          "table": {
+            "headers": ["check", "expected"],
+            "rows": [
+              ["HTTP status", "200"],
+              ["records", "exactly R151-AK007-SS"],
+              ["each record's type", "super_simple"],
+              ["detailed / direct_debit / blank rows", "absent"]
+            ]
+          },
+          "expectation": "Only invoice data matching the selected Invoice Type is displayed in the detail list."
+        }
+      ]
+    },
+    {
+      "ak_id": "AK-008",
+      "tc_id": "TC-Auto-INV-022",
+      "testcase_name": "Should not be able to match a blank-type invoice under any of the seven Invoice Type filter options (cleared type stores False)",
+      "expected": "Match with answerkey",
+      "result": "",
+      "sections": [
+        {
+          "title": "Seed blank and normal invoices",
+          "kv": [
+            ["Cleared master", "BTM-AK008-CLR with invoice_print_type set to False after invoice R151-AK008-005"],
+            ["Masterless", "invoice R151-AK008-006 with no billing_to_master"],
+            ["Normal", "master BTM-AK008-DTL (detailed) with invoice R151-AK008-007"]
+          ],
+          "table": null,
+          "expectation": "Three invoices exist; the first two have no type."
+        },
+        {
+          "title": "Read stored values and search all keys plus False",
+          "kv": [["Reads", "sales_billing_to_invoice_type on all three invoices"]],
+          "table": {
+            "headers": ["check", "expected"],
+            "rows": [
+              ["R151-AK008-005 value", "False"],
+              ["R151-AK008-006 value", "False"],
+              ["each of the 7 key searches", "blank invoices absent"],
+              ["search ('sales_billing_to_invoice_type','=','False')", "exactly the two blank invoices"],
+              ["detailed search", "R151-AK008-007 only"]
+            ]
+          },
+          "expectation": "Blank invoices display blank, never match a key filter, and are reachable only via the False domain."
+        }
+      ]
+    },
+    {
+      "ak_id": "AK-009",
+      "tc_id": "TC-Auto-INV-025",
+      "testcase_name": "Should be able to see existing invoices update their Invoice Type after the Billing To master's type is edited or reassigned (live lookup, not issuance snapshot)",
+      "expected": "Match with answerkey",
+      "result": "",
+      "sections": [
+        {
+          "title": "Create master M1, master M2 and invoice under M1",
+          "kv": [
+            ["M1", "BTM-AK009-M1 (super_simple)"],
+            ["M2", "BTM-AK009-M2 (detailed)"],
+            ["Invoice", "R151-AK009-010 under M1, billing confirmed"]
+          ],
+          "table": null,
+          "expectation": "Invoice reads super_simple before any edit."
+        },
+        {
+          "title": "Edit the master type and re-read",
+          "kv": [["Action", "M1.invoice_print_type = direct_debit; env flush"]],
+          "table": {
+            "headers": ["check", "expected"],
+            "rows": [["invoice sales_billing_to_invoice_type", "direct_debit"]]
+          },
+          "expectation": "The existing invoice follows the master edit (live lookup)."
+        },
+        {
+          "title": "Reassign the billing's master, then edit the old master again",
+          "kv": [
+            ["Action 1", "billing.billing_to_master_id = M2; flush"],
+            ["Action 2", "M1.invoice_print_type = credit_card; flush"]
+          ],
+          "table": {
+            "headers": ["check", "expected"],
+            "rows": [
+              ["after reassignment", "detailed"],
+              ["after old-master edit", "still detailed (no stale super_simple/credit_card leak)"]
+            ]
+          },
+          "expectation": "The invoice shows the currently linked master's value at all times — QA-001 answer (b)."
+        }
+      ]
+    },
+    {
+      "ak_id": "AK-010",
+      "tc_id": "TC-Auto-INV-026",
+      "testcase_name": "Should not be able to observe any new lock on list, filter or export for invoices dated in a closed accounting period (closing unchanged)",
+      "expected": "Match with answerkey",
+      "result": "",
+      "sections": [
+        {
+          "title": "Close the period covering the invoice",
+          "kv": [
+            ["Invoice", "R151-AK010-011, billing date inside the target period, master type simple"],
+            ["Action", "execute the period closing so the banner is active"]
+          ],
+          "table": null,
+          "expectation": "Closing banner shows on the screen (2026/MM/DDまで締めが実行されており...)."
+        },
+        {
+          "title": "Exercise list, filter and export inside the closed period",
+          "kv": [
+            ["Request 1", "search_read, empty domain"],
+            ["Request 2", "search_read, domain type = simple"],
+            ["Request 3", "download_excel, same domain"]
+          ],
+          "table": {
+            "headers": ["check", "expected"],
+            "rows": [
+              ["list", "R151-AK010-011 present, type simple"],
+              ["filtered list", "row returned"],
+              ["export", "row present, Invoice Type cell = localized simple label"],
+              ["new blocking introduced", "none"]
+            ]
+          },
+          "expectation": "Closing blocks nothing on this screen — behaviour unchanged by the modification."
+        }
+      ]
+    },
+    {
+      "ak_id": "AK-011",
+      "tc_id": "TC-Auto-INV-027",
+      "testcase_name": "Should be able to complete the closing process for a period containing invoices carrying the new Invoice Type field (T-009)",
+      "expected": "Match with answerkey",
+      "result": "",
+      "sections": [
+        {
+          "title": "Prepare an open period with typed invoices",
+          "kv": [
+            ["Invoices", "confirmed invoices across at least 3 distinct Invoice Types inside the open period"],
+            ["Operator", "user permitted to execute closing"]
+          ],
+          "table": null,
+          "expectation": "Rows list on the Invoice List with their types before closing."
+        },
+        {
+          "title": "Execute the closing process to completion",
+          "kv": [["Action", "run the closing flow for the period end-to-end and wait for completion"]],
+          "table": {
+            "headers": ["check", "expected"],
+            "rows": [
+              ["process result", "completes successfully (no error mentioning sales_billing_to_invoice_type)"],
+              ["post-closing list", "screen opens, search works"],
+              ["post-closing download", "file produced with the Invoice Type column"]
+            ]
+          },
+          "expectation": "The closing process is unaffected by the new field and finishes successfully."
+        }
+      ]
+    },
+    {
+      "ak_id": "AK-012",
+      "tc_id": "TC-Auto-INV-033",
+      "testcase_name": "Should be able to display, search and download the Invoice List as a guest user exactly as before the modification (T-008)",
+      "expected": "Match with answerkey",
+      "result": "",
+      "sections": [
+        {
+          "title": "Prepare guest access and seed data",
+          "kv": [
+            ["Guest account", "real guest login available (DOC-001 marks guest access TBD — record the account's menu state)"],
+            ["Seed", "invoices of super_simple and detailed masters exist"]
+          ],
+          "table": null,
+          "expectation": "Guest login works; the precondition state is written down for sign-off."
+        },
+        {
+          "title": "Guest display, search and download",
+          "kv": [
+            ["Step 1", "log in as guest, open Invoice List (INV-060-013)"],
+            ["Step 2", "open Invoice Type pull-down, select Super Simple Version, click Search"],
+            ["Step 3", "click Download All, open the file"]
+          ],
+          "table": {
+            "headers": ["check", "expected"],
+            "rows": [
+              ["screen opens", "yes, with Invoice Type filter and column"],
+              ["pull-down", "7 master values offered"],
+              ["search result", "only super_simple rows"],
+              ["download", "file produced; Invoice Type column present with matching labels"],
+              ["if access refused", "stop and report — guest baseline differs from PRD 'No change'; escalate as T-008 sign-off item (EX-005)"]
+            ]
+          },
+          "expectation": "Guest display, search and download behave exactly as before the modification."
+        }
+      ]
+    },
+    {
+      "ak_id": "AK-013",
+      "tc_id": "TC-Auto-INV-041",
+      "testcase_name": "Should be able to download in Japanese and see all seven Invoice Type values as correct Japanese labels including the full-width envelope parentheses",
+      "expected": "Match with answerkey",
+      "result": "",
+      "sections": [
+        {
+          "title": "Seed one invoice per Invoice Type key",
+          "kv": [["Pattern", "master BTM-AK013-0N with type T, confirmed invoice R151-AK013-00N"]],
+          "table": {
+            "headers": ["invoice_no", "type", "ja_label"],
+            "rows": [
+              ["R151-AK013-001", "detailed", "詳細版"],
+              ["R151-AK013-002", "simple", "簡易版優先"],
+              ["R151-AK013-003", "super_simple", "超簡易版"],
+              ["R151-AK013-004", "direct_debit", "口座引落"],
+              ["R151-AK013-005", "credit_card", "クレジット引落明細書"],
+              ["R151-AK013-006", "envelope", "一括詳細版（窓付き封筒対応）"],
+              ["R151-AK013-007", "envelope_simple", "一括簡易版（窓付き封筒対応）"]
+            ]
+          },
+          "expectation": "Seven rows visible on a JA screen with the labels above."
+        },
+        {
+          "title": "Export in Japanese and inspect header and cells",
+          "kv": [["Request", "download_excel, lang ja_JP, ja headers + ja convert_fields"]],
+          "table": {
+            "headers": ["check", "expected"],
+            "rows": [
+              ["Invoice Type header", "請求書種類"],
+              ["cell per row", "equals the ja_label column above"],
+              ["envelope parentheses", "full-width （窓付き封筒対応） preserved, no half-width () or mojibake"],
+              ["raw enum keys / EN labels in cells", "none"]
+            ]
+          },
+          "expectation": "All seven JA labels export exactly as the JA screen shows them (T-007 same-value rule, Japanese half)."
+        }
+      ]
+    }
+  ],
+  "coverage": {
+    "reqs_without_tm": [],
+    "tm_without_tc": [],
+    "skipped_requirements": [
+      "REQ-005 — informational only (AMB-002 answer: section 3.3 only names the page being edited, no separate report change); behaviour itself is undefined, nothing observable beyond REQ-001",
+      "REQ-013 — non-functional with no measurable threshold (AMB-001 answer: 'the performance concern can simply be disregarded'; no numeric baseline will be given); the one concrete bound QA-005 confirms (download limited to 2,000 rows in the team environment) is covered functionally by TC-Auto-INV-007 under REQ-004"
+    ],
+    "conflicts_detected": []
+  },
+  "heuristic_checklist": [
+    {"hc_id": "HC-01", "heuristic": "Numbers (Data Type Attacks)", "status": "applied", "evidence": "TC-Auto-INV-007 (limit / limit+1 / 0-unlimited), TC-Auto-INV-020 and TC-Auto-INV-024 (0/1/many counts)"},
+    {"hc_id": "HC-02", "heuristic": "Strings (Data Type Attacks)", "status": "applied", "evidence": "Label strings incl. Japanese multibyte and full-width parens: TC-Auto-INV-005, TC-Auto-INV-015, TC-Auto-INV-039, TC-Auto-INV-041 (all-seven JA set incl. the full-width envelope parens); the only new input surface is a select, so free-string probes do not apply"},
+    {"hc_id": "HC-03", "heuristic": "Time & Date (Data Type Attacks)", "status": "applied", "evidence": "TC-Auto-INV-030 (same Japan-time calendar day on screen and file), TC-Auto-INV-031 (tz invariance of the new column), TC-Auto-INV-026/027 (closed period dates)"},
+    {"hc_id": "HC-04", "heuristic": "Paths/Files (Data Type Attacks)", "status": "applied", "evidence": "Generated Excel artifact parsed in every download TC (TC-Auto-INV-008, TC-Auto-INV-013 interrupted file state); no path input surface exists in this change"},
+    {"hc_id": "HC-05", "heuristic": "General (Data Type Attacks)", "status": "applied", "evidence": "Uniqueness: duplicate 'Invoice Type' header guard TC-Auto-INV-011; domain-rule violation: forbidden option values TC-Auto-INV-004"},
+    {"hc_id": "HC-06", "heuristic": "Navigation (Web Tests)", "status": "applied", "evidence": "Refresh mid-flow TC-Auto-INV-036, direct URL without entry TC-Auto-INV-032, session loss TC-Auto-INV-037"},
+    {"hc_id": "HC-07", "heuristic": "Input (Web Tests)", "status": "na", "evidence": "The modification adds a dropdown filter, a read-only column and an export column; no free-text input, textarea or injection surface is introduced (existing free-text filters are out of change scope)"},
+    {"hc_id": "HC-08", "heuristic": "Preferences (Web Tests)", "status": "applied", "evidence": "UI-language preference EN/JA varied across TC-Auto-INV-005, TC-Auto-INV-010, TC-Auto-INV-012, TC-Auto-INV-015, TC-Auto-INV-040, TC-Auto-INV-041"},
+    {"hc_id": "HC-09", "heuristic": "Accessibility (Web Tests)", "status": "deferred", "evidence": "Labels and localized text are verified, but keyboard/zoom/contrast criteria are not stated in this PRD; needs design-system acceptance criteria before designable"},
+    {"hc_id": "HC-10", "heuristic": "Seen and Heard (Ady Stokes)", "status": "na", "evidence": "No audio, video or screen-reader-specific surface in this change scope"},
+    {"hc_id": "HC-11", "heuristic": "BINMEN (API Tests)", "status": "applied", "evidence": "Boundary TC-Auto-INV-007/010, Invalid/Not-exact TC-Auto-INV-019, NULL/blank TC-Auto-INV-022/014, Empty result TC-Auto-INV-009; wrong-verb probing of the generic dataset route is outside this PRD's behaviours"},
+    {"hc_id": "HC-12", "heuristic": "POISED (API Tests)", "status": "applied", "evidence": "Parameters TC-Auto-INV-017/018, Output TC-Auto-INV-015, Interop (lang) TC-Auto-INV-012, Security TC-Auto-INV-032/033, Errors TC-Auto-INV-007, Data volume TC-Auto-INV-016"},
+    {"hc_id": "HC-13", "heuristic": "VADER (API Tests)", "status": "applied", "evidence": "Verbs search/download TC-Auto-INV-018/008, authZ TC-Auto-INV-032/033, Data all 7 types TC-Auto-INV-023, Errors TC-Auto-INV-007; Responsiveness deliberately skipped per AMB-001 answer (REQ-013)"},
+    {"hc_id": "HC-14", "heuristic": "Mobile (Daniel Knott)", "status": "na", "evidence": "PRD and FE extract cover the desktop web screen INV-060-013 only; no mobile surface"},
+    {"hc_id": "HC-15", "heuristic": "Variable Analysis", "status": "applied", "evidence": "Enumerated before design: master type (8 states incl. cleared), master link, invoice count, UI language, tz, period state, archive state, actor, volume, selection mode — each varied somewhere in the matrix"},
+    {"hc_id": "HC-16", "heuristic": "TouchPoints", "status": "applied", "evidence": "Routes /api/dataset/sales.billing.invoice/{search_read,download_excel}, FE filter/table/download hook, billing.to.master.invoice_print_type, locales — recorded in layer_targets and EX-001..006"},
+    {"hc_id": "HC-17", "heuristic": "Boundaries", "status": "applied", "evidence": "Position boundary (immediately-right-of) TC-Auto-INV-010/029, 7-value set boundary TC-Auto-INV-003/004, limit boundary TC-Auto-INV-007, zero-row TC-Auto-INV-009"},
+    {"hc_id": "HC-18", "heuristic": "Goldilocks", "status": "applied", "evidence": "Too few / too many / just right: 0, 1, many matches TC-Auto-INV-020; option count 6 vs 7 vs 8 guarded by TC-Auto-INV-003/004"},
+    {"hc_id": "HC-19", "heuristic": "CRUD", "status": "applied", "evidence": "Read TC-Auto-INV-023, Update (master type edit / reassignment) TC-Auto-INV-025, archive-as-update TC-Auto-INV-001; Create/Delete of invoices do not exist on this read-and-download screen (DOC-001 §1)"},
+    {"hc_id": "HC-20", "heuristic": "Follow the Data", "status": "applied", "evidence": "master -> invoice -> screen -> file chain verified stepwise: TC-Auto-INV-023 (read), TC-Auto-INV-025 (edit), TC-Auto-INV-015 (export), TC-Auto-INV-016 (filtered export)"},
+    {"hc_id": "HC-21", "heuristic": "Count", "status": "applied", "evidence": "TC-Auto-INV-009 (0), TC-Auto-INV-020 (0/1/many), TC-Auto-INV-024 (1/many)"},
+    {"hc_id": "HC-22", "heuristic": "Selection", "status": "applied", "evidence": "Some/none/all: one type selected TC-Auto-INV-018, none selected (blank rows visible) TC-Auto-INV-020, combined selection TC-Auto-INV-017, ticked-row vs all-row download TC-Auto-INV-008"},
+    {"hc_id": "HC-23", "heuristic": "Position", "status": "applied", "evidence": "Column position boundary asserted on file and screen: TC-Auto-INV-010/029 (immediately after Billing To)"},
+    {"hc_id": "HC-24", "heuristic": "Dependencies", "status": "applied", "evidence": "invoice -> billing -> master tree walked with edit/reassign/archive: TC-Auto-INV-025, TC-Auto-INV-001, TC-Auto-INV-022 (masterless leaf)"},
+    {"hc_id": "HC-25", "heuristic": "Constraints", "status": "applied", "evidence": "Required link missing (masterless -> False) TC-Auto-INV-022; archive constraint refusal TC-Auto-INV-002; duplicate header name guard TC-Auto-INV-011"},
+    {"hc_id": "HC-26", "heuristic": "Input Method", "status": "applied", "evidence": "GUI dropdown path TC-Auto-INV-035 vs direct API domain path TC-Auto-INV-018 — both entry methods converge on the same '=' domain"},
+    {"hc_id": "HC-27", "heuristic": "Sequences", "status": "applied", "evidence": "filter -> edit master -> refilter TC-Auto-INV-021/025; edit then export TC-Auto-INV-016; cancel then retry export TC-Auto-INV-013"},
+    {"hc_id": "HC-28", "heuristic": "Sorting", "status": "na", "evidence": "Columns cannot be sorted on this screen (DOC-001 §3.1; InvoiceTable sets sorter: false) — no sortable surface"},
+    {"hc_id": "HC-29", "heuristic": "Interruptions", "status": "applied", "evidence": "TC-Auto-INV-036 (refresh / double-submit Search), TC-Auto-INV-037 (session loss), TC-Auto-INV-013 (cancel / refresh mid-spinner)"},
+    {"hc_id": "HC-30", "heuristic": "Starvation", "status": "deferred", "evidence": "Load/stress testing is unmeasurable per AMB-001 (no threshold given, team says disregard); only the bounded 2,000-row volume is covered (TC-Auto-INV-007/016)"},
+    {"hc_id": "HC-31", "heuristic": "Configurations", "status": "applied", "evidence": "Language EN/JA (TC-Auto-INV-005/012/015/040/041/042), timezone Asia/Tokyo vs Europe/London (TC-Auto-INV-031), per-company download limit (TC-Auto-INV-007)"},
+    {"hc_id": "HC-32", "heuristic": "Multi-User", "status": "applied", "evidence": "TC-Auto-INV-012 (two accounts, two languages, same resource), TC-Auto-INV-021 (editor vs viewer), TC-Auto-INV-034 (guest vs internal)"},
+    {"hc_id": "HC-33", "heuristic": "Flood", "status": "applied", "evidence": "TC-Auto-INV-006 (5 concurrent downloads), TC-Auto-INV-021 (rapid master edits), TC-Auto-INV-034 (guest rapid downloads)"},
+    {"hc_id": "HC-34", "heuristic": "State Analysis", "status": "applied", "evidence": "Master states typed/cleared/reassigned/archived (TC-Auto-INV-022/025/001), period open/closed (TC-Auto-INV-026/027), session live/expired (TC-Auto-INV-037)"},
+    {"hc_id": "HC-35", "heuristic": "Map Making", "status": "applied", "evidence": "Base -> one step out -> return: filtered search then back to unfiltered list including blank rows TC-Auto-INV-020; reload returns a usable screen TC-Auto-INV-036"},
+    {"hc_id": "HC-36", "heuristic": "Users & Scenarios / Seven Dwarfs / D&I", "status": "applied", "evidence": "Guest persona (the least-privileged actor) TC-Auto-INV-033/034; user without menu entry TC-Auto-INV-032; hurried double-clicker TC-Auto-INV-006/036"},
+    {"hc_id": "HC-37", "heuristic": "Wisdom: question per test", "status": "applied", "evidence": "All 39 matrix entries are single-question Able to / Not able to / Verify statements, each traced to REQ ids"},
+    {"hc_id": "HC-38", "heuristic": "Wisdom: contrary approach", "status": "applied", "evidence": "TC-Auto-INV-003 vs 004 (options), 018 vs 019 (matching), 023 vs 022 (value vs blank), 033 vs 032 (access), 001 vs 002 (archive), 030 vs 031 (offset attempt)"},
+    {"hc_id": "HC-39", "heuristic": "Wisdom: vary", "status": "applied", "evidence": "Sequences varied (025/013), configurations varied (005/007/031), data varied across all 7 types and blank (023/022/015)"},
+    {"hc_id": "HC-40", "heuristic": "Judgement framework (Lyndsay)", "status": "applied", "evidence": "Inconsistencies and absences vs PRD recorded as EX-001..EX-006 (fixture drift, 0-limit contradiction, stale header, e2e/mock/guest gaps) — never as expected results"},
+    {"hc_id": "HC-41", "heuristic": "Wisdom: bugs cluster", "status": "applied", "evidence": "Deepened around the two risk clusters found: the label collision (EX-003 -> TC-Auto-INV-011/039) and the download-limit contradiction (EX-004 -> TC-Auto-INV-007)"},
+    {"hc_id": "HC-42", "heuristic": "RCRCRC (regression scope)", "status": "applied", "evidence": "Regression core on every 'No change' area: archive TC-Auto-INV-001/002, closing TC-Auto-INV-026/027, timezone TC-Auto-INV-030/031, guest TC-Auto-INV-032/033/034; configuration-sensitive: limit TC-Auto-INV-007, language TC-Auto-INV-012"},
+    {"hc_id": "HC-43", "heuristic": "Wisdom: informative tests", "status": "applied", "evidence": "Audit done: duplicates merged (flow interrupts shared across REQ-002/003/004/014 via ID-CHECK-039/040; guest flood folded into TC-Auto-INV-034); every TC answers a distinct question or was cut"}
+  ]
+}

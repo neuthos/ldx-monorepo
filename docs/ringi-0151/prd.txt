@@ -1,0 +1,125 @@
+### **Revision History**
+
+| Date | PIC | Message |
+| :---- | :---- | :---- |
+| October 06, 2026 | Kawakami | Newly Created |
+
+### **1.RINGI**
+
+* **RINGI Document \[RINGI No.　0151\]　Filter Addition and Item Addition (Invoice Type)**  
+* **Application Date: 2026/10/06**  
+* **Applicant: Kawakami**
+
+#### **1.1.Development Overview**
+
+* **Development Category: Modification of Existing Function**  
+* **Screen Name**  
+  * **【Modification】 Invoice List**  
+* **Impact:**  
+* **Target Industries (multiple selection allowed)**  
+*  Wholesale  
+*  Manufacturer  
+*  Retail  
+*  EC  
+*  Others: All industries conducting BtoB Transactions  
+* **Specific Target Users: Headquarters (management, accounting & finance departments)**
+
+#### **1.2.Purpose / Reason for Development / Background**
+
+* **Purpose:** 
+
+  To clearly distinguish the wide variety of invoice formats (Simple Version, Detailed Version, credit, Direct Debit, window envelope support, etc.) in the list, and to enable instant searching and filtering by specific conditions.
+
+* #### **Reason for Development**
+
+  * Currently, there is no "Invoice Type" in the filters or download data
+
+
+* **Background / Current Issues:**
+
+#### **1.3.Expected Quantitative Effects**
+
+* **Effects of Operational Improvement (Revenue Increase / Cost Reduction, etc.):**  
+* **Quantitative Forecast of Business Results per Company:**   
+* **Number of Upsell/Cross-sell Target Companies and Expected Annual Revenue:**   
+* **Number of Expected New Companies and Expected Annual Revenue:**
+
+#### **1.4.Risks**
+
+* **Development Difficulty / Technical Risk:**  
+* **Risks Related to Laws/Regulations and Security:**
+
+#### **1.5.ROI Estimate**
+
+* **Expected Annual Revenue (Total): 32,648,400,000**  
+* **Development Cost:**  
+* **Cost per Development Man-hour:**  
+* **Coefficient Considering Difficulty and Risk:**  
+* **ROI (Expected Effect ÷ Development Cost):** 
+
+#### **1.6.Approval**
+
+* **Chief Product & Solution Officer: Signature　Futamura / Date 2026/10/6**  
+* **Chief Technology Officer: Signature／Date**  
+* **Chief Executive Officer: Signature／Date**
+
+### **2.Purpose**
+
+To clearly distinguish the wide variety of invoice formats (Simple Version, Detailed Version, credit, Direct Debit, window envelope support, etc.) in the list, and to enable instant searching and filtering by specific conditions.
+
+### **3.Modification Targets**
+
+#### **3.1.Screens to Modify**
+
+| Screen No. | Screen Name |
+| :---- | :---- |
+| INV-060-013 | Invoice List |
+
+#### **3.2.Flows to Modify**
+
+* Add "Invoice Type" to the filter  
+* Add "Invoice Type" to the detail items  
+* Add "Invoice Type" to the download data
+
+#### **3.3.Reports to Modify**
+
+* Invoice List
+
+### **4.Modification Details**
+
+#### **4.1. Add "Invoice Type" to the Filter**
+
+* Display the "Invoice Type" of the Billing To master
+
+#### **4.2. Add "Invoice Type" to the Detail Items**
+
+* Display the Invoice Type of the Invoice Number
+
+#### **4.3. Add "Invoice Type" to the Download Data Items**
+
+* Insert immediately to the right of Billing To  
+* [Download Sample](https://docs.google.com/spreadsheets/d/1AGUdW3hrTHbLk3ar_BOxoeqPF_CzSsg2/edit?gid=479112557#gid=479112557)
+
+#### **4.4. Others**
+
+* Guest user permissions: No change  
+* Archive: No change  
+* Closing process: No change  
+* Time zone: No change  
+* Performance: Maintain current level
+
+### **5\. Scenario Test**
+
+| Test ID | Major Item | Medium Item | Test Scenario (Operation Steps) | Expected Result (Verification Details) | Remarks (Points to Note) |
+| :---- | :---- | :---- | :---- | :---- | :---- |
+| T-001 | Screen Display | Check Filter Items | Open the Invoice List screen and check the search condition area. | The "Invoice Type" filter item must be added to the search condition area. |  |
+| T-002 | Screen Display | Check Filter Options | Open the "Invoice Type" pull-down menu. | The "Invoice Type" values set in the Billing To master must be correctly displayed as options. |  |
+| T-003 | Search Function | Filtering by Invoice Type | Select any option in "Invoice Type" and click the "Search" button. | Only invoice data matching the selected "Invoice Type" must be displayed in the detail list. |  |
+| T-004 | Screen Display | Check Detail List Items | Check the header items of the search result detail table. | An "Invoice Type" column must be added to the detail table. |  |
+| T-005 | Data Display | Check Detail List Data | Compare the value in the "Invoice Type" column of each row in the detail table against the corresponding invoice data. | The correct "Invoice Type" linked to the Invoice Number of each row must be displayed. |  |
+| T-006 | Data Output | Check Download Items | Download data from the list screen (e.g., Download All), open the output file, and check the header row. | An "Invoice Type" column must be newly added immediately to the right of the "Billing To" column in the file. |  |
+| T-007 | Data Output | Check Download Data | Check the data in each row of the "Invoice Type" column of the output file. | The same correct value as the "Invoice Type" on the screen must be output in each row. |  |
+| T-008 | Scope of Impact (Others) | Check Guest User Permissions | Log in with a guest user account and perform display, search, and download operations on the Invoice List screen. | The guest user permission behavior must not be affected by the modification and must be usable as before. |  |
+| T-009 | Scope of Impact (Others) | Check Archive / Closing Process | Execute an archive operation on invoices and the closing process for the relevant period. | This modification must not affect the archive function or closing process function, and the processes must complete successfully. | Verification as a regression test |
+| T-010 | Scope of Impact (Others) | Check Time Zone / Performance | Check the screen with a different time zone setting, such as an overseas location. Also, execute screen display, search, and download with a large volume of data. | There must be no change or offset in the time zone display. Also, the response speed (performance) of each operation must be maintained at the current level. | Check that there is no significant delay in perceived speed or processing time |
+

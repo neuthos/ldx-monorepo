@@ -1,0 +1,68 @@
+/* prd-testkit theme — dealt app style: framed-sheet (draw.mjs --app, seed 1426014804)
+   Distilled for: QA test-design review page (requirements, traceability matrix, test cases).
+   Identity taken from the sheet: IBM Plex Mono for IDs, keys and figures in tables;
+   depth from a single tone step. Brand override per user brief: the accent is the
+   product's own blue #042288 (replaces the dealt teal), carried by the mark, the focus
+   ring and the one primary control; data keeps the status pairs. Fonts load via the
+   template's <head> links. */
+
+:root {
+  --ground: #f9fbfc;
+  --surface: #ffffff;
+  --raised: #f4f6f8;
+  --active: #ebedee;
+  --border: #e8eaec;
+  --rule: #f0f1f2;
+  --control: #cdced1;
+  --text: #131416;
+  --muted: #5d5f60;
+  --faint: #6b6b6b;
+  --primary: #042288;
+  --on-primary: #ffffff;
+  --accent: #042288;
+  --positive: #1e7b4f;
+  --negative: #c4242a;
+  --warning: #92400e;
+  --pill-positive-bg: #dcfae5; --pill-positive-ink: #04250e;
+  --pill-negative-bg: #ffedea; --pill-negative-ink: #831c1e;
+  --pill-warning-bg: #fffbeb; --pill-warning-ink: #92400e;
+  --pill-neutral-bg: #ebedee; --pill-neutral-ink: #353736;
+  --grid: #e5e5e5;
+  --radius-card: 8px;
+  --radius-control: 6px;
+  --radius-sheet: 16px;
+  --gap: 24px;
+  --card-pad: 24px;
+  --pad: 24px;
+  --nav-row: 34px;
+  --control-h: 32px;
+  --row-h: 48px;
+  --sidebar-w: 228px;
+  --topbar-h: 48px;
+  --sheet-inset: 8px;
+  --font: 'IBM Plex Sans', Inter, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --fs-title: 22px;
+  --fs-section: 16px;
+  --fs-kpi: 24px;
+  --fs-body: 14px;
+  --fs-small: 12px;
+}
+
+/* The mark: the product's monogram in the brand blue, one quiet square. */
+#nav .brand .mark {
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+}
+
+/* The one primary control carries the brand hue; hover is one step darker. */
+.btn.btn-primary { background: #042288; border-color: #042288; }
+.btn.btn-primary:hover { background: #031b6e; border-color: #031b6e; opacity: 1; }
+
+/* The active nav item stays a neutral grey pill; the accent never touches chrome. */
+.nav-item.is-active { background: var(--active); color: var(--text); }
+
+/* Focus carries the one hue, thin and quiet. */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }

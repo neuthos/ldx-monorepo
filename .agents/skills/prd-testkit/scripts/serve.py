@@ -11,7 +11,7 @@ import json
 import os
 import sys
 from functools import partial
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 
 ALLOWED = {"requirements.json", "design.json"}
 DEFAULT_PORT = 8765
@@ -69,7 +69,7 @@ def main():
         sys.exit(1)
     port = int(sys.argv[2]) if len(sys.argv) > 2 else DEFAULT_PORT
     handler = partial(Handler, directory=root)
-    with HTTPServer(("127.0.0.1", port), handler) as httpd:
+    with ThreadingHTTPServer(("127.0.0.1", port), handler) as httpd:
         print(f"prd-testkit server: http://127.0.0.1:{port}/index.html  (serving {root})")
         print("POST /save accepts:", ", ".join(sorted(ALLOWED)))
         try:
